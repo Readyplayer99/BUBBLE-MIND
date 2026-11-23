@@ -1,0 +1,495 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0a1021">
+  <meta name="description" content="A playful, private space for ideas. Every universe begins with a thought.">
+  <title>Bubble Mind — Every universe begins with a thought</title>
+  <link rel="icon" href="data:image/png;base64,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" type="image/png">
+  <style>
+:root{--bg:#0a1021;--ink:#eef2ff;--muted:#97a3c3;--line:rgba(173,196,248,.13);--panel:rgba(20,29,53,.7);--accent:#91a7ff;--safe-bottom:env(safe-area-inset-bottom,0px);color-scheme:dark;font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}*{box-sizing:border-box}html,body{margin:0;min-height:100%;background:var(--bg);color:var(--ink)}body{overflow-x:hidden}button,input,textarea{font:inherit}button{cursor:pointer}button:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid #c1b6ff;outline-offset:3px}button:disabled{opacity:.5;cursor:not-allowed}.ambient{pointer-events:none;position:fixed;width:70vw;height:70vw;filter:blur(105px);border-radius:50%;opacity:.13;z-index:0}.ambient-one{background:#6747ad;top:-35vw;left:-20vw}.ambient-two{background:#087e92;bottom:-35vw;right:-25vw}.app-shell{position:relative;z-index:1;min-height:100dvh;display:flex;flex-direction:column;max-width:1280px;margin:0 auto}.topbar{height:78px;flex:none;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px clamp(18px,4vw,48px);border-bottom:1px solid var(--line)}.brand{display:flex;align-items:center;gap:10px;min-width:0}.brand-symbol{position:relative;width:36px;height:36px;flex:none}.brand-symbol span{position:absolute;border:1.5px solid #9dabff;border-radius:50%;background:rgba(125,141,252,.12)}.brand-symbol span:nth-child(1){width:26px;height:26px;top:7px;left:4px}.brand-symbol span:nth-child(2){width:15px;height:15px;top:0;right:0;border-color:#85dbd0;background:rgba(88,200,190,.15)}.brand-symbol span:nth-child(3){width:11px;height:11px;bottom:0;right:1px;border-color:#d7a0ec;background:rgba(200,120,234,.2)}.brand-title{font-size:22px;line-height:1.02;font-weight:750;letter-spacing:-.9px;white-space:nowrap}.brand-period{color:#9ca8ff}.brand-sub{font-size:8px;letter-spacing:1.2px;color:#8490b1;margin-top:7px;white-space:nowrap}.top-actions{display:flex;align-items:center;gap:8px}.icon-action{width:40px;height:40px;border-radius:13px;background:rgba(255,255,255,.035);color:#aab6db;border:1px solid var(--line);display:grid;place-items:center}.icon-action svg{width:18px;height:18px;stroke:currentColor;stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}.icon-action:hover,.icon-action.selected{background:rgba(159,172,248,.16);color:#e0e4ff}.header-create,.primary-button{border:none;color:#0e1332;background:linear-gradient(135deg,#ccd1ff,#99beff);font-weight:750;padding:11px 16px;border-radius:13px;box-shadow:0 5px 20px #677bfb24}.header-create{display:flex;align-items:center;gap:6px}.header-create span:first-child{font-size:21px;font-weight:350;line-height:18px}.main-panel{width:100%;flex:1;display:flex;flex-direction:column;padding:23px clamp(18px,4vw,48px) 0}.crumbs{min-height:24px;display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:17px;font-size:12px;color:#8e9dbd}.crumb-link{border:0;background:none;color:#98a6c6;padding:3px 2px}.crumb-link:hover{color:#e2e7ff}.crumb-divider{opacity:.5}.crumb-current{color:#e5e9ff;font-weight:600;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.intro{text-align:center;margin:12px auto 2px;max-width:650px}.eyebrow{font-size:10px;font-weight:700;letter-spacing:3px;color:#a1b4ed;margin:0 0 13px}.intro h1{font-size:clamp(25px,5vw,42px);letter-spacing:-1.6px;line-height:1.14;margin:0 0 13px;font-weight:680}.intro .sub{color:#9ba8c6;line-height:1.58;font-size:14px;margin:0 auto;max-width:445px}.intro .heading-wrap{display:flex;align-items:center;gap:9px;justify-content:center}.intro .heading-wrap h1{margin:0}.mini-tool{background:rgba(166,180,250,.08);color:#b8c4e5;border:1px solid var(--line);border-radius:10px;padding:7px 9px}.intro-child{margin-top:6px}.intro-child .sub{margin-top:13px}.bubble-world{flex:1;min-height:360px;position:relative;display:flex;flex-direction:column;align-items:stretch;padding:18px 0 38px}.bubble-world::before{content:"";position:absolute;inset:0;pointer-events:none;background-image:radial-gradient(circle,#bccbff 1px,transparent 1.7px),radial-gradient(circle,#aec8db .75px,transparent 1.6px);background-size:91px 109px,151px 121px;background-position:7px 13px,61px 45px;opacity:.11;mask-image:linear-gradient(transparent 0%,black 18%,black 85%,transparent 100%)}.empty-world{flex:1;min-height:320px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:25px;position:relative}.empty-hint{font-size:12px;color:#8293b7;letter-spacing:.3px}.home-grid,.child-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:25px 14px;justify-items:center;align-items:center;position:relative;z-index:1}.home-grid{max-width:910px;margin:25px auto auto;width:100%;min-height:230px}.home-grid .bubble-slot{min-height:170px}.constellation{position:relative;max-width:900px;width:100%;margin:6px auto 0}.connection-lines{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0;overflow:visible}.focus-stage{position:relative;z-index:1;display:flex;align-items:center;justify-content:center;min-height:215px}.child-grid{padding-top:26px;padding-bottom:12px;min-height:150px}.child-grid .bubble-slot{min-height:150px}.bubble-slot{display:flex;justify-content:center;align-items:center;position:relative;width:100%}.bubble{position:relative;width:var(--bubble-size,124px);height:var(--bubble-size,124px);border-radius:50%;padding:17px;border:1.7px solid var(--bubble-color,#91a7ff);background:radial-gradient(circle at 34% 27%,color-mix(in srgb,var(--bubble-color,#91a7ff) 36%,transparent),color-mix(in srgb,var(--bubble-color,#91a7ff) 13%,transparent) 53%,color-mix(in srgb,var(--bubble-color,#91a7ff) 7%,transparent) 73%);box-shadow:inset 0 0 32px color-mix(in srgb,var(--bubble-color,#91a7ff) 13%,transparent),0 5px 45px color-mix(in srgb,var(--bubble-color,#91a7ff) 14%,transparent);color:#eef1ff;display:flex;align-items:center;justify-content:center;text-align:center;flex-direction:column;gap:5px;transition:box-shadow .2s,border-color .2s,filter .2s;touch-action:manipulation;z-index:2;overflow:visible}.bubble::before{content:"";position:absolute;top:15%;left:24%;width:28%;height:11%;border-radius:50%;transform:rotate(-28deg);background:rgba(255,255,255,.23);filter:blur(6px);pointer-events:none}.bubble::after{content:"";position:absolute;inset:7px;border:1px solid rgba(225,230,255,.09);border-radius:50%;pointer-events:none}.bubble:hover{filter:brightness(1.15);box-shadow:0 0 45px color-mix(in srgb,var(--bubble-color,#91a7ff) 32%,transparent)}.bubble:active{filter:brightness(1.35)}.bubble-label{position:relative;display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;line-clamp:3;overflow:hidden;max-width:100%;word-break:break-word;font-size:clamp(12px,3.6vw,15px);font-weight:640;letter-spacing:-.15px;line-height:1.25;text-shadow:0 1px 12px #10152b}.bubble-sub{font-size:10px;color:#c8d5ed;opacity:.82;position:relative}.bubble-create{--bubble-color:#9ab5ff;width:124px;height:124px;border-style:dashed;border-width:1.5px;background:radial-gradient(circle at 32% 26%,rgba(164,188,255,.24),rgba(114,150,255,.095) 65%);box-shadow:0 0 48px #92aaff18}.bubble-create .bubble-label{font-weight:620}.bubble-create .create-plus{font-size:26px;font-weight:300;line-height:1}.bubble-floating{animation:bob var(--drift-time,6s) ease-in-out infinite;animation-delay:var(--drift-delay,0s)}.bubble-focus{--bubble-size:157px;font-size:17px}.bubble-small{--bubble-size:116px}.bubble-home{--bubble-size:136px}.bubble-edit{position:absolute;right:-11px;bottom:6px;width:33px;height:33px;border:1px solid rgba(212,220,255,.32);border-radius:50%;color:#e3e9ff;background:#293250;display:grid;place-items:center;box-shadow:0 5px 14px #070a1799;z-index:4}.bubble-edit svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.child-placeholder{display:flex;flex-direction:column;align-items:center;gap:8px;color:#9aabd1;margin:0 auto 18px;text-align:center;font-size:13px;position:relative}.floating-action-strip{display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;position:relative;margin-top:12px}.soft-button{color:#ccd8f5;border:1px solid rgba(153,175,222,.2);background:rgba(137,157,218,.08);border-radius:13px;padding:10px 14px}.soft-button:hover{background:rgba(137,157,218,.16)}.footer{display:flex;align-items:center;gap:9px;padding:15px clamp(18px,4vw,48px) calc(18px + var(--safe-bottom));border-top:1px solid var(--line);color:#8493b4;font-size:11px}.footer-right{margin-left:auto}.status-pulse{width:7px;height:7px;display:inline-block;background:#65c9b7;border-radius:50%;box-shadow:0 0 11px #65c9b77a}.overlay{position:fixed;inset:0;z-index:40;background:rgba(3,7,20,.73);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:18px}.dialog{width:min(440px,100%);max-height:min(86dvh,760px);overflow:auto;border-radius:22px;background:linear-gradient(145deg,#202a4b,#151e38);border:1px solid rgba(195,207,255,.22);box-shadow:0 30px 100px #030510e0;padding:24px}.dialog h2,.sheet h2{margin:0;font-size:23px;letter-spacing:-.6px}.dialog .dialog-sub{font-size:13px;color:#a6b3d1;line-height:1.6;margin:9px 0 21px}.field-label{display:block;color:#d0dafa;font-size:12px;font-weight:650;margin-bottom:8px}.text-field,.note-area{background:#0e172d;border:1px solid rgba(157,180,230,.23);border-radius:12px;color:#f0f4ff;padding:13px 14px;width:100%;outline:0}.text-field:focus,.note-area:focus{border-color:#9cafff;box-shadow:0 0 0 3px #9cafff18}.colors{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px}.color-choice{width:31px;height:31px;background:var(--swatch);border:3px solid #1b2645;border-radius:50%;box-shadow:0 0 0 1px #7e8ba955}.color-choice.chosen{box-shadow:0 0 0 2px white}.form-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:23px}.ghost-button{background:none;border:1px solid rgba(165,180,227,.25);border-radius:12px;padding:11px 14px;color:#bfcae2}.sheet-overlay{position:fixed;inset:0;z-index:40;background:#0207149c;display:flex;justify-content:center;align-items:end;backdrop-filter:blur(3px)}.sheet{height:min(570px,88dvh);width:min(700px,100%);background:#171f39;border:1px solid rgba(165,186,234,.22);border-bottom:0;border-radius:24px 24px 0 0;box-shadow:0 -10px 70px #030610cb;padding:15px 23px calc(20px + var(--safe-bottom));display:flex;flex-direction:column;gap:15px;animation:sheet-up .24s ease-out}.sheet.full{height:100dvh;width:100%;max-width:none;border-radius:0}.sheet-handle{width:41px;height:5px;border-radius:10px;background:#53617e;margin:0 auto 1px}.sheet-toolbar{display:flex;gap:8px;align-items:center;justify-content:space-between}.sheet-buttons{display:flex;gap:7px}.sheet-icon{width:34px;height:34px;display:grid;place-items:center;border-radius:9px;background:#283352;border:1px solid #3b4968;color:#d8e3ff}.sheet-icon svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}.editor-name{font-size:22px;font-weight:700;border:0;border-bottom:1px solid #3c4566;background:transparent;border-radius:0;color:white;width:100%;padding:4px 0 10px}.editor-note{flex:1;min-height:70px;resize:none;line-height:1.65;color:#e9eeff;font-size:15px;padding:15px}.sheet-footer{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#8593b7;font-size:11px}.danger-button{background:none;border:0;color:#fd9baf;padding:8px;font-size:12px}.backup-options{display:grid;gap:12px}.backup-option{width:100%;border:1px solid #475574;border-radius:13px;background:#25304d;color:#e1e7ff;padding:16px;text-align:left}.backup-option b{display:block;margin-bottom:5px}.backup-option small{color:#acb9d3}.backup-note{font-size:12px;line-height:1.6;color:#a8b5d2;padding:8px 2px}.import-input{display:none}#toast{position:fixed;left:50%;bottom:calc(35px + var(--safe-bottom));transform:translate(-50%,20px);padding:11px 16px;border-radius:13px;background:#273b61;color:#f4f7ff;box-shadow:0 6px 34px #0008;z-index:70;font-size:13px;opacity:0;transition:transform .25s,opacity .25s;pointer-events:none;white-space:nowrap;max-width:90%;text-overflow:ellipsis;overflow:hidden}#toast.visible{opacity:1;transform:translate(-50%,0)}.portal{position:fixed;border-radius:50%;border:2px solid var(--portal-color,#97b7ff);background:radial-gradient(circle at 37% 28%,color-mix(in srgb,var(--portal-color,#97b7ff) 65%,white 20%),color-mix(in srgb,var(--portal-color,#97b7ff) 58%,#12203b 42%) 75%);box-shadow:0 0 100px color-mix(in srgb,var(--portal-color,#97b7ff) 40%,transparent);z-index:100;pointer-events:none;will-change:transform,opacity}.hidden{display:none!important}@keyframes bob{0%,100%{transform:translate3d(0,2px,0)}50%{transform:translate3d(0,-7px,0)}}@keyframes sheet-up{from{transform:translateY(50px);opacity:0}to{transform:translateY(0);opacity:1}}@media(min-width:750px){.intro{margin-top:19px}.bubble-world{padding-top:40px}.child-grid{grid-template-columns:repeat(4,1fr)}.home-grid{grid-template-columns:repeat(4,1fr)}.focus-stage{min-height:230px}.sheet{height:min(680px,80dvh);border-radius:24px;margin-bottom:25px;border-bottom:1px solid rgba(165,186,234,.22)}.sheet-overlay{align-items:end}}@media(max-width:440px){.topbar{height:71px}.brand-title{font-size:19px}.brand-symbol{width:30px;height:30px}.brand-sub{font-size:7px;letter-spacing:.8px}.header-create{padding:10px 12px}.icon-action{width:36px;height:36px}.top-actions{gap:5px}.main-panel{padding-top:16px}.intro h1{letter-spacing:-.8px}.home-grid,.child-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:19px 6px}.bubble-world{padding-top:19px}.bubble-home{--bubble-size:122px}.bubble-small{--bubble-size:109px}.focus-stage{min-height:193px}.child-grid{padding-top:17px}.footer-right{font-size:9px}}@media(prefers-reduced-motion:reduce){.bubble-floating{animation:none!important}*,*::after,*::before{scroll-behavior:auto!important;transition-duration:.01ms!important}}
+
+  .preview-fallback{position:relative;z-index:50;padding:14px 18px;background:#3a2947;color:#fff;font-size:13px;line-height:1.5;text-align:center}
+  .bubble-floating:active,.bubble-floating:focus-visible{animation-play-state:paused}
+  </style>
+  <link rel="manifest" href="./manifest.webmanifest">
+  <link rel="apple-touch-icon" href="./icon-192.png">
+</head>
+<body>
+  <div id="preview-fallback" class="preview-fallback" role="status">This is an interactive web app. If the buttons do nothing, your file preview is blocking JavaScript. Download the HTML file and open it in Chrome or use a hosted HTTPS link.</div>
+  <div class="ambient ambient-one"></div><div class="ambient ambient-two"></div>
+  <div id="app" class="app-shell">
+    <header class="topbar">
+      <div class="brand"><div class="brand-symbol" aria-hidden="true"><span></span><span></span><span></span></div><div><div class="brand-title">bubble mind<span class="brand-period">.</span></div><div class="brand-sub">EVERY IDEA HAS A UNIVERSE</div></div></div>
+      <div class="top-actions">
+        <button class="icon-action" id="motion-button" aria-label="Toggle floating motion" title="Toggle floating motion"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12c4-8 7 8 11 0s5-4 5 0"/></svg></button>
+        <button class="header-create" id="new-button"><span aria-hidden="true">＋</span><span>New</span></button>
+      </div>
+    </header>
+    <main class="main-panel">
+      <nav class="crumbs" id="crumbs" aria-label="Your current location"></nav>
+      <div class="intro" id="intro"></div>
+      <div class="bubble-world" id="world" aria-live="polite"></div>
+    </main>
+    <footer class="footer"><span class="status-pulse" aria-hidden="true"></span><span id="save-status">Saved on this device</span><span class="footer-right">Bubble Mind · Stage 1</span></footer>
+  </div>
+  <div id="overlay-root"></div><div id="portal-root" aria-hidden="true"></div><div id="toast" role="status" aria-live="polite"></div>
+  <script>
+document.getElementById('preview-fallback')?.remove();
+/* Bubble Mind — Stage 1: a blank slate, floating bubbles, and navigable ideas.
+   No external dependencies, accounts, AI services, or sample projects. */
+(() => {
+  'use strict';
+
+  const STORAGE_KEY = 'bubble-mind-stage1-v1';
+  const PALETTE = ['#9bb5ff', '#8bd8ca', '#d5a1ee', '#f0c180', '#ee9da9', '#9fce97'];
+  const state = { nodes: [], motion: true, currentId: null, transition: false };
+  const refs = {
+    world: document.getElementById('world'),
+    intro: document.getElementById('intro'),
+    crumbs: document.getElementById('crumbs'),
+    overlay: document.getElementById('overlay-root'),
+    portal: document.getElementById('portal-root'),
+    toast: document.getElementById('toast'),
+    motion: document.getElementById('motion-button'),
+    saveStatus: document.getElementById('save-status')
+  };
+  let toastTimer;
+  let linesObserver;
+
+  function element(tag, cls, text) {
+    const node = document.createElement(tag);
+    if (cls) node.className = cls;
+    if (text !== undefined) node.textContent = text;
+    return node;
+  }
+  function find(id) { return state.nodes.find(n => n.id === id) || null; }
+  function childrenOf(id) { return state.nodes.filter(n => n.parentId === id); }
+  function makeId() {
+    if (globalThis.crypto && typeof crypto.randomUUID === 'function') return crypto.randomUUID();
+    return 'idea-' + Date.now() + '-' + Math.random().toString(36).slice(2);
+  }
+  function reducedMotion() { return matchMedia('(prefers-reduced-motion: reduce)').matches; }
+  function normaliseData(data) {
+    if (!data || !Array.isArray(data.nodes)) return;
+    const ids = new Set();
+    const candidates = data.nodes.slice(0, 1500).filter(n => {
+      if (!n || typeof n.id !== 'string' || !n.id || ids.has(n.id) || typeof n.title !== 'string') return false;
+      ids.add(n.id);
+      return true;
+    });
+    state.nodes = candidates.map((n, idx) => ({
+      id: n.id,
+      parentId: typeof n.parentId === 'string' && n.parentId !== n.id && ids.has(n.parentId) ? n.parentId : null,
+      title: n.title.trim().slice(0, 80) || 'Untitled idea',
+      color: PALETTE.includes(n.color) ? n.color : PALETTE[idx % PALETTE.length]
+    }));
+    state.motion = data.motion !== false;
+  }
+  function load() {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) normaliseData(JSON.parse(raw));
+    } catch (error) {
+      refs.saveStatus.textContent = 'Saving unavailable in this preview';
+      console.warn('Local storage unavailable:', error);
+    }
+  }
+  function save() {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({ version: 1, nodes: state.nodes, motion: state.motion }));
+      refs.saveStatus.textContent = 'Saved on this device';
+    } catch (error) {
+      refs.saveStatus.textContent = 'Saving unavailable in this preview';
+      showToast('This preview cannot save. Open the app in Chrome from a hosted link.');
+    }
+  }
+  function showToast(message) {
+    clearTimeout(toastTimer);
+    refs.toast.textContent = message;
+    refs.toast.classList.add('visible');
+    toastTimer = setTimeout(() => refs.toast.classList.remove('visible'), 2500);
+  }
+  function getPath(id) {
+    const path = [];
+    let node = find(id);
+    const visited = new Set();
+    while (node && !visited.has(node.id)) {
+      visited.add(node.id);
+      path.unshift(node);
+      node = find(node.parentId);
+    }
+    return path;
+  }
+  function actionButton(label, cls, handler) {
+    const button = element('button', cls, label);
+    button.type = 'button';
+    button.addEventListener('click', handler);
+    return button;
+  }
+
+  function renderCrumbs() {
+    refs.crumbs.replaceChildren();
+    const path = getPath(state.currentId);
+    if (!path.length) {
+      refs.crumbs.append(element('span', 'crumb-current', 'Home / Your ideas'));
+      return;
+    }
+    const home = actionButton('Home', 'crumb-link', () => navigateTo(null, { backward: true }));
+    refs.crumbs.append(home);
+    for (const [index, node] of path.entries()) {
+      refs.crumbs.append(element('span', 'crumb-divider', '›'));
+      if (index === path.length - 1) {
+        refs.crumbs.append(element('span', 'crumb-current', node.title));
+      } else {
+        refs.crumbs.append(actionButton(node.title, 'crumb-link', () => navigateTo(node.id, { backward: true })));
+      }
+    }
+  }
+  function renderIntro() {
+    refs.intro.replaceChildren();
+    const current = find(state.currentId);
+    const label = current ? 'EXPLORE YOUR IDEA' : 'YOUR SPACE TO IMAGINE';
+    const title = current ? current.title : (state.nodes.length ? 'Your ideas, in motion.' : 'Every universe begins with a thought.');
+    const summary = current ? 'Step into another bubble, or start a new thought inside this one.'
+      : state.nodes.length ? 'Tap a bubble to step inside. Every idea can grow into its own universe.'
+        : 'A blank space, full of possibility. Tap the bubble below to begin.';
+    refs.intro.append(element('p', 'eyebrow', label));
+    refs.intro.append(element('h1', '', title));
+    refs.intro.append(element('p', 'sub', summary));
+  }
+
+  function makeBubble(node, options = {}) {
+    const size = options.size || '';
+    const slot = element('div', 'bubble-slot');
+    const bubble = actionButton('', 'bubble ' + size + (state.motion ? ' bubble-floating' : ''), () => navigateTo(node.id, { origin: bubble }));
+    bubble.style.setProperty('--bubble-color', node.color);
+    bubble.style.setProperty('--drift-time', `${5.8 + (node.title.length % 4) * .55}s`);
+    bubble.style.setProperty('--drift-delay', `-${(node.title.length % 6) * .7}s`);
+    bubble.setAttribute('aria-label', `Enter ${node.title}`);
+    bubble.append(element('span', 'bubble-label', node.title));
+    const num = childrenOf(node.id).length;
+    if (num) bubble.append(element('span', 'bubble-sub', `${num} ${num === 1 ? 'thought' : 'thoughts'}`));
+    slot.append(bubble);
+    if (options.editable !== false) {
+      const edit = element('button', 'bubble-edit');
+      edit.type = 'button';
+      edit.setAttribute('aria-label', `Rename or remove ${node.title}`);
+      edit.title = 'Rename or remove';
+      edit.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 19h8M4 17.5V20h3.5L19.4 8.1a2.1 2.1 0 0 0-3-3L4 16.5z"/></svg>';
+      edit.addEventListener('click', () => openEdit(node.id));
+      slot.append(edit);
+    }
+    return slot;
+  }
+  function makeCreateBubble(parentId, small = false) {
+    const slot = element('div', 'bubble-slot');
+    const bubble = actionButton('', 'bubble bubble-create ' + (small ? 'bubble-small ' : '') + (state.motion ? 'bubble-floating' : ''), () => openCreate(parentId));
+    bubble.setAttribute('aria-label', 'Begin a new idea');
+    bubble.append(element('span', 'create-plus', '+'));
+    bubble.append(element('span', 'bubble-label', parentId ? 'Add a thought' : 'Begin an idea'));
+    slot.append(bubble);
+    return slot;
+  }
+  function renderHome() {
+    if (!state.nodes.length) {
+      const area = element('div', 'empty-world');
+      area.append(makeCreateBubble(null));
+      area.append(element('div', 'empty-hint', 'A single thought can become a whole universe.'));
+      refs.world.append(area);
+      return;
+    }
+    const grid = element('div', 'home-grid');
+    childrenOf(null).forEach(node => grid.append(makeBubble(node, { size: 'bubble-home' })));
+    grid.append(makeCreateBubble(null, true));
+    refs.world.append(grid);
+  }
+  function renderInside() {
+    const here = find(state.currentId);
+    if (!here) { state.currentId = null; renderHome(); return; }
+    const constellation = element('section', 'constellation');
+    constellation.setAttribute('aria-label', `Inside ${here.title}`);
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.classList.add('connection-lines');
+    svg.setAttribute('aria-hidden', 'true');
+    constellation.append(svg);
+    const focusStage = element('div', 'focus-stage');
+    const current = element('div', 'bubble bubble-focus' + (state.motion ? ' bubble-floating' : ''));
+    current.style.setProperty('--bubble-color', here.color);
+    current.append(element('span', 'bubble-label', here.title));
+    current.append(element('span', 'bubble-sub', 'YOU ARE HERE'));
+    focusStage.append(current);
+    constellation.append(focusStage);
+
+    const kids = childrenOf(here.id);
+    if (!kids.length) {
+      const hint = element('div', 'child-placeholder');
+      hint.append(element('span', '', 'A new world can start here.'));
+      constellation.append(hint);
+      const empty = element('div', 'empty-world');
+      empty.style.minHeight = '175px';
+      empty.append(makeCreateBubble(here.id));
+      constellation.append(empty);
+    } else {
+      const grid = element('div', 'child-grid');
+      kids.forEach(node => grid.append(makeBubble(node, { size: 'bubble-small' })));
+      grid.append(makeCreateBubble(here.id, true));
+      constellation.append(grid);
+    }
+    const tools = element('div', 'floating-action-strip');
+    tools.append(actionButton('← Back one level', 'soft-button', () => navigateTo(here.parentId, { backward: true })));
+    tools.append(actionButton('Rename this idea', 'soft-button', () => openEdit(here.id)));
+    constellation.append(tools);
+    refs.world.append(constellation);
+    if (linesObserver) linesObserver.disconnect();
+    const draw = () => drawLines(constellation, svg);
+    requestAnimationFrame(draw);
+    if (typeof ResizeObserver !== 'undefined') {
+      linesObserver = new ResizeObserver(draw);
+      linesObserver.observe(constellation);
+    }
+  }
+  function drawLines(container, svg) {
+    if (!container.isConnected) return;
+    const root = container.getBoundingClientRect();
+    const centre = container.querySelector('.bubble-focus');
+    if (!centre) return;
+    const first = centre.getBoundingClientRect();
+    const x1 = first.left + first.width / 2 - root.left;
+    const y1 = first.top + first.height / 2 - root.top;
+    const lineData = [];
+    container.querySelectorAll('.child-grid .bubble:not(.bubble-create)').forEach(bubble => {
+      const dest = bubble.getBoundingClientRect();
+      lineData.push([dest.left + dest.width / 2 - root.left, dest.top + dest.height / 2 - root.top]);
+    });
+    svg.setAttribute('viewBox', `0 0 ${Math.max(1, root.width)} ${Math.max(1, root.height)}`);
+    svg.replaceChildren();
+    lineData.forEach(([x2, y2]) => {
+      const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+      for (const [k, v] of Object.entries({ x1, y1, x2, y2, stroke: '#8da5df', 'stroke-width': '1.6', 'stroke-opacity': '.38' })) line.setAttribute(k, String(v));
+      svg.append(line);
+    });
+  }
+  function render() {
+    if (linesObserver) linesObserver.disconnect();
+    refs.motion.classList.toggle('selected', state.motion);
+    refs.motion.setAttribute('aria-pressed', String(state.motion));
+    refs.motion.title = state.motion ? 'Turn floating off' : 'Turn floating on';
+    renderCrumbs();
+    renderIntro();
+    refs.world.replaceChildren();
+    state.currentId ? renderInside() : renderHome();
+  }
+
+  async function portalTransition(origin, destinationId, backward) {
+    if (state.transition) return;
+    state.transition = true;
+    const animate = !reducedMotion();
+    const original = origin?.getBoundingClientRect?.();
+    const duration = 410;
+    if (!animate || (!original && !backward)) {
+      state.currentId = destinationId;
+      render();
+      state.transition = false;
+      return;
+    }
+    const colour = origin?.style?.getPropertyValue('--bubble-color') || '#9bb5ff';
+    const circle = element('div', 'portal');
+    circle.style.setProperty('--portal-color', colour);
+    refs.portal.append(circle);
+    try {
+      if (!backward && original) {
+        const cx = innerWidth / 2, cy = innerHeight / 2;
+        const scale = Math.max(innerWidth / original.width, innerHeight / original.height) * 2.3;
+        circle.style.left = `${original.left}px`;
+        circle.style.top = `${original.top}px`;
+        circle.style.width = `${original.width}px`;
+        circle.style.height = `${original.height}px`;
+        const animation = circle.animate([
+          { transform: 'translate(0, 0) scale(1)', opacity: 1 },
+          { transform: `translate(${cx - original.left - original.width / 2}px, ${cy - original.top - original.height / 2}px) scale(${scale})`, opacity: 1 }
+        ], { duration, easing: 'cubic-bezier(.2,.8,.2,1)', fill: 'forwards' });
+        await animation.finished;
+        state.currentId = destinationId;
+        render();
+      } else {
+        // Render the destination behind a full-screen portal, then shrink into its bubble.
+        state.currentId = destinationId;
+        render();
+        const target = destinationId === null
+          ? refs.world.querySelector('.bubble-home') || refs.world.querySelector('.bubble-create')
+          : refs.world.querySelector('.bubble-focus');
+        const rect = target?.getBoundingClientRect();
+        if (rect) {
+          const radius = Math.max(innerWidth, innerHeight) * 1.7;
+          const big = radius * 2;
+          circle.style.width = `${big}px`;
+          circle.style.height = `${big}px`;
+          circle.style.left = `${rect.left + rect.width / 2 - radius}px`;
+          circle.style.top = `${rect.top + rect.height / 2 - radius}px`;
+          const scale = rect.width / big;
+          await circle.animate([
+            { transform: 'scale(1)', opacity: 1 },
+            { transform: `scale(${scale})`, opacity: .8 }
+          ], { duration, easing: 'cubic-bezier(.3,.0,.15,1)', fill: 'forwards' }).finished;
+        }
+      }
+      await circle.animate([{ opacity: 1 }, { opacity: 0 }], { duration: 140, fill: 'forwards' }).finished;
+    } catch (error) {
+      state.currentId = destinationId;
+      render();
+    } finally {
+      circle.remove();
+      state.transition = false;
+    }
+  }
+  function navigateTo(id, options = {}) {
+    if (state.transition || id === state.currentId) return;
+    if (id !== null && !find(id)) return;
+    const backward = !!options.backward;
+    const origin = options.origin || (backward ? refs.world.querySelector('.bubble-focus') : null);
+    history.pushState({ bubbleMind: true, id }, '');
+    void portalTransition(origin, id, backward);
+  }
+
+  function closeOverlay() {
+    refs.overlay.replaceChildren();
+    document.body.classList.remove('dialog-open');
+  }
+  function openDialog(title, description, builder) {
+    closeOverlay();
+    const wrap = element('div', 'overlay');
+    wrap.addEventListener('mousedown', evt => { if (evt.target === wrap) closeOverlay(); });
+    const dialog = element('div', 'dialog');
+    dialog.setAttribute('role', 'dialog');
+    dialog.setAttribute('aria-modal', 'true');
+    const heading = element('h2', '', title);
+    heading.id = 'dialog-title';
+    dialog.setAttribute('aria-labelledby', heading.id);
+    dialog.append(heading);
+    dialog.append(element('p', 'dialog-sub', description));
+    builder(dialog);
+    wrap.append(dialog);
+    refs.overlay.append(wrap);
+    document.body.classList.add('dialog-open');
+    dialog.querySelector('input')?.focus();
+  }
+  function fieldInput(name, value = '') {
+    const label = element('label', 'field-label', name);
+    label.setAttribute('for', 'bubble-name');
+    const input = element('input', 'text-field');
+    input.id = 'bubble-name';
+    input.maxLength = 80;
+    input.required = true;
+    input.autocomplete = 'off';
+    input.placeholder = 'Give your thought a name';
+    input.value = value;
+    return { label, input };
+  }
+  function openCreate(parentId) {
+    if (state.transition) return;
+    const parent = find(parentId);
+    openDialog(parent ? 'Start a new thought' : 'Begin an idea',
+      parent ? `This bubble will live inside “${parent.title}”.` : 'Give your idea a name. You can explore it once it appears.', dialog => {
+        const form = element('form');
+        const { label, input } = fieldInput('Idea name');
+        form.append(label, input);
+        const actions = element('div', 'form-actions');
+        actions.append(actionButton('Cancel', 'ghost-button', closeOverlay));
+        const create = element('button', 'primary-button', 'Create bubble');
+        create.type = 'submit';
+        actions.append(create);
+        form.append(actions);
+        form.addEventListener('submit', event => {
+          event.preventDefault();
+          const title = input.value.trim();
+          if (!title) { input.focus(); return; }
+          state.nodes.push({ id: makeId(), parentId, title, color: PALETTE[state.nodes.length % PALETTE.length] });
+          save();
+          closeOverlay();
+          render();
+          showToast(`Created “${title}”`);
+        });
+        dialog.append(form);
+      });
+  }
+  function descendants(id) {
+    const ids = new Set([id]);
+    let previousSize = 0;
+    while (ids.size !== previousSize) {
+      previousSize = ids.size;
+      for (const node of state.nodes) if (ids.has(node.parentId)) ids.add(node.id);
+    }
+    return ids;
+  }
+  function openEdit(id) {
+    const node = find(id);
+    if (!node) return;
+    openDialog('Rename your idea', 'Change the bubble name, or remove this test idea.', dialog => {
+      const form = element('form');
+      const { label, input } = fieldInput('Idea name', node.title);
+      form.append(label, input);
+      const actions = element('div', 'form-actions');
+      actions.append(actionButton('Cancel', 'ghost-button', closeOverlay));
+      const submit = element('button', 'primary-button', 'Save name');
+      submit.type = 'submit';
+      actions.append(submit);
+      form.append(actions);
+      form.addEventListener('submit', event => {
+        event.preventDefault();
+        const newName = input.value.trim();
+        if (!newName) return;
+        node.title = newName;
+        save();
+        closeOverlay();
+        render();
+        showToast('Bubble renamed');
+      });
+      dialog.append(form);
+      const deleteButton = actionButton('Remove this bubble', 'danger-button', () => {
+        const ids = descendants(id);
+        if (!confirm(`Remove “${node.title}” and all ${ids.size - 1} nested thoughts? This cannot be undone.`)) return;
+        state.nodes = state.nodes.filter(n => !ids.has(n.id));
+        if (ids.has(state.currentId)) state.currentId = node.parentId;
+        save();
+        closeOverlay();
+        render();
+        showToast('Bubble removed');
+      });
+      deleteButton.style.marginTop = '12px';
+      dialog.append(deleteButton);
+    });
+  }
+
+  refs.motion.addEventListener('click', () => {
+    state.motion = !state.motion;
+    save();
+    render();
+    showToast(state.motion ? 'Floating enabled' : 'Floating paused');
+  });
+  document.getElementById('new-button').addEventListener('click', () => openCreate(state.currentId));
+  document.addEventListener('keydown', event => {
+    if (event.key !== 'Escape') return;
+    if (refs.overlay.childElementCount) closeOverlay();
+    else if (state.currentId !== null) navigateTo(find(state.currentId)?.parentId ?? null, { backward: true });
+  });
+  window.addEventListener('popstate', event => {
+    const id = event.state?.bubbleMind ? event.state.id : null;
+    if (id === state.currentId) return;
+    const target = id !== null && find(id) ? id : null;
+    void portalTransition(refs.world.querySelector('.bubble-focus'), target, true);
+  });
+
+  load();
+  // On every fresh launch start at Home, even if the user closed the app deep inside an idea.
+  history.replaceState({ bubbleMind: true, id: null }, '');
+  render();
+  if ('serviceWorker' in navigator && (location.protocol === 'https:' || location.hostname === 'localhost')) {
+    window.addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => {}));
+  }
+})();
+
+  </script>
+</body>
+</html>

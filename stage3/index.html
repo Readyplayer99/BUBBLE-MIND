@@ -144,6 +144,12 @@ background-size:100% 100%,100% 100%,100% 100%,163px 173px,227px 193px,283px 239p
 .map-node .bubble-floating,.bubble-home.bubble-floating,.bubble-create.bubble-floating{animation:visible-bubble-float var(--drift-time,4.5s) ease-in-out infinite}
 @media(prefers-reduced-motion:reduce){.map-node .bubble-floating,.bubble-home.bubble-floating,.bubble-create.bubble-floating{animation:none!important}}
 @media(orientation:landscape) and (max-height:550px){.app-shell.inside .topbar{height:44px}.app-shell.inside .intro{display:none}.app-shell.inside .map-controls{margin:0}.app-shell.inside .crumbs{min-height:18px;margin:0}.app-shell.inside .bubble-world{padding:2px 0}}
+
+.note-preview{flex:1;min-height:0;overflow:auto;border:1px solid #879cd54a;background:#070e22d9;color:#f6f7ff;border-radius:12px;padding:14px;font:15px/1.65 ui-sans-serif,system-ui}
+.note-preview[hidden],.note-body[hidden]{display:none!important}
+.note-preview h2{font-size:24px;margin:8px 0}.note-preview h3{font-size:19px;margin:7px 0}
+.note-preview p{margin:5px 0;white-space:pre-wrap}.note-preview a{color:#afd5ff;text-decoration:underline}
+.note-preview input{margin-right:9px}.note-format-help{font-size:12px;color:#b7c8eb;margin:0 0 6px}
 </style>
 </head>
 <body>
@@ -275,16 +281,48 @@ function openNotes(nodeId,full=false){
  let timer=null,oldValue=body.value;const save=()=>{clearTimeout(timer);if(body.value===oldValue)return;const before=oldValue;const next=body.value;state.past.push(snapshot());if(state.past.length>45)state.past.shift();state.future=[];state.notes[nodeId]=next;const ok=persist();if(!ok){status.textContent='Save failed — copy your text';return}oldValue=next;status.textContent='Saved on this device'};
  const closeNotes=(rerender=true)=>{save();activeNote=null;backdrop.remove();document.body.classList.remove('dialog-open');if(rerender)render()};
  activeNote={save,close:closeNotes};
- const toolbar=el('div','note-toolbar');
+ const toolbar=el('div','note-toolbar');const preview=el('div','note-preview');preview.hidden=true;preview.setAttribute('aria-label','Formatted notes preview');
  function insert(prefix,suffix='',placeholder='text'){const a=body.selectionStart,b=body.selectionEnd,val=body.value,selected=val.slice(a,b)||placeholder;body.value=val.slice(0,a)+prefix+selected+suffix+val.slice(b);body.focus();body.setSelectionRange(a+prefix.length,a+prefix.length+selected.length);status.textContent='Unsaved changes';clearTimeout(timer);timer=setTimeout(save,550)}
- for(const [name,pre,suf,placeholder] of [['H1','# ','','Heading'],['H2','## ','','Heading'],['Bold','**','**','bold'],['Italic','*','*','italic'],['List','- ','','item'],['Numbered','1. ','','item'],['Task','- [ ] ','','task'],['Link','[','](https://)','link text']])toolbar.append(btn(name,'',()=>insert(pre,suf,placeholder)));
+ for(const [name,pre,suf,placeholder] of [['H1','# ','','Heading'],['H2','## ','','Heading'],['Bold','**','**','bold'],['Italic','*','*','italic'],['List','- ','','item'],['Numbered','1. ','','item'],['Task','- [ ] ','','task'],['Link','[','](https://)','link text']]){const button=btn(name,'',()=>{if(!preview.hidden){preview.hidden=true;body.hidden=false;previewButton.textContent='Preview'}insert(pre,suf,placeholder)});button.title='Select text, then choose '+name;toolbar.append(button)}
+ const previewButton=btn('Preview','stage3-action',()=>{
+  const showing=preview.hidden;preview.hidden=!showing;body.hidden=showing;
+  previewButton.textContent=showing?'Edit text':'Preview';
+  if(showing)displayNotePreview(preview,body.value);else body.focus();
+ });toolbar.append(previewButton);
  const expand=btn(full?'Quick view':'Full screen','stage3-action',()=>{save();closeNotes(false);openNotes(nodeId,!full)}),exit=btn('Close','stage3-action',closeNotes);
- bar.append(title,status,expand,exit);sheet.append(bar,toolbar,body);backdrop.append(sheet);document.body.append(backdrop);document.body.classList.add('dialog-open');
+ bar.append(title,status,expand,exit);sheet.append(bar,el('p','note-format-help','Select text and choose H1 (heading), H2 (subheading), Bold, Italic, List, Numbered, Task or Link. Use Preview to see formatting.'),toolbar,body,preview);backdrop.append(sheet);document.body.append(backdrop);document.body.classList.add('dialog-open');
  backdrop.addEventListener('pointerdown',e=>{if(e.target===backdrop)closeNotes()});
  body.addEventListener('input',()=>{status.textContent='Saving…';clearTimeout(timer);timer=setTimeout(save,550)});
  body.addEventListener('blur',save);body.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();save()}if(e.key==='Escape'){e.preventDefault();closeNotes()}});
  body.focus();
 }
+
+function displayNotePreview(box,value){
+ box.replaceChildren();
+ for(const line of value.split('\n')){
+  let tag='p', content=line, checkbox=false,bullet=false;
+  if(line.startsWith('## ')){tag='h3';content=line.slice(3)}
+  else if(line.startsWith('# ')){tag='h2';content=line.slice(2)}
+  else if(line.startsWith('- [ ] ')||line.startsWith('- [x] ')){checkbox=true;content=line.slice(6)}
+  else if(line.startsWith('- ')){bullet=true;content=line.slice(2)}
+  else if(/^[0-9]+\. /.test(line)){bullet=true;content=line}
+  const item=el(tag,'note-preview-line');
+  if(checkbox){const cb=el('input');cb.type='checkbox';cb.disabled=true;cb.checked=line.startsWith('- [x] ');item.append(cb)}
+  if(bullet)item.append(document.createTextNode('• '));
+  const tokens=/(\*\*([^*]+)\*\*|\*([^*]+)\*|\[([^\]]+)\]\((https?:\/\/[^ )]+)\))/g;
+  let at=0,match;
+  while((match=tokens.exec(content))!==null){
+   if(match.index>at)item.append(document.createTextNode(content.slice(at,match.index)));
+   if(match[2])item.append(el('strong','',match[2]));
+   else if(match[3])item.append(el('em','',match[3]));
+   else if(match[4]){const link=el('a','',match[4]);link.href=match[5];link.target='_blank';link.rel='noopener noreferrer';item.append(link)}
+   at=tokens.lastIndex;
+  }
+  item.append(document.createTextNode(content.slice(at)||' '));
+  box.append(item);
+ }
+}
+
 function openSearch(){
  dialog('Search all your ideas','Find bubbles and note contents anywhere in your projects.',d=>{
  const input=el('input','stage3-search');input.placeholder='Search ideas, descriptions or notes';input.setAttribute('aria-label','Search all ideas');const results=el('div','search-panel');d.append(input,results);

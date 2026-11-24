@@ -13,7 +13,7 @@ Stage 4 is a separate evolution of Stage 3. The original app and earlier stages 
 - No cloud sync. Export JSON to protect your data independently of browser storage.
 
 ## Installation
-- Manifest, icons and service worker limited to `stage4/` scope.
+- Manifest, scalable SVG icon and service worker limited to `stage4/` scope.
 - Browser-menu installation when supported, or Add to Home Screen.
 - Open Stage 4 online once after publishing to cache assets; previously cached app can load offline.
 - Data stays local on each device. Restore via downloaded JSON on other devices.

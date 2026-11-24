@@ -297,6 +297,13 @@ background-size:100% 100%,100% 100%,100% 100%,163px 173px,227px 193px,283px 239p
 .ai-result button{justify-self:start}
 .ai-feedback{color:#b3dcc6}
 .ai-draft{white-space:pre-wrap;overflow-wrap:anywhere;max-height:220px;overflow-y:auto;font-size:12px;color:#e4ecff}
+
+/* Compact clickable detail sub-nodes, separate from child bubbles */
+.detail-subnode-chip{position:absolute;left:0;bottom:-23px;min-width:78px;max-width:145px;min-height:30px;padding:5px 8px;border-radius:16px;border:1px solid #a7c4eb94;background:#203960f2;color:#eaf3ff;z-index:8;box-shadow:0 4px 14px #0007;font:11px/1.2 system-ui,sans-serif;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;cursor:pointer}
+.map-centre .detail-subnode-chip{left:16px;bottom:-29px}
+.detail-subnode-list{display:flex;flex-direction:column;gap:8px;padding:8px 0}
+.detail-subnode-list button{text-align:left;min-height:39px}
+@media(max-width:680px){.detail-subnode-chip{min-width:66px;max-width:110px;font-size:10px;bottom:-19px;padding:5px 6px}}
 </style>
 </head>
 <body>
@@ -325,7 +332,7 @@ document.getElementById("preview-fallback")?.remove();
    Deliberately does NOT use, modify, or import the user's original application. */
 (()=>{'use strict';
 const KEY='bubble-mind-stage5-v1',STAGE1_KEY='bubble-mind-stage4-mobile-v1',PALETTE=['#9bb5ff','#8bd8ca','#d5a1ee','#f0c180','#ee9da9','#9fce97','#73c6ed','#f18ec6'];
-const state={nodes:[],links:[],notes:{},motion:true,motionOverride:false,homeStatic:false,layout:'orbit',currentId:null,transition:false,pan:{x:0,y:0,k:1},past:[],future:[],dragHappened:false};
+const state={nodes:[],links:[],notes:{},subnodes:[],motion:true,motionOverride:false,homeStatic:false,layout:'orbit',currentId:null,transition:false,pan:{x:0,y:0,k:1},past:[],future:[],dragHappened:false};
 const byId=id=>state.nodes.find(n=>n.id===id)||null;
 const kids=id=>state.nodes.filter(n=>n.parentId===id);
 const id=()=>globalThis.crypto?.randomUUID?.()||'bm-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
@@ -345,6 +352,7 @@ function scrub(raw){
  // Break cycles from malformed backups, even though Stage 2 never deliberately creates them.
  for(const n of clean){const chain=new Set([n.id]);let p=n.parentId;while(p){if(chain.has(p)){n.parentId=null;break}chain.add(p);p=clean.find(x=>x.id===p)?.parentId||null}}
  state.nodes=clean;
+ state.subnodes=Array.isArray(raw.subnodes)?raw.subnodes.filter(x=>x&&typeof x.id==='string'&&typeof x.ownerId==='string'&&ids.has(x.ownerId)).slice(0,5000).map(x=>({id:x.id.slice(0,160),ownerId:x.ownerId,title:String(x.title||'Details').slice(0,100),body:String(x.body||'').slice(0,500000)})):[];
  state.notes=(raw.notes&&typeof raw.notes==='object'&&!Array.isArray(raw.notes))?Object.fromEntries(Object.entries(raw.notes).filter(([k,v])=>ids.has(k)&&typeof v==='string').map(([k,v])=>[k,v.slice(0,500000)])):{};
  state.links=Array.isArray(raw.links)?raw.links.filter(l=>l&&typeof l.id==='string'&&ids.has(l.from)&&ids.has(l.to)&&l.from!==l.to).slice(0,20000).map(l=>({id:l.id,from:l.from,to:l.to,label:String(l.label||'').slice(0,90),color:normalHex(l.color)})):[];
  state.motion=raw.motion!==false;state.motionOverride=raw.motionOverride===true;state.homeStatic=raw.homeStatic===true;state.layout=['orbit','grid','free'].includes(raw.layout)?raw.layout:'orbit';
@@ -364,13 +372,13 @@ function load(){
   }
  }catch(e){refs.save.textContent='Storage unavailable — changes may not persist';console.warn(e)}
 }
-function persist(){try{localStorage.setItem(KEY,JSON.stringify({version:3,nodes:state.nodes,notes:state.notes,links:state.links,motion:state.motion,motionOverride:state.motionOverride,homeStatic:state.homeStatic,layout:state.layout}));refs.save.textContent='Saved on this device';return true}catch(e){console.error(e);refs.save.textContent='Save failed — storage unavailable';toast('Could not save to this browser');return false}}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify({version:5,nodes:state.nodes,notes:state.notes,subnodes:state.subnodes,links:state.links,motion:state.motion,motionOverride:state.motionOverride,homeStatic:state.homeStatic,layout:state.layout}));refs.save.textContent='Saved on this device';return true}catch(e){console.error(e);refs.save.textContent='Save failed — storage unavailable';toast('Could not save to this browser');return false}}
 
 /* Stage 4: non-destructive backups and deliberate restores.
    This app uses its own localStorage key and imports a COPY of Stage 3 once. */
 const ROLLBACK_KEY='bubble-mind-stage5-pre-restore-v1';
 let deferredInstall=null;
-const collectData=()=>({version:4,nodes:state.nodes,notes:state.notes,links:state.links,
+const collectData=()=>({version:5,nodes:state.nodes,notes:state.notes,subnodes:state.subnodes,links:state.links,
  motion:state.motion,motionOverride:state.motionOverride,homeStatic:state.homeStatic,layout:state.layout});
 const safeName=()=>new Date().toISOString().replace(/[:.]/g,'-');
 function saveDownload(filename,content,mime){
@@ -382,7 +390,7 @@ function saveDownload(filename,content,mime){
 }
 function backupJSONString(){
  return JSON.stringify({format:'bubble-mind-backup',formatVersion:1,
-  exportedAt:new Date().toISOString(),source:'stage4',data:collectData()},null,2);
+  exportedAt:new Date().toISOString(),source:'stage5',data:collectData()},null,2);
 }
 function exportJSON(){saveDownload('bubble-mind-backup-'+safeName()+'.json',backupJSONString(),'application/json;charset=utf-8');toast('JSON backup prepared — check downloads')}
 function mdSafe(v){return String(v||'').replace(/[\r\n]+/g,' ').replace(/([\\*_{}\[\]<>#+.!|])/g,'\\$1')}
@@ -398,6 +406,7 @@ function exportMarkdown(){
    lines.push('  '.repeat(depth)+'- **'+mdSafe(n.title)+'**');
    if(n.description)lines.push('  '.repeat(depth+1)+mdSafe(n.description));
    if(state.notes[n.id]){lines.push('','  '.repeat(depth+1)+'Notes:', '');for(const line of state.notes[n.id].split(/\r?\n/))lines.push('  '.repeat(depth+1)+line);lines.push('')}
+   for(const sub of state.subnodes.filter(x=>x.ownerId===n.id)){lines.push('  '.repeat(depth+1)+'- Sub-node: **'+mdSafe(sub.title)+'**');for(const line of sub.body.split(/\r?\n/))lines.push('  '.repeat(depth+2)+line);lines.push('')}
    walk(n.id,depth+1);
   }
  }
@@ -415,7 +424,7 @@ function exportCSV(){
   return '"'+safe.replace(/"/g,'""')+'"';
  };
  const rows=[['id','parent_id','title','path','description','notes','color','size','x','y'].map(cell).join(',')];
- for(const n of state.nodes)rows.push([n.id,n.parentId||'',n.title,path(n),n.description,state.notes[n.id]||'',n.color,n.size,n.x??'',n.y??''].map(cell).join(','));
+ for(const n of state.nodes)rows.push([n.id,n.parentId||'',n.title,path(n),n.description,[state.notes[n.id]||'',...state.subnodes.filter(x=>x.ownerId===n.id).map(x=>'Sub-node: '+x.title+'\n'+x.body)].filter(Boolean).join('\n\n'),n.color,n.size,n.x??'',n.y??''].map(cell).join(','));
  saveDownload('bubble-mind-ideas-'+safeName()+'.csv','\uFEFF'+rows.join('\r\n'),'text/csv;charset=utf-8');
  toast('CSV export prepared');
 }
@@ -442,7 +451,7 @@ function checkedImport(raw){
  for(const l of data.links||[]){
   if(!l||typeof l.from!=='string'||typeof l.to!=='string'||typeof l.id!=='string')throw Error('Invalid connection record.');
  }
- return {nodes:data.nodes,links:data.links||[],notes:data.notes||{},
+ return {nodes:data.nodes,links:data.links||[],notes:data.notes||{},subnodes:Array.isArray(data.subnodes)?data.subnodes:[],
   motion:data.motion,motionOverride:data.motionOverride,homeStatic:data.homeStatic,layout:data.layout};
 }
 function mergeImported(incoming){
@@ -454,6 +463,7 @@ function mergeImported(incoming){
  for(const [oldId,note] of Object.entries(incoming.notes)){
   if(map.has(oldId))state.notes[map.get(oldId)]=note;
  }
+ for(const sub of incoming.subnodes||[]){if(map.has(sub.ownerId))state.subnodes.push({...sub,id:id(),ownerId:map.get(sub.ownerId)})}
  for(const link of incoming.links){
   const from=map.get(link.from),to=map.get(link.to);
   if(from&&to&&from!==to)state.links.push({...link,id:id(),from,to});
@@ -545,7 +555,7 @@ function openBackupManager(){
 }
 
 let activeNote=null;
-function snapshot(){return JSON.stringify({nodes:state.nodes,notes:state.notes,links:state.links,motion:state.motion,motionOverride:state.motionOverride,homeStatic:state.homeStatic,layout:state.layout})}
+function snapshot(){return JSON.stringify({nodes:state.nodes,notes:state.notes,subnodes:state.subnodes,links:state.links,motion:state.motion,motionOverride:state.motionOverride,homeStatic:state.homeStatic,layout:state.layout})}
 function record(){state.past.push(snapshot());if(state.past.length>45)state.past.shift();state.future=[]}
 function change(action,msg){record();try{action()}catch(e){const old=state.past.pop();Object.assign(state,JSON.parse(old));console.error(e);toast(e.message||'Operation failed');return false}const saved=persist();render();if(msg)toast(saved?msg:msg+' (not saved — check browser storage)');return true}
 function undo(){if(!state.past.length)return toast('Nothing to undo');state.future.push(snapshot());Object.assign(state,JSON.parse(state.past.pop()));if(state.currentId&&!byId(state.currentId))state.currentId=null;persist();render();toast('Undone')}
@@ -559,9 +569,62 @@ function actions(d,onSave,saveLabel='Save'){const row=el('div','form-actions');r
 function addNode(parentId){dialog(parentId?'Add a thought':'Begin an idea','Name the bubble and choose its colour.',d=>{const f=field('Idea name');const desc=field('Short description (optional)','','textarea');const color=colorPicker(PALETTE[state.nodes.length%PALETTE.length]);d.append(f.box,desc.box,color.wrap);const submit=()=>{const name=f.input.value.trim();if(!name){toast('Give your bubble a name');f.input.focus();return}const saved=change(()=>{state.nodes.push({id:id(),parentId,title:name,color:color.get(),description:desc.input.value.slice(0,2000),size:1,x:null,y:null})},'Bubble created');if(saved){close();if(parentId&&state.currentId!==parentId)navigate(parentId)}};actions(d,submit,'Create bubble');f.input.addEventListener('keydown',e=>{if(e.key==='Enter'&&!e.isComposing){e.preventDefault();submit()}})})}
 function descendants(nodeId){const set=new Set([nodeId]);let previous=-1;while(set.size!==previous){previous=set.size;for(const n of state.nodes)if(set.has(n.parentId))set.add(n.id)}return set}
 function isAncestor(possibleAncestor,childId){let p=byId(childId),seen=new Set();while(p&&!seen.has(p.id)){if(p.id===possibleAncestor)return true;seen.add(p.id);p=byId(p.parentId)}return false}
-function duplicate(nodeId){const list=[...descendants(nodeId)],parent=byId(nodeId)?.parentId;const remap=new Map(list.map(i=>[i,id()]));const original=state.nodes.filter(n=>remap.has(n.id));const inner=state.links.filter(l=>remap.has(l.from)&&remap.has(l.to));change(()=>{for(const n of original){state.nodes.push({...n,id:remap.get(n.id),parentId:n.id===nodeId?parent:remap.get(n.parentId),title:n.id===nodeId?n.title+' (copy)':n.title,x:n.x===null?null:n.x+30,y:n.y===null?null:n.y+30})}for(const l of inner)state.links.push({...l,id:id(),from:remap.get(l.from),to:remap.get(l.to)})},'Bubble and descendants duplicated')}
+function duplicate(nodeId){const list=[...descendants(nodeId)],parent=byId(nodeId)?.parentId;const remap=new Map(list.map(i=>[i,id()]));const original=state.nodes.filter(n=>remap.has(n.id));const inner=state.links.filter(l=>remap.has(l.from)&&remap.has(l.to));change(()=>{for(const n of original){state.nodes.push({...n,id:remap.get(n.id),parentId:n.id===nodeId?parent:remap.get(n.parentId),title:n.id===nodeId?n.title+' (copy)':n.title,x:n.x===null?null:n.x+30,y:n.y===null?null:n.y+30})}for(const sub of state.subnodes.filter(x=>remap.has(x.ownerId)).slice()){state.subnodes.push({...sub,id:id(),ownerId:remap.get(sub.ownerId)})}for(const l of inner)state.links.push({...l,id:id(),from:remap.get(l.from),to:remap.get(l.to)})},'Bubble and descendants duplicated')}
 function moveNode(nodeId){const n=byId(nodeId),invalid=descendants(nodeId);dialog('Move bubble','Choose a different parent for this idea and all its descendants.',d=>{const select=el('select');select.style.cssText='width:100%;padding:11px;background:#111b34;color:#fff;border-radius:10px;border:1px solid #64739d';const root=el('option','','Home (top-level)');root.value='';select.append(root);for(const p of state.nodes){if(invalid.has(p.id))continue;const op=el('option','',getPath(p.id).map(x=>x.title).join(' / '));op.value=p.id;select.append(op)}select.value=n.parentId||'';d.append(el('p','help-text','The bubble keeps all its children and labelled relationships.'),select);actions(d,()=>{const dest=select.value||null;if(dest===n.parentId)return close();if(dest&&invalid.has(dest))return toast('Cannot move inside its own descendant');if(state.currentId===nodeId)state.currentId=dest;change(()=>{n.parentId=dest;n.x=null;n.y=null},'Bubble moved');close()})})}
-function editNode(nodeId){const n=byId(nodeId);if(!n)return;dialog('Edit bubble',`Manage “${n.title}”.`,d=>{const name=field('Idea name',n.title),desc=field('Description',n.description||'','textarea'),color=colorPicker(n.color),size=el('select');size.style.cssText='padding:10px;border-radius:10px;background:#111b34;color:white;border:1px solid #56658b';for(const [v,t] of [['.7','Extra small'],['.85','Small'],['1','Normal'],['1.25','Large'],['1.4','Extra large']]){const o=el('option','',t);o.value=v;size.append(o)}size.value=String([.7,.85,1,1.25,1.4].reduce((a,b)=>Math.abs(b-n.size)<Math.abs(a-n.size)?b:a,1));d.append(name.box,desc.box,color.wrap,el('p','help-text','Bubble size'),size);actions(d,()=>{const title=name.input.value.trim();if(!title)return toast('A title is required');change(()=>{n.title=title;n.description=desc.input.value.slice(0,2000);n.color=color.get();n.size=Math.max(.7,Math.min(1.4,Number(size.value)||1))},'Bubble updated');close()});const lower=el('div','dialog-section');lower.append(btn('Duplicate branch','soft-button',()=>{duplicate(nodeId);close()}),document.createTextNode(' '),btn('Move branch','soft-button',()=>{close();moveNode(nodeId)}),document.createTextNode(' '),btn('Connections','soft-button',()=>{close();connections(nodeId)}));const remove=btn('Delete bubble & descendants','danger-button',()=>{const count=descendants(nodeId).size-1;if(!confirm(`Delete “${n.title}” and ${count} nested idea(s)? You can undo this until you leave the page.`))return;change(()=>{const ids=descendants(nodeId);state.nodes=state.nodes.filter(x=>!ids.has(x.id));state.links=state.links.filter(l=>!ids.has(l.from)&&!ids.has(l.to));if(ids.has(state.currentId))state.currentId=n.parentId},'Bubble deleted — Undo available');close()});remove.style.marginTop='12px';lower.append(el('br'),remove);d.append(lower)})}
+
+/* Detail sub-nodes attach information to a bubble without becoming map children. */
+const subnodesFor=ownerId=>state.subnodes.filter(x=>x.ownerId===ownerId);
+function openSubnode(subId){
+ const sub=state.subnodes.find(x=>x.id===subId);if(!sub)return;
+ const owner=byId(sub.ownerId);if(!owner)return toast('That bubble no longer exists');
+ dialog('Detail sub-node · '+owner.title,'A separate information page attached to this bubble. Long text stays out of the galaxy map.',d=>{
+  const name=field('Detail title',sub.title);
+  const body=field('Information',sub.body,'textarea');body.input.rows=13;body.input.maxLength=500000;
+  body.input.style.minHeight='220px';body.input.style.width='100%';body.input.style.resize='vertical';
+  const controls=el('div','form-actions');
+  controls.append(btn('Close','ghost-button',close),btn('Save detail','primary-button',()=>{
+   if(!name.input.value.trim())return toast('Give this sub-node a title');
+   change(()=>{sub.title=name.input.value.trim().slice(0,100);sub.body=body.input.value.slice(0,500000)},'Detail sub-node saved');
+   close();
+  }));
+  d.append(name.box,body.box,controls);
+  const remove=btn('Delete this detail sub-node','danger-button',()=>{
+   if(!window.confirm('Delete "'+sub.title+'"?'))return;
+   change(()=>{state.subnodes=state.subnodes.filter(x=>x.id!==sub.id)},'Sub-node deleted');close();
+  });
+  d.append(remove);
+ });
+}
+function addSubnode(ownerId){
+ const owner=byId(ownerId);if(!owner)return;
+ dialog('Add detail sub-node','Attach a separate, clickable information page to "'+owner.title+'".',d=>{
+  const name=field('Sub-node title','Details'),body=field('Information','','textarea');
+  body.input.rows=9;body.input.style.minHeight='170px';body.input.style.width='100%';body.input.style.resize='vertical';
+  d.append(name.box,body.box);
+  actions(d,()=>{
+   const title=name.input.value.trim();if(!title)return toast('Name the sub-node');
+   const sub={id:id(),ownerId,title:title.slice(0,100),body:body.input.value.slice(0,500000)};
+   const ok=change(()=>state.subnodes.push(sub),'Detail sub-node added');
+   if(ok)close();
+  },'Create sub-node');
+ });
+}
+function subnodeButton(ownerId){
+ const attached=subnodesFor(ownerId);
+ const pill=btn('ⓘ '+(attached.length?'Details ('+attached.length+')':'Add details'),'detail-subnode-chip',()=>{
+  if(!attached.length)return addSubnode(ownerId);
+  dialog('Sub-nodes · '+(byId(ownerId)?.title||'Idea'),'Click a detail to read it, or create another information page.',d=>{
+   const list=el('div','detail-subnode-list');
+   for(const sub of attached)list.append(btn('ⓘ '+sub.title,'soft-button',()=>openSubnode(sub.id)));
+   list.append(btn('＋ New detail sub-node','soft-button',()=>addSubnode(ownerId)));
+   d.append(list);
+  });
+ });
+ pill.setAttribute('aria-label','Open detail sub-nodes for '+(byId(ownerId)?.title||'bubble'));
+ return pill;
+}
+
+function editNode(nodeId){const n=byId(nodeId);if(!n)return;dialog('Edit bubble',`Manage “${n.title}”.`,d=>{const name=field('Idea name',n.title),desc=field('Description',n.description||'','textarea'),color=colorPicker(n.color),size=el('select');size.style.cssText='padding:10px;border-radius:10px;background:#111b34;color:white;border:1px solid #56658b';for(const [v,t] of [['.7','Extra small'],['.85','Small'],['1','Normal'],['1.25','Large'],['1.4','Extra large']]){const o=el('option','',t);o.value=v;size.append(o)}size.value=String([.7,.85,1,1.25,1.4].reduce((a,b)=>Math.abs(b-n.size)<Math.abs(a-n.size)?b:a,1));d.append(name.box,desc.box,color.wrap,el('p','help-text','Bubble size'),size);actions(d,()=>{const title=name.input.value.trim();if(!title)return toast('A title is required');change(()=>{n.title=title;n.description=desc.input.value.slice(0,2000);n.color=color.get();n.size=Math.max(.7,Math.min(1.4,Number(size.value)||1))},'Bubble updated');close()});const lower=el('div','dialog-section');lower.append(btn('＋ Detail sub-node','soft-button',()=>{close();addSubnode(nodeId)}),document.createTextNode(' '),btn('Duplicate branch','soft-button',()=>{duplicate(nodeId);close()}),document.createTextNode(' '),btn('Move branch','soft-button',()=>{close();moveNode(nodeId)}),document.createTextNode(' '),btn('Connections','soft-button',()=>{close();connections(nodeId)}));const remove=btn('Delete bubble & descendants','danger-button',()=>{const count=descendants(nodeId).size-1;if(!confirm(`Delete “${n.title}” and ${count} nested idea(s)? You can undo this until you leave the page.`))return;change(()=>{const ids=descendants(nodeId);state.nodes=state.nodes.filter(x=>!ids.has(x.id));state.subnodes=state.subnodes.filter(x=>!ids.has(x.ownerId));state.links=state.links.filter(l=>!ids.has(l.from)&&!ids.has(l.to));if(ids.has(state.currentId))state.currentId=n.parentId},'Bubble deleted — Undo available');close()});remove.style.marginTop='12px';lower.append(el('br'),remove);d.append(lower)})}
 function getPath(nodeId){const out=[],seen=new Set();let n=byId(nodeId);while(n&&!seen.has(n.id)){out.unshift(n);seen.add(n.id);n=byId(n.parentId)}return out}
 function connections(nodeId){const n=byId(nodeId);if(!n)return;dialog('Connections',`Label relationships for “${n.title}”. Links can go across projects.`,d=>{const list=el('div');const update=()=>{list.replaceChildren();const all=state.links.filter(l=>l.from===nodeId||l.to===nodeId);if(!all.length)list.append(el('p','help-text','No labelled relationships yet.'));for(const l of all){const other=byId(l.from===nodeId?l.to:l.from),row=el('div','rel-row'),txt=el('div');txt.append(el('strong','',other?.title||'Unknown bubble'),el('small','',l.label||'Related'));const acts=el('div','rel-actions');acts.append(btn('Go', '',()=>{close();goTo(other?.id)}),btn('Edit','',()=>{const v=prompt('Relationship label:',l.label);if(v!==null)change(()=>l.label=v.trim().slice(0,90),'Link updated');close();connections(nodeId)}),btn('×','',()=>{change(()=>state.links=state.links.filter(x=>x.id!==l.id),'Link removed');update()}));row.append(txt,acts);list.append(row)}};update();d.append(list);const section=el('div','dialog-section');section.append(el('h3','','New relationship'));const to=el('select'),label=field('Relationship label (e.g. allies with)');to.style.cssText='width:100%;padding:11px;background:#111b34;color:white;border:1px solid #56658b;border-radius:10px';for(const other of state.nodes){if(other.id===nodeId)continue;const opt=el('option','',getPath(other.id).map(x=>x.title).join(' / '));opt.value=other.id;to.append(opt)}section.append(to,label.box,btn('Add connection','primary-button',()=>{if(!to.value)return toast('No other bubble to link');if(state.links.some(l=>(l.from===nodeId&&l.to===to.value)||(l.to===nodeId&&l.from===to.value)))return toast('These bubbles are already linked');change(()=>state.links.push({id:id(),from:nodeId,to:to.value,label:label.input.value.trim().slice(0,90),color:'#d5a1ee'}),'Relationship created');label.input.value='';update()}));d.append(section)})}
 function goTo(id){if(!id||!byId(id))return;state.currentId=id;state.pan={x:0,y:0,k:1};render()}
@@ -956,13 +1019,13 @@ function openOutline(){
 function renderInside(){const parent=byId(state.currentId);if(!parent){state.currentId=null;return renderHome()}const tools=el('div','map-controls');tools.append(el('span','help-text','Layout:'));for(const [mode,label] of [['orbit','Orbit'],['grid','Grid'],['free','Free']]){const b=btn(label,'map-control'+(state.layout===mode?' active':''),()=>change(()=>{if(mode==='free'&&state.layout!=='free'){const positions=layoutPositions(kids(state.currentId));for(const n of kids(state.currentId)){const p=positions.get(n.id);n.x=p.x;n.y=p.y}}state.layout=mode},`Layout: ${label}`));b.setAttribute('aria-pressed',String(state.layout===mode));tools.append(b)}tools.append(btn('Undo','map-control',undo),btn('Redo','map-control',redo),btn('Notes','map-control',()=>openNotes(parent.id)));
  tools.append(btn('Actions','map-control landscape-actions',()=>dialog('Bubble actions','Choose what to do inside this idea.',d=>{
   const list=el('div','menu');
-  for(const [name,fn] of [['Write notes',()=>openNotes(parent.id)],['Add child bubble',()=>addNode(parent.id)],['Edit central idea',()=>editNode(parent.id)],['Relationships',()=>connections(parent.id)],['Back one level',()=>navigate(parent.parentId)]])list.append(btn(name,'soft-button',()=>{close();fn()}));
+  for(const [name,fn] of [['Write notes',()=>openNotes(parent.id)],['Add child bubble',()=>addNode(parent.id)],['Add detail sub-node',()=>addSubnode(parent.id)],['Edit central idea',()=>editNode(parent.id)],['Relationships',()=>connections(parent.id)],['Back one level',()=>navigate(parent.parentId)]])list.append(btn(name,'soft-button',()=>{close();fn()}));
   d.append(list)
  })));tools.append(el('span','tether-mode-label','Tether drift · parent + children float'));refs.world.append(tools);
- viewport=el('div','map-viewport');viewport.setAttribute('aria-label','Idea mind map');canvas=el('div','map-canvas');svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.classList.add('map-svg');canvas.append(svg);const centre=el('div','map-centre');centre.style.setProperty('--core-size',bubbleDiameter(parent,'centre')+'px');const c=bubbleButton(parent,'bubble-focus');c.onclick=null;c.addEventListener('click',e=>{e.stopImmediatePropagation();editNode(parent.id)},true);centre.append(c);centre.append(btn('✎','map-chip',()=>editNode(parent.id)));canvas.append(centre);
- const children=kids(parent.id),positions=layoutPositions(children);display=new Map();children.forEach((n)=>{const p=positions.get(n.id);display.set(n.id,p);const slot=el('div','map-node');slot.dataset.id=n.id;slot.style.setProperty('--slot-size',bubbleDiameter(n)+'px');slot.style.transform=`translate(${p.x-bubbleDiameter(n)/2}px,${p.y-bubbleDiameter(n)/2}px)`;const bub=bubbleButton(n);bub.classList.toggle('bubble-floating',state.motion&&!reduced());slot.append(bub,btn('⋯','map-chip',()=>editNode(n.id)));canvas.append(slot);wireDrag(slot,n,p)});viewport.append(canvas);const panHelp=el('p','map-pan-help','Drag empty space to pan · Scroll or pinch to zoom');const reset=btn('Center view','map-control map-reset',()=>{state.pan={x:0,y:0,k:1};applyPan()});viewport.append(reset);refs.world.append(viewport,panHelp);applyPan();updateMapLinks();wirePan(viewport);
+ viewport=el('div','map-viewport');viewport.setAttribute('aria-label','Idea mind map');canvas=el('div','map-canvas');svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.classList.add('map-svg');canvas.append(svg);const centre=el('div','map-centre');centre.style.setProperty('--core-size',bubbleDiameter(parent,'centre')+'px');const c=bubbleButton(parent,'bubble-focus');c.onclick=null;c.addEventListener('click',e=>{e.stopImmediatePropagation();editNode(parent.id)},true);centre.append(c);centre.append(btn('✎','map-chip',()=>editNode(parent.id)));centre.append(subnodeButton(parent.id));canvas.append(centre);
+ const children=kids(parent.id),positions=layoutPositions(children);display=new Map();children.forEach((n)=>{const p=positions.get(n.id);display.set(n.id,p);const slot=el('div','map-node');slot.dataset.id=n.id;slot.style.setProperty('--slot-size',bubbleDiameter(n)+'px');slot.style.transform=`translate(${p.x-bubbleDiameter(n)/2}px,${p.y-bubbleDiameter(n)/2}px)`;const bub=bubbleButton(n);bub.classList.toggle('bubble-floating',state.motion&&!reduced());slot.append(bub,btn('⋯','map-chip',()=>editNode(n.id)),subnodeButton(n.id));canvas.append(slot);wireDrag(slot,n,p)});viewport.append(canvas);const panHelp=el('p','map-pan-help','Drag empty space to pan · Scroll or pinch to zoom');const reset=btn('Center view','map-control map-reset',()=>{state.pan={x:0,y:0,k:1};applyPan()});viewport.append(reset);refs.world.append(viewport,panHelp);applyPan();updateMapLinks();wirePan(viewport);
  const stats=el('div','map-summary',`${children.length} child bubbles · ${state.links.filter(l=>l.from===parent.id||l.to===parent.id||display.has(l.from)&&display.has(l.to)).length} labelled links`);refs.world.append(stats);
- const bar=el('div','map-toolbar');bar.append(btn('✎ Write notes','soft-button',()=>openNotes(parent.id)),btn('Focus editor','soft-button',()=>openNotes(parent.id,true)),btn('＋ Add a bubble','soft-button',()=>addNode(parent.id)),btn('✎ Edit central idea','soft-button',()=>editNode(parent.id)),btn('↔ Relationships','soft-button',()=>connections(parent.id)),btn('← Back','soft-button',()=>navigate(parent.parentId)));refs.world.append(bar);refs.world.append(el('p','map-help','Tap to enter · Tab creates a child · ⋯ to edit, duplicate, move or connect · Free layout allows dragging'))}
+ const bar=el('div','map-toolbar');bar.append(btn('✎ Write notes','soft-button',()=>openNotes(parent.id)),btn('Focus editor','soft-button',()=>openNotes(parent.id,true)),btn('＋ Add a bubble','soft-button',()=>addNode(parent.id)),btn('ⓘ Detail sub-node','soft-button',()=>addSubnode(parent.id)),btn('✎ Edit central idea','soft-button',()=>editNode(parent.id)),btn('↔ Relationships','soft-button',()=>connections(parent.id)),btn('← Back','soft-button',()=>navigate(parent.parentId)));refs.world.append(bar);refs.world.append(el('p','map-help','Tap to enter · Tab creates a child · ⋯ to edit, duplicate, move or connect · Free layout allows dragging'))}
 function wireDrag(slot,n,initial){const bubble=slot.querySelector('.bubble');let moving=false,sx=0,sy=0,bx=initial.x,by=initial.y,pid=-1;const start=e=>{if(e.button!==0&&e.pointerType==='mouse')return;e.stopPropagation();stopBubbleFloat();moving=false;sx=e.clientX;sy=e.clientY;pid=e.pointerId;bx=display.get(n.id).x;by=display.get(n.id).y;try{bubble.setPointerCapture(pid)}catch(_){}};const move=e=>{if(pid!==e.pointerId)return;e.stopPropagation();const dx=(e.clientX-sx)/state.pan.k,dy=(e.clientY-sy)/state.pan.k;if(!moving&&Math.hypot(dx,dy)<8)return;if(!moving){moving=true;record();slot.classList.add('dragged');if(state.layout!=='free'){const p=new Map(display);state.layout='free';for(const node of kids(state.currentId)){const pos=p.get(node.id);node.x=pos.x;node.y=pos.y}refs.world.querySelectorAll('.map-control').forEach(b=>{if(['Orbit','Grid','Free'].includes(b.textContent))b.classList.toggle('active',b.textContent==='Free')})}}const p={x:Math.round(bx+dx),y:Math.round(by+dy)};display.set(n.id,p);n.x=p.x;n.y=p.y;slot.style.transform=`translate(${p.x-bubbleDiameter(n)/2}px,${p.y-bubbleDiameter(n)/2}px)`;updateMapLinks()};const end=e=>{if(pid!==e.pointerId)return;e.stopPropagation();pid=-1;slot.classList.remove('dragged');if(moving){moving=false;state.dragHappened=true;state.future=[];persist();setTimeout(()=>{state.dragHappened=false},100);toast('Position saved');render()}else{navigate(n.id)}};bubble.addEventListener('pointerdown',start);bubble.addEventListener('pointermove',move);bubble.addEventListener('pointerup',end);bubble.addEventListener('pointercancel',()=>{pid=-1;moving=false;slot.classList.remove('dragged')});bubble.addEventListener('click',e=>{e.stopImmediatePropagation();e.preventDefault()},true);bubble.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();navigate(n.id)}});bubble.addEventListener('contextmenu',e=>{e.preventDefault();editNode(n.id)})}
 function wirePan(view){let pointers=new Map(),start=null,zoomStart=null;view.addEventListener('pointerdown',e=>{if(e.target.closest('.map-node,.map-centre,button'))return;view.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===1)start={x:e.clientX,y:e.clientY,panX:state.pan.x,panY:state.pan.y};if(pointers.size===2){const [a,b]=[...pointers.values()];zoomStart={distance:Math.hypot(a.x-b.x,a.y-b.y),k:state.pan.k}}});view.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId))return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===1&&start){state.pan.x=start.panX+e.clientX-start.x;state.pan.y=start.panY+e.clientY-start.y;applyPan()}else if(pointers.size===2&&zoomStart){const [a,b]=[...pointers.values()];state.pan.k=Math.max(.35,Math.min(2.4,zoomStart.k*Math.hypot(a.x-b.x,a.y-b.y)/Math.max(1,zoomStart.distance)));applyPan()}});const end=e=>{pointers.delete(e.pointerId);if(pointers.size!==1)start=null;if(!pointers.size)zoomStart=null};view.addEventListener('pointerup',end);view.addEventListener('pointercancel',end);view.addEventListener('wheel',e=>{if(e.target.closest('button'))return;e.preventDefault();state.pan.k=Math.max(.35,Math.min(2.4,state.pan.k*Math.exp(-e.deltaY*.001)));applyPan()},{passive:false})}
 // Floating with Tethers (Option B). Children drift independently, while their
@@ -1232,6 +1295,7 @@ window.BubbleMindStudioBridge=Object.freeze({
  getAI:()=>({key:aiKey,model:aiModel}),
  setAI:(key,model)=>{aiKey=String(key||'');aiModel=String(model||'')},
  dialog,close,el,btn,change,toast,id,colors:PALETTE,
+ addSubnode,subnodesFor,openSubnode,
  path:nodeId=>getPath(nodeId).map(n=>n.title).join(' / ')
 });
 window.BubbleMindStage2Test={snapshot,byId,kids,change,undo,redo,descendants,isAncestor,layoutPositions,orbitPosition,getState:()=>state};

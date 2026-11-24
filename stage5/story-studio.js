@@ -126,7 +126,7 @@ function review(result,region,status){
  list.forEach((item,i)=>{
   const row=el('div','unified-tree-row');row.style.marginLeft=Math.min(36,item.depth*9)+'px';
   const toggle=el('label','unified-include'),checked=el('input');checked.type='checkbox';checked.checked=true;
-  checked.addEventListener('change',()=>{item.use=checked.checked});toggle.append(checked,document.createTextNode(' Include this bubble'));
+  checked.disabled=i===0;checked.addEventListener('change',()=>{item.use=checked.checked});toggle.append(checked,document.createTextNode(i===0?' Parent bubble (required)':' Include this bubble'));
   const name=mkInput('input','Bubble name','Bubble title');name.value=item.title;name.maxLength=100;
   const description=mkInput('textarea','Description','Bubble description');description.value=item.description;description.rows=2;description.maxLength=2000;
   const notes=mkInput('textarea','Detailed notes','Bubble notes');notes.value=item.notes;notes.rows=3;notes.maxLength=30000;
@@ -225,6 +225,7 @@ function studio(){
    const typed=composer.value.trim(),transcript=[...chat.messages];
    if(mode==='send'&&!typed){status.textContent='Write a message first.';return}
    if(mode==='analyze'&&!chat.document){status.textContent='Attach a document first.';return}
+   if(mode==='build'&&chat.document){status.textContent='Analyze the attached document first, so it can be included in your bubble map.';return}
    if(mode==='build'&&!transcript.length&&!typed){status.textContent='Brainstorm or analyze a document before building a map.';return}
    if(typed)transcript.push({role:'user',content:typed.slice(0,7000)});
    if(transcript.length>100){status.textContent='This chat is too long for a single AI request. Create a map or begin a new chat.';return}

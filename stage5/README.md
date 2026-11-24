@@ -28,3 +28,11 @@ Future Stage 5 AI development will be optional and should require explicit user 
 - Review and edit every proposed bubble title, description, and note. One Create Bubble Map confirmation adds all nodes with one undoable history action. Existing projects are never replaced.
 - The conversation and uploaded text remain in memory and are not persisted until an approved bubble map is created. Reloading loses unsaved conversation/text.
 - Separate Story Studio JS/CSS files are part of the Stage 5 offline cache; OpenRouter and remote document-library fetching still require internet.
+
+## OpenRouter model discovery
+- In AI Ideas or Story Studio, enter your OpenRouter API key and select **Load My Models**.
+- The app requests `GET https://openrouter.ai/api/v1/models/user` with the provided key to retrieve models permitted by your account's settings. **All Models** uses the public `/models` catalog; listed models may not be available under your account limits.
+- Search by name or ID, filter to **Free only**, and choose a model. Pricing is shown as approximate USD per million input/output tokens, plus context length. Model catalog and prices can change.
+- The selected ID fills the existing model field and is shared by AI Ideas and Story Studio in the current tab. Manual model-ID entry is retained.
+- Model lists are fetched on demand, not automatically; a network connection is required.
+- API keys are not stored in project backups or browser localStorage.

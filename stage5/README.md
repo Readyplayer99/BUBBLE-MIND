@@ -36,3 +36,12 @@ Future Stage 5 AI development will be optional and should require explicit user 
 - The selected ID fills the existing model field and is shared by AI Ideas and Story Studio in the current tab. Manual model-ID entry is retained.
 - Model lists are fetched on demand, not automatically; a network connection is required.
 - API keys are not stored in project backups or browser localStorage.
+
+## Unified AI Chat (Stage 5)
+- **AI Chat** is now the only AI entry point, replacing the earlier AI Ideas and Story Studio screens.
+- Natural multi-turn conversation about any idea, not only books. Conversation history is kept in sessionStorage (this tab/session) with no API key, and can be cleared with **New Chat** or copied with **Copy Chat**. Unsaved conversations are not added to Bubble Mind project backups.
+- Attach TXT, Markdown, DOCX or text-based PDF. Reading is local; DOCX/PDF parsing requires downloading public JavaScript libraries. Click **Analyze Document** and explicitly approve paid OpenRouter requests before any content is sent. Very large documents must be split.
+- **Build Bubble Map** generates a hierarchy from the conversation or analyzed document. The user reviews, edits, includes/excludes bubbles, selects the destination and explicitly confirms **Approve & Create Bubbles**. No AI change is applied automatically.
+- One save action creates the selected parent/child hierarchy with notes. Existing projects stay unchanged; undo is available through Bubble Mind's edit history.
+- Model discovery remains in the collapsible AI Settings panel. Credentials stay in app memory and are not in localStorage, sessionStorage or backups.
+- The actual OpenRouter model responses and phone layout require user testing. Models may charge for requests.

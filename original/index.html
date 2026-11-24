@@ -24,6 +24,7 @@ button{font:inherit;color:inherit;cursor:pointer}
 .sep{color:var(--muted);opacity:.6}
 .icon,.pill{min-width:44px;min-height:44px;border:1px solid var(--line);background:color-mix(in srgb,var(--panel) 80%,transparent);border-radius:22px;padding:0 14px}
 .icon{padding:0;font-size:20px}
+.icon:disabled{opacity:.35}
 .pill[aria-pressed=false]{opacity:.7}
 .pill.small{min-height:40px;font-size:14px}
 button:focus-visible,input:focus-visible,textarea:focus-visible,.bubble:focus-visible .bubble__inner,.core:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
@@ -39,11 +40,18 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,.bubble:focus-vi
 @keyframes pop{from{transform:scale(.4);opacity:0}to{transform:scale(1);opacity:1}}
 .bubble.is-pressed .bubble__inner{transform:scale(.93)}
 .bubble.is-dragging .bubble__inner{transform:scale(1.07);box-shadow:inset 0 -10px 20px rgba(0,0,0,.18),inset 0 8px 16px rgba(255,255,255,.3),0 18px 40px rgba(0,0,0,.4)}
+.bubble.hl .bubble__inner{box-shadow:0 0 0 3px #fff,0 0 28px 6px color-mix(in srgb,var(--c) 70%,transparent)}
+.bubble.linked .bubble__inner{box-shadow:0 0 0 3px rgba(255,255,255,.65),0 0 20px 3px color-mix(in srgb,var(--c) 55%,transparent)}
+.badge{position:absolute;top:-6px;right:-6px;min-width:26px;height:26px;padding:0 6px;border-radius:13px;background:var(--panel);color:var(--fg);border:1px solid var(--line);font-size:12px;font-weight:700;display:grid;place-items:center;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.35)}
 .bubble__label,.clamp{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere;line-height:1.15;pointer-events:none}
 .bubble__label{font-size:var(--fs,16px);font-weight:650}
 .bubble[data-tone=light] .bubble__label{color:#fff;text-shadow:0 1px 3px rgba(0,0,0,.5)}
 .bubble[data-tone=dark] .bubble__label{color:#0b1020}
 .core{position:absolute;left:-60px;top:-60px;width:120px;height:120px;border-radius:50%;display:grid;place-items:center;padding:16px;text-align:center;cursor:pointer;border:2px dashed color-mix(in srgb,var(--c) 70%,transparent);background:color-mix(in srgb,var(--c) 14%,transparent);color:var(--fg);font-size:14px;font-weight:600}
+.conn path{fill:none;stroke-width:2.5;stroke-opacity:.8;stroke-linecap:round}
+.conn polygon{stroke:none}
+.conn text{font-size:13px;font-weight:600;fill:var(--fg);text-anchor:middle;paint-order:stroke;stroke:var(--bg);stroke-width:4px;stroke-linejoin:round}
+.conn.hl path{stroke-width:4.5;stroke-opacity:1}
 #empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;pointer-events:none;z-index:2}
 #begin{pointer-events:auto;width:min(210px,56vw);aspect-ratio:1;border-radius:50%;border:1px solid rgba(255,255,255,.4);padding:20px;font-size:22px;font-weight:700;color:#fff;text-shadow:0 1px 4px rgba(0,0,0,.5);background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.55),transparent 34%),radial-gradient(circle at 50% 55%,#6f8dff,#4a3fd0 75%,#2a2a85);box-shadow:inset 0 -14px 28px rgba(0,0,0,.25),0 0 60px 8px rgba(122,162,255,.35);animation:bob 7s ease-in-out infinite,glow 4.5s ease-in-out infinite}
 [data-float=off] #begin{animation:glow 4.5s ease-in-out infinite}
@@ -56,7 +64,7 @@ button:focus-visible,input:focus-visible,textarea:focus-visible,.bubble:focus-vi
 #hint{position:absolute;left:50%;top:calc(50% + 100px);transform:translateX(-50%);margin:0;width:min(320px,80vw);text-align:center;color:var(--muted);pointer-events:none}
 #status{position:absolute;left:50%;bottom:calc(14px + env(safe-area-inset-bottom));transform:translateX(-50%);font-size:13px;color:var(--muted);pointer-events:none;z-index:4}
 #status.error{color:#ff8a8a;font-weight:600}
-#recenter{position:absolute;left:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:4}
+#tools{position:absolute;left:12px;bottom:calc(12px + env(safe-area-inset-bottom));z-index:4;display:flex;gap:8px;align-items:center}
 .fab{position:absolute;right:calc(16px + env(safe-area-inset-right));bottom:calc(16px + env(safe-area-inset-bottom));width:60px;height:60px;border-radius:50%;border:1px solid rgba(255,255,255,.4);font-size:34px;line-height:1;color:#fff;background:radial-gradient(circle at 32% 26%,rgba(255,255,255,.5),transparent 40%),linear-gradient(135deg,#6f8dff,#5a43d6);box-shadow:0 8px 24px rgba(60,70,200,.5);z-index:6}
 .fab:active{transform:scale(.94)}
 #overlay .backdrop{position:fixed;inset:0;z-index:20;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(4,7,18,.55);-webkit-backdrop-filter:blur(5px);backdrop-filter:blur(5px);animation:fade .18s ease-out}
@@ -74,7 +82,7 @@ textarea{resize:vertical}
 .swatch{width:40px;height:40px;border-radius:50%;border:2px solid transparent;padding:0}
 .swatch[aria-pressed=true]{border-color:var(--fg);box-shadow:inset 0 0 0 2px var(--panel)}
 input.swatch.custom{background:none;border:2px solid var(--line);padding:2px}
-.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px}
+.actions{display:flex;gap:10px;justify-content:flex-end;margin-top:8px;flex-wrap:wrap}
 .btn{min-height:46px;padding:0 20px;border-radius:23px;border:1px solid var(--line);background:transparent}
 .btn.primary{background:linear-gradient(135deg,#6f8dff,#5a43d6);border-color:transparent;color:#fff;font-weight:600}
 .btn.danger{background:#c43b3b;border-color:transparent;color:#fff;font-weight:600}
@@ -88,6 +96,12 @@ input.swatch.custom{background:none;border:2px solid var(--line);padding:2px}
 .row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px}
 .row input{width:26px;height:26px}
 .note{font-size:13px;color:var(--muted);margin:0 0 12px}
+.list{display:flex;flex-direction:column;gap:6px;max-height:46vh;overflow:auto;margin:8px 0}
+.item{display:flex;flex-direction:column;align-items:flex-start;gap:2px;text-align:left;width:100%;padding:10px 14px;border-radius:14px;border:1px solid var(--line);background:transparent;min-height:48px}
+.item small{color:var(--muted);overflow-wrap:anywhere}
+.rowline{display:flex;align-items:center;gap:6px;justify-content:space-between;border:1px solid var(--line);border-radius:14px;padding:8px 10px}
+.rowline .t{min-width:0;flex:1;overflow-wrap:anywhere}.rowline .t small{display:block;color:var(--muted)}
+.rowline .btn{min-height:40px;padding:0 12px}
 #toast{position:fixed;left:50%;bottom:calc(92px + env(safe-area-inset-bottom));transform:translateX(-50%);z-index:30;max-width:min(92vw,460px)}
 .toast{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--line);padding:10px 12px 10px 16px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.4);animation:rise .2s ease-out}
 .toast button{min-height:40px;padding:0 12px;border-radius:12px;border:0;background:transparent;color:var(--accent);font-weight:700}
@@ -104,7 +118,7 @@ input.swatch.custom{background:none;border:2px solid var(--line);padding:2px}
    <button id='backBtn' class='icon' aria-label='Back one level' hidden>&#8592;</button>
    <nav id='crumbs' aria-label='Breadcrumb'></nav>
    <button id='floatBtn' class='pill' type='button' aria-pressed='true'>Float: on</button>
-   <button id='settingsBtn' class='icon' type='button' aria-label='Settings'>&#9881;</button>
+   <button id='menuBtn' class='icon' type='button' aria-label='Menu' aria-haspopup='dialog'>&#8943;</button>
   </header>
   <div id='stage'>
    <div id='ripple'></div>
@@ -114,7 +128,11 @@ input.swatch.custom{background:none;border:2px solid var(--line);padding:2px}
    </div>
    <p id='hint' hidden>Nothing inside yet. Tap + to add the first idea.</p>
    <div id='status' role='status' aria-live='polite'></div>
-   <button id='recenter' class='pill small' type='button' hidden>Recenter</button>
+   <div id='tools'>
+    <button id='undoBtn' class='icon' type='button' aria-label='Undo' disabled>&#8630;</button>
+    <button id='redoBtn' class='icon' type='button' aria-label='Redo' disabled>&#8631;</button>
+    <button id='recenter' class='pill small' type='button' hidden>Recenter</button>
+   </div>
   </div>
   <button id='fab' class='fab' type='button' aria-label='New project'>+</button>
  </div>
@@ -126,9 +144,10 @@ input.swatch.custom{background:none;border:2px solid var(--line);padding:2px}
 'use strict';
 // <CORE>
 const PALETTE=['#7aa2ff','#b58cff','#ff7eb6','#ff9f6b','#ffd166','#5fd6a4','#4fd1e8','#e86a6a'];
-const DEFAULT_COLOUR=PALETTE[0];
-const MAX_TITLE=200, BASE_RADIUS=46, HOME_SIZE=1.3, CORE_RADIUS=60;
-const DEFAULT_SETTINGS={key:'app',theme:'dark',floatingEnabled:true,reducedMotion:'system'};
+const DEFAULT_COLOUR=PALETTE[0], LINK_COLOUR='#9fb0d9';
+const MAX_TITLE=200, BASE_RADIUS=46, HOME_SIZE=1.3, CORE_RADIUS=60, LAYOUT_GAP=28, GRID=60, UNDO_LIMIT=100;
+const SIZES=[['Small',.8],['Medium',1],['Large',1.4]];
+const DEFAULT_SETTINGS={key:'app',theme:'dark',floatingEnabled:true,reducedMotion:'system',defaultLayout:'freeform',gridSnap:false};
 
 function newId(){
   const c=globalThis.crypto;
@@ -150,13 +169,13 @@ function luminance(hex){
 function contrastWith(hex){const L=luminance(hex);return{white:1.05/(L+0.05),black:(L+0.05)/0.05}}
 function readableTone(hex){const c=contrastWith(hex);return c.white>=c.black?'light':'dark'}
 const radiusFor=size=>BASE_RADIUS*Math.min(2.2,Math.max(0.6,size||1));
+const snapTo=(v,g)=>Math.round(v/g)*g;
 
-// Deterministic outward spiral: first point that does not overlap any existing circle.
-function findFreePosition(existing,r,gap=28){
+// First point on a deterministic outward spiral that overlaps nothing.
+function findFreePosition(existing,r,gap=LAYOUT_GAP){
   const golden=Math.PI*(3-Math.sqrt(5));
   for(let i=0;i<20000;i++){
-    const d=70*Math.sqrt(i);
-    const x=Math.round(d*Math.cos(i*golden)), y=Math.round(d*Math.sin(i*golden));
+    const d=70*Math.sqrt(i),x=Math.round(d*Math.cos(i*golden)),y=Math.round(d*Math.sin(i*golden));
     let free=true;
     for(const c of existing){if(Math.hypot(c.x-x,c.y-y)<c.r+r+gap){free=false;break}}
     if(free)return{x,y};
@@ -164,20 +183,52 @@ function findFreePosition(existing,r,gap=28){
   return{x:existing.length*200,y:0};
 }
 
+// Pure layout engine: items [{id,r}] in creation order -> Map id->{x,y}. hasCore reserves room for the centre bubble.
+function computeLayout(kind,items,hasCore){
+  const out=new Map(),n=items.length;if(!n)return out;
+  const maxR=Math.max(...items.map(i=>i.r)),cell=2*maxR+LAYOUT_GAP,R0=hasCore?CORE_RADIUS+maxR+LAYOUT_GAP:cell,rnd=Math.round;
+  if(kind==='radial'){
+    if(!hasCore&&n===1){out.set(items[0].id,{x:0,y:0});return out}
+    let k=0,i=0;
+    while(i<n){
+      const rad=R0+k*cell,cap=Math.max(1,Math.floor(Math.PI/Math.asin(Math.min(1,cell/(2*rad)))));
+      const cnt=Math.min(cap,n-i),off=-Math.PI/2+(k%2)*(Math.PI/cap);
+      for(let j=0;j<cnt;j++){const a=off+j*2*Math.PI/cnt;out.set(items[i+j].id,{x:rnd(rad*Math.cos(a)),y:rnd(rad*Math.sin(a))})}
+      i+=cnt;k++;
+    }
+  }else if(kind==='tree'){
+    const cols=Math.max(1,Math.ceil(Math.sqrt(n*1.6))),rows=Math.ceil(n/cols);
+    const y0=hasCore?R0:-((rows-1)*cell)/2;let i=0,row=0;
+    while(i<n){const cnt=Math.min(cols,n-i);for(let j=0;j<cnt;j++)out.set(items[i+j].id,{x:rnd((j-(cnt-1)/2)*cell),y:rnd(y0+row*cell)});i+=cnt;row++}
+  }else{ // grid
+    let cells;
+    for(let s=Math.ceil(Math.sqrt(n));;s++){
+      cells=[];const o=(s-1)/2;
+      for(let r=0;r<s;r++)for(let c=0;c<s;c++){const x=(c-o)*cell,y=(r-o)*cell;if(!hasCore||Math.hypot(x,y)>=R0)cells.push({x:rnd(x),y:rnd(y)})}
+      if(cells.length>=n)break;
+    }
+    items.forEach((it,i)=>out.set(it.id,cells[i]));
+  }
+  return out;
+}
+
 function cleanTitle(t){const v=String(t==null?'':t).trim().slice(0,MAX_TITLE);if(!v)throw new Error('A title is required.');return v}
 const cleanColour=c=>normaliseHex(c)||DEFAULT_COLOUR;
 const cleanDesc=d=>String(d==null?'':d).trim().slice(0,5000);
+const cleanLabel=l=>String(l==null?'':l).trim().slice(0,80);
+const cleanSize=s=>{const n=Number(s);return Number.isFinite(n)&&n>0?Math.min(2.2,Math.max(.6,n)):1};
 const byCreated=(a,b)=>a.createdAt-b.createdAt||(a.id<b.id?-1:1);
 
-// ---------- storage back-ends (same tiny interface) ----------
+// ---------- storage back-ends: get / getAll / getByIndex / batch([{t,v}|{t,id,del:true}]) ----------
+const TABLES=['projects','bubbles','settings','connections'];
 class MemoryStore{
-  constructor(){this.t={projects:new Map(),bubbles:new Map(),settings:new Map()}}
+  constructor(){this.t={};for(const n of TABLES)this.t[n]=new Map()}
   async get(t,id){const v=this.t[t].get(id);return v?structuredClone(v):undefined}
   async getAll(t){return[...this.t[t].values()].map(v=>structuredClone(v))}
   async getByIndex(t,idx,key){return(await this.getAll(t)).filter(v=>v[idx]===key)}
   async batch(ops){
     for(const o of ops)if(!this.t[o.t])throw new Error('Unknown table '+o.t);
-    for(const o of ops)this.t[o.t].set(o.t==='settings'?o.v.key:o.v.id,structuredClone(o.v));
+    for(const o of ops){if(o.del)this.t[o.t].delete(o.id);else this.t[o.t].set(o.t==='settings'?o.v.key:o.v.id,structuredClone(o.v))}
   }
   close(){}
 }
@@ -188,14 +239,19 @@ class IdbStore{
     return new Promise((res,rej)=>{
       if(typeof indexedDB==='undefined')return rej(new Error('IndexedDB is unavailable'));
       let r;
-      try{r=indexedDB.open(name,1)}catch(e){return rej(e)}
-      r.onupgradeneeded=()=>{
-        const db=r.result;
-        db.createObjectStore('projects',{keyPath:'id'});
-        const b=db.createObjectStore('bubbles',{keyPath:'id'});
-        b.createIndex('parentId','parentId');
-        b.createIndex('projectId','projectId');
-        db.createObjectStore('settings',{keyPath:'key'});
+      try{r=indexedDB.open(name,2)}catch(e){return rej(e)}
+      r.onupgradeneeded=ev=>{ // versioned migrations: each block only adds, never deletes user data
+        const db=r.result,old=ev.oldVersion;
+        if(old<1){
+          db.createObjectStore('projects',{keyPath:'id'});
+          const b=db.createObjectStore('bubbles',{keyPath:'id'});
+          b.createIndex('parentId','parentId');b.createIndex('projectId','projectId');
+          db.createObjectStore('settings',{keyPath:'key'});
+        }
+        if(old<2){
+          const c=db.createObjectStore('connections',{keyPath:'id'});
+          c.createIndex('sourceId','sourceId');c.createIndex('targetId','targetId');
+        }
       };
       r.onsuccess=()=>{const db=r.result;db.onversionchange=()=>db.close();res(new IdbStore(db))};
       r.onerror=()=>rej(r.error||new Error('Could not open storage'));
@@ -204,8 +260,7 @@ class IdbStore{
   }
   _req(t,mode,fn){
     return new Promise((res,rej)=>{
-      const tx=this.db.transaction(t,mode);
-      let out;
+      const tx=this.db.transaction(t,mode);let out;
       const rq=fn(tx.objectStore(t));
       rq.onsuccess=()=>{out=rq.result};
       tx.oncomplete=()=>res(out);
@@ -220,9 +275,8 @@ class IdbStore{
   batch(ops){
     return new Promise((res,rej)=>{
       if(!ops.length)return res();
-      const names=[...new Set(ops.map(o=>o.t))];
-      const tx=this.db.transaction(names,'readwrite');
-      for(const o of ops)tx.objectStore(o.t).put(o.v);
+      const tx=this.db.transaction([...new Set(ops.map(o=>o.t))],'readwrite');
+      for(const o of ops){const st=tx.objectStore(o.t);if(o.del)st.delete(o.id);else st.put(o.v)}
       tx.oncomplete=()=>res();
       tx.onerror=()=>rej(tx.error);
       tx.onabort=()=>rej(tx.error||new Error('Write aborted (storage may be full)'));
@@ -231,237 +285,553 @@ class IdbStore{
   close(){this.db.close()}
 }
 
-// ---------- repository: all integrity rules live here ----------
+// ---------- repository: every integrity rule lives here; every edit is one undoable changeset ----------
+const nextStamp=list=>Math.max(Date.now(),...list.map(x=>x.createdAt+1));
+const chg=(t,before,after)=>({t,id:(after||before).id,before:before||null,after});
 class Repo{
-  constructor(store){this.s=store}
+  constructor(store){this.s=store;this.undoStack=[];this.redoStack=[];this.lastEntry=null;this.listeners=[]}
+  onHistory(f){this.listeners.push(f)}
+  _fire(){for(const f of this.listeners){try{f()}catch(_){}}}
+  get canUndo(){return this.undoStack.length>0}
+  get canRedo(){return this.redoStack.length>0}
+  get undoLabel(){const e=this.undoStack[this.undoStack.length-1];return e?e.label:''}
+  get redoLabel(){const e=this.redoStack[this.redoStack.length-1];return e?e.label:''}
+  clearHistory(){this.undoStack=[];this.redoStack=[];this.lastEntry=null;this._fire()}
+
+  // Writes the 'after' state atomically, then records how to reverse it.
+  async commit(label,changes){
+    changes=changes.filter(c=>c&&c.after);
+    if(!changes.length)return null;
+    await this.s.batch(changes.map(c=>({t:c.t,v:c.after})));
+    const e={label,changes};
+    this.undoStack.push(e);if(this.undoStack.length>UNDO_LIMIT)this.undoStack.shift();
+    this.redoStack=[];this.lastEntry=e;this._fire();return e;
+  }
+  async undo(){
+    const e=this.undoStack.pop();if(!e)return null;
+    try{await this.s.batch(e.changes.slice().reverse().map(c=>c.before?{t:c.t,v:c.before}:{t:c.t,id:c.id,del:true}))}
+    catch(err){this.undoStack.push(e);throw err}
+    this.redoStack.push(e);this._fire();return e.label;
+  }
+  async redo(){
+    const e=this.redoStack.pop();if(!e)return null;
+    try{await this.s.batch(e.changes.map(c=>({t:c.t,v:c.after})))}
+    catch(err){this.redoStack.push(e);throw err}
+    this.undoStack.push(e);this._fire();return e.label;
+  }
 
   async getSettings(){const v=await this.s.get('settings','app');return{...DEFAULT_SETTINGS,...(v||{})}}
   async saveSettings(v){await this.s.batch([{t:'settings',v:{...v,key:'app'}}])}
 
+  async _rec(t,id){const r=await this.s.get(t,id);if(!r||r.deletedAt)throw new Error(t==='projects'?'Project not found.':'Bubble not found.');return r}
+  getProject(id){return this._rec('projects',id)}
+  getBubble(id){return this._rec('bubbles',id)}
+  getBubbles(ids){return Promise.all(ids.map(id=>this.getBubble(id)))}
   async listProjects(){return(await this.s.getAll('projects')).filter(p=>!p.deletedAt).sort(byCreated)}
-  async getProject(id){const p=await this.s.get('projects',id);if(!p||p.deletedAt)throw new Error('Project not found.');return p}
+  async listChildren(parentId){return(await this.s.getByIndex('bubbles','parentId',parentId)).filter(b=>!b.deletedAt).sort(byCreated)}
 
+  // ----- create / edit -----
   async createProject(input){
-    const title=cleanTitle(input.title);
-    const now=Date.now();
-    const circles=(await this.listProjects()).map(p=>({x:p.x,y:p.y,r:radiusFor(HOME_SIZE)}));
-    const pos=findFreePosition(circles,radiusFor(HOME_SIZE));
-    const projectId=newId(), rootId=newId(), colour=cleanColour(input.colour), description=cleanDesc(input.description);
-    const root={id:rootId,projectId,parentId:null,title,description,colour,x:0,y:0,size:1,createdAt:now,updatedAt:now,deletedAt:null,metadata:{}};
-    const project={id:projectId,title,description,colour,rootBubbleId:rootId,x:pos.x,y:pos.y,createdAt:now,updatedAt:now,deletedAt:null};
-    await this.s.batch([{t:'bubbles',v:root},{t:'projects',v:project}]); // one atomic write
+    const title=cleanTitle(input.title),existing=await this.listProjects(),now=nextStamp(existing);
+    const pos=findFreePosition(existing.map(p=>({x:p.x,y:p.y,r:radiusFor(HOME_SIZE)})),radiusFor(HOME_SIZE));
+    const projectId=newId(),rootId=newId(),colour=cleanColour(input.colour),description=cleanDesc(input.description);
+    const root={id:rootId,projectId,parentId:null,title,description,colour,x:0,y:0,z:0,size:1,createdAt:now,updatedAt:now,deletedAt:null,metadata:{}};
+    const project={id:projectId,title,description,colour,rootBubbleId:rootId,x:pos.x,y:pos.y,createdAt:now,updatedAt:now,deletedAt:null,metadata:{}};
+    await this.commit('Create project \u201c'+title+'\u201d',[chg('bubbles',null,root),chg('projects',null,project)]);
     return project;
   }
   async updateProject(id,input){
-    const title=cleanTitle(input.title);
-    const p=await this.getProject(id);
-    const root=await this.s.get('bubbles',p.rootBubbleId);
+    const title=cleanTitle(input.title),p=await this.getProject(id),root=await this.s.get('bubbles',p.rootBubbleId);
     const patch={title,description:cleanDesc(input.description),colour:cleanColour(input.colour),updatedAt:Date.now()};
-    const ops=[{t:'projects',v:{...p,...patch}}];
-    if(root)ops.push({t:'bubbles',v:{...root,...patch}});
-    await this.s.batch(ops);
+    await this.commit('Edit project',[chg('projects',p,{...p,...patch}),root?chg('bubbles',root,{...root,...patch}):null]);
   }
-  async moveProject(id,x,y){const p=await this.getProject(id);await this.s.batch([{t:'projects',v:{...p,x,y,updatedAt:Date.now()}}])}
-  async deleteProject(id){await this.getProject(id);return this._softDelete('projects',[id])}
-  async countProjectBubbles(projectId){
-    const all=(await this.s.getByIndex('bubbles','projectId',projectId)).filter(b=>!b.deletedAt);
-    return Math.max(0,all.length-1); // the hidden root is not counted
-  }
-
-  async getBubble(id){const b=await this.s.get('bubbles',id);if(!b||b.deletedAt)throw new Error('Bubble not found.');return b}
-  async getBubbles(ids){return Promise.all(ids.map(id=>this.getBubble(id)))}
-  async listChildren(parentId){return(await this.s.getByIndex('bubbles','parentId',parentId)).filter(b=>!b.deletedAt).sort(byCreated)}
-
   async createBubble(parentId,input){
-    const title=cleanTitle(input.title);
-    const parent=await this.getBubble(parentId);
+    const title=cleanTitle(input.title),parent=await this.getBubble(parentId),size=cleanSize(input.size);
     const sibs=await this.listChildren(parentId);
-    const obstacles=[{x:0,y:0,r:CORE_RADIUS},...sibs.map(s=>({x:s.x,y:s.y,r:radiusFor(s.size)}))];
-    const pos=findFreePosition(obstacles,radiusFor(1));
-    const now=Date.now();
-    const b={id:newId(),projectId:parent.projectId,parentId,title,description:cleanDesc(input.description),colour:cleanColour(input.colour),x:pos.x,y:pos.y,size:1,createdAt:now,updatedAt:now,deletedAt:null,metadata:{}};
-    await this.s.batch([{t:'bubbles',v:b}]);
+    const pos=findFreePosition([{x:0,y:0,r:CORE_RADIUS},...sibs.map(s=>({x:s.x,y:s.y,r:radiusFor(s.size)}))],radiusFor(size));
+    const now=nextStamp(sibs);
+    const b={id:newId(),projectId:parent.projectId,parentId,title,description:cleanDesc(input.description),colour:cleanColour(input.colour),x:pos.x,y:pos.y,z:0,size,createdAt:now,updatedAt:now,deletedAt:null,metadata:{}};
+    await this.commit('Create bubble \u201c'+title+'\u201d',[chg('bubbles',null,b)]);
     return b;
   }
   async updateBubble(id,input){
-    const title=cleanTitle(input.title);
-    const b=await this.getBubble(id);
-    await this.s.batch([{t:'bubbles',v:{...b,title,description:cleanDesc(input.description),colour:cleanColour(input.colour),updatedAt:Date.now()}}]);
+    const title=cleanTitle(input.title),b=await this.getBubble(id);
+    await this.commit('Edit bubble',[chg('bubbles',b,{...b,title,description:cleanDesc(input.description),colour:cleanColour(input.colour),size:input.size==null?b.size:cleanSize(input.size),updatedAt:Date.now()})]);
   }
-  async moveBubble(id,x,y){const b=await this.getBubble(id);await this.s.batch([{t:'bubbles',v:{...b,x,y,updatedAt:Date.now()}}])}
-
-  // Active descendants, cycle-safe, one read per project.
-  async descendantIds(id){
-    const b=await this.s.get('bubbles',id);
-    if(!b)return[];
-    const all=(await this.s.getByIndex('bubbles','projectId',b.projectId)).filter(x=>!x.deletedAt);
-    const kids=new Map();
-    for(const x of all){if(x.parentId){if(!kids.has(x.parentId))kids.set(x.parentId,[]);kids.get(x.parentId).push(x.id)}}
-    const out=[], seen=new Set([id]);
-    let frontier=[id];
-    while(frontier.length){
-      const next=[];
-      for(const f of frontier)for(const k of(kids.get(f)||[])){if(!seen.has(k)){seen.add(k);out.push(k);next.push(k)}}
-      frontier=next;
+  async moveMany(t,moves,label){
+    const ch=[];
+    for(const m of moves){
+      const r=await this._rec(t,m.id);
+      if(r.x===m.x&&r.y===m.y&&m.meta===undefined)continue;
+      ch.push(chg(t,r,{...r,x:m.x,y:m.y,metadata:m.meta!==undefined?m.meta:(r.metadata||{}),updatedAt:Date.now()}));
     }
+    return this.commit(label||'Move',ch);
+  }
+  moveBubble(id,x,y){return this.moveMany('bubbles',[{id,x,y}])}
+  moveProject(id,x,y){return this.moveMany('projects',[{id,x,y}])}
+
+  // ----- structure queries -----
+  async descendantIds(id,includeDeleted){
+    const b=await this.s.get('bubbles',id);if(!b)return[];
+    const kids=new Map();
+    for(const x of(await this.s.getByIndex('bubbles','projectId',b.projectId))){if((includeDeleted||!x.deletedAt)&&x.parentId){if(!kids.has(x.parentId))kids.set(x.parentId,[]);kids.get(x.parentId).push(x.id)}}
+    const out=[],seen=new Set([id]);let frontier=[id];
+    while(frontier.length){const next=[];for(const f of frontier)for(const k of(kids.get(f)||[]))if(!seen.has(k)){seen.add(k);out.push(k);next.push(k)}frontier=next}
     return out;
   }
   async countDescendants(id){return(await this.descendantIds(id)).length}
-  async deleteBubble(id){
-    const b=await this.getBubble(id);
-    if(b.parentId===null)throw new Error('A project root cannot be deleted this way. Delete the project instead.');
-    return this._softDelete('bubbles',[id,...(await this.descendantIds(id))]);
+  async countProjectBubbles(pid){return Math.max(0,(await this.s.getByIndex('bubbles','projectId',pid)).filter(b=>!b.deletedAt).length-1)}
+  async pathTo(id){ // bubble records from the project root down to id
+    const out=[],seen=new Set();let cur=id;
+    while(cur){if(seen.has(cur))throw new Error('Cycle in hierarchy.');seen.add(cur);const b=await this.s.get('bubbles',cur);if(!b)throw new Error('Missing bubble in hierarchy.');out.push(b);cur=b.parentId}
+    return out.reverse();
   }
-
-  // Soft delete: nothing is erased. Each operation gets its own id so undo restores exactly what it removed.
-  async _softDelete(t,ids){
-    const opId=newId(), stamp=Date.now(), ops=[];
-    for(const id of ids){const o=await this.s.get(t,id);if(o&&!o.deletedAt)ops.push({t,v:{...o,deletedAt:stamp,deletedBy:opId}})}
-    await this.s.batch(ops);
-    return{t,ids:ops.map(o=>o.v.id),opId};
-  }
-  async restore(rec){
-    const ops=[];
-    for(const id of rec.ids){const o=await this.s.get(rec.t,id);if(o&&o.deletedBy===rec.opId)ops.push({t:rec.t,v:{...o,deletedAt:null,deletedBy:null}})}
-    await this.s.batch(ops);
-  }
-
-  // A navigation path is valid only if it is an unbroken, active parent chain from a live project root.
   async validatePath(path){
     if(!Array.isArray(path))return false;
     if(!path.length)return true;
     if(path.some(p=>typeof p!=='string'))return false;
     const bs=await Promise.all(path.map(id=>this.s.get('bubbles',id)));
-    for(let i=0;i<bs.length;i++){
-      const b=bs[i];
-      if(!b||b.deletedAt)return false;
-      if(i===0?b.parentId!==null:b.parentId!==path[i-1])return false;
-    }
+    for(let i=0;i<bs.length;i++){const b=bs[i];if(!b||b.deletedAt)return false;if(i===0?b.parentId!==null:b.parentId!==path[i-1])return false}
     const p=await this.s.get('projects',bs[0].projectId);
     return !!p&&!p.deletedAt&&p.rootBubbleId===path[0];
+  }
+
+  // ----- delete (soft) -----
+  async _softDelete(label,t,ids){
+    const opId=newId(),stamp=Date.now(),ch=[];
+    for(const id of ids){const o=await this.s.get(t,id);if(o&&!o.deletedAt)ch.push(chg(t,o,{...o,deletedAt:stamp,deletedBy:opId}))}
+    await this.commit(label,ch);return{ids:ch.map(c=>c.id),opId};
+  }
+  async deleteBubble(id){
+    const b=await this.getBubble(id);
+    if(b.parentId===null)throw new Error('A project root cannot be deleted this way. Delete the project instead.');
+    return this._softDelete('Delete \u201c'+b.title+'\u201d','bubbles',[id,...(await this.descendantIds(id))]);
+  }
+  async deleteProject(id){const p=await this.getProject(id);return this._softDelete('Delete project \u201c'+p.title+'\u201d','projects',[id])}
+
+  // ----- duplicate -----
+  async _copyConnections(map,now){
+    return(await this.s.getAll('connections')).filter(c=>!c.deletedAt&&map.has(c.sourceId)&&map.has(c.targetId))
+      .map(c=>chg('connections',null,{...c,id:newId(),sourceId:map.get(c.sourceId),targetId:map.get(c.targetId),createdAt:now,updatedAt:now}));
+  }
+  async duplicateBubble(id){
+    const b=await this.getBubble(id);
+    if(b.parentId===null)throw new Error('Duplicate the project instead.');
+    const recs=await Promise.all([id,...(await this.descendantIds(id))].map(i=>this.s.get('bubbles',i)));
+    const map=new Map(recs.map(r=>[r.id,newId()]));
+    const sibs=await this.listChildren(b.parentId),now=nextStamp(sibs);
+    const pos=findFreePosition([{x:0,y:0,r:CORE_RADIUS},...sibs.map(s=>({x:s.x,y:s.y,r:radiusFor(s.size)}))],radiusFor(b.size));
+    const ch=recs.map(r=>chg('bubbles',null,r.id===id
+      ?{...r,id:map.get(r.id),title:(r.title+' (copy)').slice(0,MAX_TITLE),x:pos.x,y:pos.y,createdAt:now,updatedAt:now,deletedAt:null,deletedBy:null,metadata:{}}
+      :{...r,id:map.get(r.id),parentId:map.get(r.parentId),updatedAt:now,deletedAt:null,deletedBy:null,metadata:{...(r.metadata||{})}}));
+    ch.push(...await this._copyConnections(map,now));
+    await this.commit('Duplicate \u201c'+b.title+'\u201d',ch);
+    return map.get(id);
+  }
+  async duplicateProject(id){
+    const p=await this.getProject(id),recs=await Promise.all([p.rootBubbleId,...(await this.descendantIds(p.rootBubbleId))].map(i=>this.s.get('bubbles',i)));
+    const map=new Map(recs.map(r=>[r.id,newId()])),pid=newId(),others=await this.listProjects(),now=nextStamp(others);
+    const pos=findFreePosition(others.map(q=>({x:q.x,y:q.y,r:radiusFor(HOME_SIZE)})),radiusFor(HOME_SIZE));
+    const title=(p.title+' (copy)').slice(0,MAX_TITLE),isRoot=r=>r.id===p.rootBubbleId;
+    const ch=recs.map(r=>chg('bubbles',null,{...r,id:map.get(r.id),projectId:pid,parentId:isRoot(r)?null:map.get(r.parentId),title:isRoot(r)?title:r.title,updatedAt:now,createdAt:isRoot(r)?now:r.createdAt,deletedAt:null,deletedBy:null,metadata:isRoot(r)?{}:{...(r.metadata||{})}}));
+    ch.push(chg('projects',null,{...p,id:pid,title,rootBubbleId:map.get(p.rootBubbleId),x:pos.x,y:pos.y,createdAt:now,updatedAt:now,deletedAt:null,deletedBy:null,metadata:{}}));
+    ch.push(...await this._copyConnections(map,now));
+    await this.commit('Duplicate project \u201c'+p.title+'\u201d',ch);
+    return pid;
+  }
+
+  // ----- move to another parent (cycle-safe, may cross projects) -----
+  async reparent(id,newParentId){
+    const b=await this.getBubble(id);
+    if(b.parentId===null)throw new Error('A project root cannot be moved. Move its contents instead.');
+    const np=await this._activeBubble(newParentId);
+    if(np.id===b.parentId)return null;
+    const sub=await this.descendantIds(id,true); // includes contents already in the Trash, so a later restore stays consistent
+    if(np.id===id||sub.includes(np.id))throw new Error('A bubble cannot be moved inside itself or its own contents.');
+    const sibs=await this.listChildren(np.id),now=Date.now();
+    const pos=findFreePosition([{x:0,y:0,r:CORE_RADIUS},...sibs.map(s=>({x:s.x,y:s.y,r:radiusFor(s.size)}))],radiusFor(b.size));
+    const ch=[chg('bubbles',b,{...b,parentId:np.id,projectId:np.projectId,x:pos.x,y:pos.y,metadata:{...(b.metadata||{}),freeform:undefined},updatedAt:now})];
+    for(const d of sub){const r=await this.s.get('bubbles',d);ch.push(chg('bubbles',r,{...r,projectId:np.projectId,updatedAt:now}))}
+    return this.commit('Move \u201c'+b.title+'\u201d',ch);
+  }
+
+  // ----- connections: separate records, so hierarchy keeps exactly one parent per bubble -----
+  async _activeBubble(id){
+    const b=await this.s.get('bubbles',id);
+    if(!b||b.deletedAt)throw new Error('That bubble no longer exists.');
+    const p=await this.s.get('projects',b.projectId);
+    if(!p||p.deletedAt)throw new Error('Its project is in the Trash.');
+    return b;
+  }
+  async createConnection(i){
+    if(i.sourceId===i.targetId)throw new Error('A bubble cannot be linked to itself.');
+    await this._activeBubble(i.sourceId);await this._activeBubble(i.targetId);
+    const direction=i.direction==='forward'?'forward':'none',label=cleanLabel(i.label),now=Date.now();
+    const dup=(await this.s.getAll('connections')).some(c=>!c.deletedAt&&c.direction===direction&&c.label.toLowerCase()===label.toLowerCase()&&
+      ((c.sourceId===i.sourceId&&c.targetId===i.targetId)||(direction==='none'&&c.sourceId===i.targetId&&c.targetId===i.sourceId)));
+    if(dup)throw new Error('These two bubbles are already linked that way.');
+    const c={id:newId(),sourceId:i.sourceId,targetId:i.targetId,label,direction,colour:normaliseHex(i.colour)||LINK_COLOUR,createdAt:now,updatedAt:now,deletedAt:null};
+    await this.commit('Connect',[chg('connections',null,c)]);return c;
+  }
+  async updateConnection(id,i){
+    const c=await this._rec('connections',id);
+    await this.commit('Edit connection',[chg('connections',c,{...c,label:cleanLabel(i.label),direction:i.direction==='forward'?'forward':'none',colour:normaliseHex(i.colour)||LINK_COLOUR,
+      sourceId:i.swap?c.targetId:c.sourceId,targetId:i.swap?c.sourceId:c.targetId,updatedAt:Date.now()})]);
+  }
+  async deleteConnection(id){const c=await this._rec('connections',id);await this.commit('Remove connection',[chg('connections',c,{...c,deletedAt:Date.now()})])}
+  // Connections hidden while an endpoint is deleted come back automatically on undo/restore.
+  async connectionsForLevel(ids){
+    const all=(await this.s.getAll('connections')).filter(c=>!c.deletedAt&&(ids.has(c.sourceId)||ids.has(c.targetId)));
+    const ext=new Set();for(const c of all)for(const e of[c.sourceId,c.targetId])if(!ids.has(e))ext.add(e);
+    const ok=new Set();for(const e of ext){try{await this._activeBubble(e);ok.add(e)}catch(_){}}
+    const internal=[],extCount=new Map();
+    for(const c of all){
+      const sIn=ids.has(c.sourceId),tIn=ids.has(c.targetId);
+      if(sIn&&tIn)internal.push(c);
+      else{const inside=sIn?c.sourceId:c.targetId,out=sIn?c.targetId:c.sourceId;if(ok.has(out))extCount.set(inside,(extCount.get(inside)||0)+1)}
+    }
+    return{internal,extCount};
+  }
+  async linksOf(bubbleId){
+    const info=new Map((await this.allBubblePaths()).map(x=>[x.id,x])),out=[];
+    for(const c of(await this.s.getAll('connections'))){
+      if(c.deletedAt||(c.sourceId!==bubbleId&&c.targetId!==bubbleId))continue;
+      const otherId=c.sourceId===bubbleId?c.targetId:c.sourceId,other=info.get(otherId);
+      if(other)out.push({conn:c,otherId,other,outgoing:c.sourceId===bubbleId});
+    }
+    return out;
+  }
+
+  // ----- layouts (positions are kept, so Freeform can always restore the hand-placed arrangement) -----
+  async applyLayout(parentId,kind){
+    const home=parentId===null,t=home?'projects':'bubbles';
+    const kids=home?await this.listProjects():await this.listChildren(parentId);
+    if(!kids.length)return 0;
+    let moves;
+    if(kind==='freeform'){
+      moves=kids.filter(k=>k.metadata&&k.metadata.freeform).map(k=>{const m={...k.metadata};const f=m.freeform;delete m.freeform;return{id:k.id,x:f.x,y:f.y,meta:m}});
+    }else{
+      const pos=computeLayout(kind,kids.map(k=>({id:k.id,r:radiusFor(home?HOME_SIZE:k.size)})),!home);
+      moves=kids.map(k=>{const p=pos.get(k.id),m={...(k.metadata||{})};if(!m.freeform)m.freeform={x:k.x,y:k.y};return{id:k.id,x:p.x,y:p.y,meta:m}});
+    }
+    if(moves.length)await this.moveMany(t,moves,'Layout: '+kind);
+    return moves.length;
+  }
+
+  // ----- Trash -----
+  async _trashGroups(){
+    const ps=await this.s.getAll('projects'),bs=await this.s.getAll('bubbles'),groups=new Map();
+    const add=(t,r)=>{if(!r.deletedAt)return;const k=r.deletedBy||('legacy-'+r.id);if(!groups.has(k))groups.set(k,{opId:k,items:[],deletedAt:r.deletedAt});groups.get(k).items.push({t,r})};
+    ps.forEach(p=>add('projects',p));bs.forEach(b=>add('bubbles',b));
+    const out=[...groups.values()];
+    for(const g of out){
+      const ids=new Set(g.items.map(i=>i.r.id));
+      g.top=g.items.find(i=>i.t==='projects')||g.items.find(i=>!ids.has(i.r.parentId))||g.items[0];
+      g.kind=g.top.t==='projects'?'project':'bubble';
+      g.title=g.top.r.title;
+      g.count=g.kind==='project'?Math.max(0,bs.filter(b=>b.projectId===g.top.r.id&&!b.deletedAt).length-1):g.items.length-1;
+    }
+    return out.sort((a,b)=>b.deletedAt-a.deletedAt);
+  }
+  listTrash(){return this._trashGroups()}
+  async restoreTrash(opId){
+    const g=(await this._trashGroups()).find(x=>x.opId===opId);if(!g)throw new Error('That item is no longer in the Trash.');
+    if(g.kind==='bubble'){
+      const par=await this.s.get('bubbles',g.top.r.parentId);
+      let ok=!!par&&!par.deletedAt;
+      if(ok){const p=await this.s.get('projects',par.projectId);ok=!!p&&!p.deletedAt}
+      if(!ok)throw new Error('What it was inside is also in the Trash (or gone). Restore that first.');
+    }
+    await this.commit('Restore \u201c'+g.title+'\u201d',g.items.map(i=>chg(i.t,i.r,{...i.r,deletedAt:null,deletedBy:null,updatedAt:Date.now()})));
+  }
+  // Permanent. Clears undo history so nothing can resurrect purged records.
+  async purgeTrash(opId){
+    const g=(await this._trashGroups()).find(x=>x.opId===opId);if(!g)throw new Error('That item is no longer in the Trash.');
+    const bs=await this.s.getAll('bubbles'),gone=new Set(),ops=[];
+    const kill=id=>{if(!gone.has(id)){gone.add(id);ops.push({t:'bubbles',id,del:true})}};
+    for(const it of g.items){
+      if(it.t==='projects'){ops.push({t:'projects',id:it.r.id,del:true});bs.filter(b=>b.projectId===it.r.id).forEach(b=>kill(b.id))}
+      else kill(it.r.id);
+    }
+    for(let grew=true;grew;){grew=false;for(const b of bs)if(!gone.has(b.id)&&gone.has(b.parentId)){kill(b.id);grew=true}}
+    for(const c of(await this.s.getAll('connections')))if(gone.has(c.sourceId)||gone.has(c.targetId))ops.push({t:'connections',id:c.id,del:true});
+    await this.s.batch(ops);this.clearHistory();
+  }
+
+  // ----- picker data & integrity -----
+  async allBubblePaths(){
+    const ps=await this.s.getAll('projects'),bs=await this.s.getAll('bubbles');
+    const pm=new Map(ps.filter(p=>!p.deletedAt).map(p=>[p.id,p])),bm=new Map(bs.map(b=>[b.id,b])),memo=new Map();
+    const info=b=>{
+      if(memo.has(b.id))return memo.get(b.id);
+      memo.set(b.id,null);let r=null;
+      if(!b.deletedAt&&pm.has(b.projectId)){
+        if(b.parentId===null)r={titles:[b.title],depth:0};
+        else{const par=bm.get(b.parentId),pi=par?info(par):null;if(pi)r={titles:[...pi.titles,b.title],depth:pi.depth+1}}
+      }
+      memo.set(b.id,r);return r;
+    };
+    const out=[];
+    for(const b of bs){const i=info(b);if(i)out.push({id:b.id,title:b.title,path:i.titles.join(' \u203a '),depth:i.depth,projectId:b.projectId,parentId:b.parentId})}
+    return out.sort((a,b)=>a.path.localeCompare(b.path));
+  }
+  async checkIntegrity(){
+    const ps=await this.s.getAll('projects'),bs=await this.s.getAll('bubbles'),cs=await this.s.getAll('connections'),bad=[];
+    const bm=new Map(bs.map(b=>[b.id,b])),pm=new Map(ps.map(p=>[p.id,p]));
+    for(const p of ps){const r=bm.get(p.rootBubbleId);if(!r)bad.push('project '+p.id+' has no root bubble');else if(r.parentId!==null||r.projectId!==p.id)bad.push('project '+p.id+' root is inconsistent')}
+    for(const b of bs){
+      if(!pm.has(b.projectId))bad.push('bubble '+b.id+' belongs to a missing project');
+      if(b.parentId===null){const p=pm.get(b.projectId);if(p&&p.rootBubbleId!==b.id)bad.push('bubble '+b.id+' is a stray root')}
+      else{const par=bm.get(b.parentId);if(!par)bad.push('bubble '+b.id+' has a missing parent');else if(par.projectId!==b.projectId)bad.push('bubble '+b.id+' is in a different project than its parent')}
+      let cur=b,steps=0;while(cur&&cur.parentId&&steps<=bs.length){cur=bm.get(cur.parentId);steps++}
+      if(steps>bs.length)bad.push('bubble '+b.id+' is part of a parent cycle');
+    }
+    for(const c of cs){if(c.deletedAt)continue;if(!bm.has(c.sourceId)||!bm.has(c.targetId))bad.push('connection '+c.id+' has a missing end');if(c.sourceId===c.targetId)bad.push('connection '+c.id+' links a bubble to itself')}
+    return bad;
   }
 }
 // </CORE>
 
 // <TESTS>
-// Runs in the browser at index.html#selftest, and in Node (MemoryStore only).
+// Runs in the browser (Settings -> Run self-test, or index.html#selftest) and in Node (in-memory store only).
 async function runSelfTests(){
   const results=[];
-  const t=async(name,fn)=>{
-    try{const d=await fn();results.push({name,ok:true,detail:d||''})}
-    catch(e){results.push({name,ok:false,detail:String(e&&e.message||e)})}
-  };
+  const t=async(name,fn)=>{try{const d=await fn();results.push({name,ok:true,detail:d||''})}catch(e){results.push({name,ok:false,detail:String(e&&e.message||e)})}};
   const ok=(c,m)=>{if(!c)throw new Error(m||'assertion failed')};
   const eq=(a,b,m)=>{if(JSON.stringify(a)!==JSON.stringify(b))throw new Error((m||'eq')+': expected '+JSON.stringify(b)+' got '+JSON.stringify(a))};
-  const rejects=async(p,m)=>{let threw=false;try{await p}catch(e){threw=true}if(!threw)throw new Error(m||'expected a rejection')};
+  const rejects=async(p,m)=>{let th=false;try{await p}catch(e){th=true}if(!th)throw new Error(m||'expected a rejection')};
   const fresh=()=>new Repo(new MemoryStore());
   const inp=(title,colour)=>({title,description:'',colour:colour||'#7aa2ff'});
+  const clean=async r=>eq(await r.checkIntegrity(),[],'integrity');
+  const snap=async r=>JSON.stringify(await Promise.all(['projects','bubbles','connections'].map(async n=>(await r.s.getAll(n)).sort((a,b)=>a.id<b.id?-1:1))));
+  const kids=async(r,id)=>(await r.listChildren(id)).map(k=>k.title).sort();
+  const proj=async(r,n)=>{const p=await r.createProject(inp(n||'P'));return p};
 
-  await t('normaliseHex accepts 3/6 digits, rejects junk',()=>{
-    eq(normaliseHex('#ABC'),'#aabbcc');eq(normaliseHex('7aa2ff'),'#7aa2ff');eq(normaliseHex('xyz'),null);eq(normaliseHex(''),null);
-  });
-  await t('every palette colour has a readable label colour (>=4.5:1)',()=>{
-    for(const c of PALETTE){const k=contrastWith(c);const best=readableTone(c)==='light'?k.white:k.black;ok(best>=4.5,c+' contrast '+best.toFixed(2))}
-  });
-  await t('findFreePosition: 200 placements never overlap',()=>{
-    const cs=[];
-    for(let i=0;i<200;i++){const p=findFreePosition(cs,46);cs.push({x:p.x,y:p.y,r:46})}
-    for(let i=0;i<cs.length;i++)for(let j=i+1;j<cs.length;j++)ok(Math.hypot(cs[i].x-cs[j].x,cs[i].y-cs[j].y)>=92+28-1,'overlap '+i+','+j);
-  });
-  await t('first run: no projects, default settings',async()=>{
-    const r=fresh();eq(await r.listProjects(),[]);const s=await r.getSettings();eq([s.theme,s.floatingEnabled],['dark',true]);
-  });
-  await t('createProject saves project + root bubble',async()=>{
-    const r=fresh();const p=await r.createProject({title:'  Atlas  ',description:' d ',colour:'#ff7eb6'});
-    eq((await r.listProjects()).length,1);eq(p.title,'Atlas');
-    const root=await r.getBubble(p.rootBubbleId);eq([root.parentId,root.projectId,root.title],[null,p.id,'Atlas']);
-  });
-  await t('validation: empty title rejected, long title cut, bad colour defaulted',async()=>{
-    const r=fresh();await rejects(r.createProject({title:'   '}));
-    eq((await r.listProjects()).length,0,'failed create must not leave data');
-    const p=await r.createProject({title:'x'.repeat(500),colour:'nope'});eq(p.title.length,MAX_TITLE);eq(p.colour,DEFAULT_COLOUR);
-  });
-  await t('updateProject keeps root bubble in sync',async()=>{
-    const r=fresh();const p=await r.createProject(inp('A'));await r.updateProject(p.id,{title:'B',description:'z',colour:'#ffd166'});
-    const root=await r.getBubble(p.rootBubbleId);eq([root.title,root.colour,root.description],['B','#ffd166','z']);
+  // ===== Stage 1 behaviour (must keep working) =====
+  await t('normaliseHex accepts 3/6 digits, rejects junk',()=>{eq(normaliseHex('#ABC'),'#aabbcc');eq(normaliseHex('7aa2ff'),'#7aa2ff');eq(normaliseHex('xyz'),null)});
+  await t('palette colours all have readable label contrast (>=4.5:1)',()=>{for(const c of PALETTE){const k=contrastWith(c),b=readableTone(c)==='light'?k.white:k.black;ok(b>=4.5,c+' '+b.toFixed(2))}});
+  await t('first run is empty with default settings',async()=>{const r=fresh();eq(await r.listProjects(),[]);const s=await r.getSettings();eq([s.theme,s.floatingEnabled,s.defaultLayout,s.gridSnap],['dark',true,'freeform',false])});
+  await t('createProject saves project + root bubble; validation rejects empty title',async()=>{
+    const r=fresh();await rejects(r.createProject({title:'  '}));eq((await r.listProjects()).length,0);
+    const p=await r.createProject({title:'  Atlas ',colour:'nope'});eq([p.title,p.colour],['Atlas',DEFAULT_COLOUR]);
+    const root=await r.getBubble(p.rootBubbleId);eq([root.parentId,root.projectId],[null,p.id]);await clean(r);
   });
   await t('12 levels deep: path validates; broken / foreign paths rejected',async()=>{
-    const r=fresh();const p=await r.createProject(inp('Deep'));const path=[p.rootBubbleId];
-    for(let i=0;i<12;i++){const b=await r.createBubble(path[path.length-1],inp('L'+i));path.push(b.id)}
-    eq(path.length,13);ok(await r.validatePath(path),'valid path');
-    ok(!(await r.validatePath([path[0],path[2]])),'skipped level');
-    ok(!(await r.validatePath([path[1]])),'does not start at a root');
-    ok(!(await r.validatePath([path[0],'missing'])),'missing id');
-    ok(!(await r.validatePath('x')),'not an array');
-    const q=await r.createProject(inp('Other'));ok(!(await r.validatePath([q.rootBubbleId,path[1]])),'cross-project');
+    const r=fresh(),p=await proj(r),path=[p.rootBubbleId];
+    for(let i=0;i<12;i++)path.push((await r.createBubble(path[path.length-1],inp('L'+i))).id);
+    ok(await r.validatePath(path));ok(!(await r.validatePath([path[0],path[2]])));ok(!(await r.validatePath([path[1]])));ok(!(await r.validatePath([path[0],'x'])));
+    const names=(await r.pathTo(path[12])).map(b=>b.title);eq(names.length,13);await clean(r);
   });
   await t('30 children never overlap each other or the centre',async()=>{
-    const r=fresh();const p=await r.createProject(inp('P'));
-    for(let i=0;i<30;i++)await r.createBubble(p.rootBubbleId,inp('c'+i));
-    const k=await r.listChildren(p.rootBubbleId);eq(k.length,30);
-    for(let i=0;i<k.length;i++){ok(Math.hypot(k[i].x,k[i].y)>=CORE_RADIUS+46,'centre '+i);for(let j=i+1;j<k.length;j++)ok(Math.hypot(k[i].x-k[j].x,k[i].y-k[j].y)>=92,'pair '+i+','+j)}
+    const r=fresh(),p=await proj(r);for(let i=0;i<30;i++)await r.createBubble(p.rootBubbleId,inp('c'+i));
+    const k=await r.listChildren(p.rootBubbleId);
+    for(let i=0;i<k.length;i++){ok(Math.hypot(k[i].x,k[i].y)>=CORE_RADIUS+46);for(let j=i+1;j<k.length;j++)ok(Math.hypot(k[i].x-k[j].x,k[i].y-k[j].y)>=92)}
   });
-  await t('moveBubble / moveProject persist',async()=>{
-    const r=fresh();const p=await r.createProject(inp('P'));const b=await r.createBubble(p.rootBubbleId,inp('c'));
-    await r.moveBubble(b.id,123,-45);await r.moveProject(p.id,7,9);
-    const k=(await r.listChildren(p.rootBubbleId))[0];eq([k.x,k.y],[123,-45]);const q=(await r.listProjects())[0];eq([q.x,q.y],[7,9]);
+  await t('settings round-trip and persistence across Repo instances',async()=>{
+    const st=new MemoryStore(),r=new Repo(st);await r.saveSettings({...DEFAULT_SETTINGS,theme:'light',gridSnap:true});
+    const s=await new Repo(st).getSettings();eq([s.theme,s.gridSnap],['light',true]);
   });
-  await t('delete hides subtree; undo restores it exactly',async()=>{
-    const r=fresh();const p=await r.createProject(inp('P'));const a=await r.createBubble(p.rootBubbleId,inp('a'));
-    const b=await r.createBubble(a.id,inp('b'));await r.createBubble(b.id,inp('c'));
-    eq(await r.countDescendants(a.id),2);const rec=await r.deleteBubble(a.id);eq(rec.ids.length,3);
-    eq((await r.listChildren(p.rootBubbleId)).length,0);ok(!(await r.validatePath([p.rootBubbleId,a.id])));
-    await r.restore(rec);eq((await r.listChildren(p.rootBubbleId)).length,1);eq(await r.countDescendants(a.id),2);
+
+  // ===== Stage 2: undo / redo =====
+  await t('undo/redo: create, edit, move, delete all reversible; redo restores exactly',async()=>{
+    const r=fresh(),p=await proj(r),a=await r.createBubble(p.rootBubbleId,inp('a'));
+    await r.updateBubble(a.id,{title:'a2',colour:'#ff7eb6',size:1.4});await r.moveBubble(a.id,77,88);await r.deleteBubble(a.id);
+    const after=await snap(r);eq(await kids(r,p.rootBubbleId),[]);
+    eq(await r.undo(),'Delete \u201ca2\u201d');eq(await kids(r,p.rootBubbleId),['a2']);
+    await r.undo();const m=(await r.listChildren(p.rootBubbleId))[0];eq([m.x,m.y],[a.x,a.y]);
+    await r.undo();eq((await r.getBubble(a.id)).title,'a');
+    await r.undo();eq(await kids(r,p.rootBubbleId),[]);
+    await r.redo();await r.redo();await r.redo();await r.redo();eq(await snap(r),after);await clean(r);
   });
-  await t('undo of a parent does not resurrect a child deleted earlier',async()=>{
-    const r=fresh();const p=await r.createProject(inp('P'));const a=await r.createBubble(p.rootBubbleId,inp('a'));
-    const c1=await r.createBubble(a.id,inp('c1'));await r.createBubble(a.id,inp('c2'));
-    await r.deleteBubble(c1.id);const rec=await r.deleteBubble(a.id);await r.restore(rec);
-    const kids=await r.listChildren(a.id);eq(kids.map(k=>k.title),['c2']);
+  await t('a new action clears redo; empty stacks return null; history is capped',async()=>{
+    const r=fresh(),p=await proj(r);await r.createBubble(p.rootBubbleId,inp('a'));await r.undo();ok(r.canRedo);
+    await r.createBubble(p.rootBubbleId,inp('b'));ok(!r.canRedo);eq(await r.redo(),null);
+    const e=fresh();eq(await e.undo(),null);
+    const q=fresh(),pp=await proj(q);for(let i=0;i<UNDO_LIMIT+20;i++)await q.moveProject(pp.id,i+1,0);eq(q.undoStack.length,UNDO_LIMIT);
   });
-  await t('project root cannot be deleted as a bubble',async()=>{
-    const r=fresh();const p=await r.createProject(inp('P'));await rejects(r.deleteBubble(p.rootBubbleId));
+  await t('failed write does not corrupt history (undo error keeps the entry)',async()=>{
+    const r=fresh(),p=await proj(r);await r.createBubble(p.rootBubbleId,inp('a'));
+    const orig=r.s.batch.bind(r.s);r.s.batch=async()=>{throw new Error('disk full')};
+    await rejects(r.undo());ok(r.canUndo,'entry kept');r.s.batch=orig;await r.undo();eq(await kids(r,p.rootBubbleId),[]);
   });
-  await t('project delete / undo; deleted project invalidates paths',async()=>{
-    const r=fresh();const p=await r.createProject(inp('P'));await r.createBubble(p.rootBubbleId,inp('x'));
-    eq(await r.countProjectBubbles(p.id),1);const rec=await r.deleteProject(p.id);
-    eq((await r.listProjects()).length,0);ok(!(await r.validatePath([p.rootBubbleId])));
-    await r.restore(rec);eq((await r.listProjects()).length,1);ok(await r.validatePath([p.rootBubbleId]));
+  await t('delete subtree + undo; project delete + undo; earlier-deleted child stays deleted',async()=>{
+    const r=fresh(),p=await proj(r),a=await r.createBubble(p.rootBubbleId,inp('a')),b=await r.createBubble(a.id,inp('b'));
+    const c1=await r.createBubble(b.id,inp('c1'));await r.createBubble(b.id,inp('c2'));
+    eq(await r.countDescendants(a.id),3);await r.deleteBubble(c1.id);await r.deleteBubble(a.id);
+    eq(await r.listChildren(p.rootBubbleId),[]);
+    await r.undo();eq(await r.countDescendants(a.id),2,'only c1 stays deleted');
+    await r.deleteProject(p.id);eq((await r.listProjects()).length,0);ok(!(await r.validatePath([p.rootBubbleId])));
+    await r.undo();eq((await r.listProjects()).length,1);await clean(r);
+    await rejects(r.deleteBubble(p.rootBubbleId));
   });
-  await t('descendantIds terminates on a corrupt parent cycle',async()=>{
-    const store=new MemoryStore();const r=new Repo(store);const p=await r.createProject(inp('P'));
-    const a=await r.createBubble(p.rootBubbleId,inp('a'));const b=await r.createBubble(a.id,inp('b'));
-    await store.batch([{t:'bubbles',v:{...a,parentId:b.id}}]);
-    const d=await r.descendantIds(a.id);ok(d.length<=2,'bounded');
+
+  // ===== Stage 2: layouts =====
+  await t('layouts radial/tree/grid: no overlaps, nothing inside the centre bubble (n up to 100, mixed sizes)',async()=>{
+    let checked=0;
+    for(const kind of['radial','tree','grid'])for(const n of[1,2,7,31,100])for(const core of[true,false]){
+      const items=Array.from({length:n},(_,i)=>({id:'i'+i,r:i%3?46:64})),out=computeLayout(kind,items,core);eq(out.size,n,kind+n);
+      for(let i=0;i<n;i++){
+        const a=items[i],pa=out.get(a.id);ok(pa&&Number.isFinite(pa.x),'pos');
+        if(core)ok(Math.hypot(pa.x,pa.y)>=CORE_RADIUS+a.r+LAYOUT_GAP-2,kind+' core '+n);
+        for(let j=i+1;j<n;j++){const b=items[j],pb=out.get(b.id);ok(Math.hypot(pa.x-pb.x,pa.y-pb.y)>=a.r+b.r+LAYOUT_GAP-2,kind+' overlap n='+n+' core='+core);checked++}
+      }
+    }
+    return checked+' pairs checked';
   });
-  await t('updateBubble on a missing id rejects',async()=>{await rejects(fresh().updateBubble('nope',inp('x')))});
-  await t('settings round-trip',async()=>{
-    const r=fresh();await r.saveSettings({...DEFAULT_SETTINGS,theme:'light',floatingEnabled:false});
-    const s=await r.getSettings();eq([s.theme,s.floatingEnabled],['light',false]);
+  await t('applyLayout moves everything undoably; Freeform restores hand-placed positions',async()=>{
+    const r=fresh(),p=await proj(r);const ids=[];
+    for(let i=0;i<9;i++)ids.push((await r.createBubble(p.rootBubbleId,inp('n'+i))).id);
+    await r.moveBubble(ids[0],500,-300);const before=await r.listChildren(p.rootBubbleId);
+    ok(await r.applyLayout(p.rootBubbleId,'radial')===9);const rad=await r.listChildren(p.rootBubbleId);ok(rad.some((b,i)=>b.x!==before[i].x||b.y!==before[i].y));
+    await r.applyLayout(p.rootBubbleId,'grid');await r.applyLayout(p.rootBubbleId,'freeform');
+    const back=await r.listChildren(p.rootBubbleId);eq(back.map(b=>[b.x,b.y]),before.map(b=>[b.x,b.y]),'freeform restored');
+    eq(back.every(b=>!b.metadata.freeform),true);
+    await r.applyLayout(p.rootBubbleId,'tree');await r.undo();eq((await r.listChildren(p.rootBubbleId)).map(b=>[b.x,b.y]),before.map(b=>[b.x,b.y]),'undo layout');
+    const home=fresh();await proj(home,'A');await proj(home,'B');ok(await home.applyLayout(null,'radial')===2);
   });
-  await t('data survives a new Repo on the same store',async()=>{
-    const st=new MemoryStore();const p=await new Repo(st).createProject(inp('Keep'));
-    eq((await new Repo(st).listProjects())[0].id,p.id);
+
+  // ===== Stage 2: duplicate / move =====
+  await t('duplicate bubble: deep copy, new ids, internal links copied, original untouched',async()=>{
+    const r=fresh(),p=await proj(r),a=await r.createBubble(p.rootBubbleId,inp('a')),b=await r.createBubble(a.id,inp('b')),c=await r.createBubble(a.id,inp('c'));
+    await r.createBubble(b.id,inp('d'));await r.createConnection({sourceId:b.id,targetId:c.id,label:'rival',direction:'forward'});
+    const x=await r.createBubble(p.rootBubbleId,inp('x'));await r.createConnection({sourceId:a.id,targetId:x.id,label:'outside'});
+    const before=await r.s.getAll('connections');const nid=await r.duplicateBubble(a.id);
+    eq(await kids(r,p.rootBubbleId),['a','a (copy)','x']);eq(await r.countDescendants(nid),await r.countDescendants(a.id));
+    const all=await r.allBubblePaths();eq(new Set(all.map(i=>i.id)).size,all.length,'unique ids');
+    const conns=(await r.s.getAll('connections')).filter(c=>!c.deletedAt);eq(conns.length,before.length+1,'only the internal link is copied');
+    eq((await r.countDescendants(a.id)),3);await clean(r);await r.undo();eq(await kids(r,p.rootBubbleId),['a','x']);
+    await rejects(r.duplicateBubble(p.rootBubbleId));
   });
-  await t('speed: create 150 siblings in one level',async()=>{
-    const r=fresh();const p=await r.createProject(inp('P'));const t0=Date.now();
-    for(let i=0;i<150;i++)await r.createBubble(p.rootBubbleId,inp('n'+i));
-    const ms=Date.now()-t0;eq((await r.listChildren(p.rootBubbleId)).length,150);return ms+' ms';
+  await t('duplicate project is fully independent',async()=>{
+    const r=fresh(),p=await proj(r,'World'),a=await r.createBubble(p.rootBubbleId,inp('a'));await r.createBubble(a.id,inp('b'));
+    const id=await r.duplicateProject(p.id);const ps=await r.listProjects();eq(ps.map(x=>x.title),['World','World (copy)']);
+    const np=ps[1];eq(await r.countProjectBubbles(np.id),2);ok(np.rootBubbleId!==p.rootBubbleId);
+    await r.deleteProject(id);eq(await r.countProjectBubbles(p.id),2);await clean(r);
   });
+  await t('reparent: moves subtree across projects, updates projectId, rejects cycles and roots',async()=>{
+    const r=fresh(),p=await proj(r,'P'),q=await proj(r,'Q'),a=await r.createBubble(p.rootBubbleId,inp('a')),b=await r.createBubble(a.id,inp('b')),c=await r.createBubble(b.id,inp('c'));
+    await rejects(r.reparent(a.id,c.id),'into own descendant');await rejects(r.reparent(a.id,a.id),'into self');await rejects(r.reparent(p.rootBubbleId,q.rootBubbleId),'root');
+    eq(await r.reparent(a.id,p.rootBubbleId),null,'same parent is a no-op');
+    await r.reparent(a.id,q.rootBubbleId);
+    for(const id of[a.id,b.id,c.id])eq((await r.getBubble(id)).projectId,q.id);
+    eq(await kids(r,p.rootBubbleId),[]);eq(await kids(r,q.rootBubbleId),['a']);await clean(r);
+    ok(await r.validatePath([q.rootBubbleId,a.id,b.id,c.id]));await r.undo();eq((await r.getBubble(c.id)).projectId,p.id);await clean(r);
+  });
+
+  // ===== Stage 2: connections =====
+  await t('connections: validation, duplicates, direction, update (swap), delete',async()=>{
+    const r=fresh(),p=await proj(r),a=await r.createBubble(p.rootBubbleId,inp('a')),b=await r.createBubble(p.rootBubbleId,inp('b'));
+    await rejects(r.createConnection({sourceId:a.id,targetId:a.id}),'self');await rejects(r.createConnection({sourceId:a.id,targetId:'nope'}),'missing end');
+    const c=await r.createConnection({sourceId:a.id,targetId:b.id,label:'  Rival of  ',direction:'forward',colour:'#ff7eb6'});eq([c.label,c.direction,c.colour],['Rival of','forward','#ff7eb6']);
+    await rejects(r.createConnection({sourceId:a.id,targetId:b.id,label:'rival OF',direction:'forward'}),'dup');
+    await r.createConnection({sourceId:b.id,targetId:a.id,label:'Rival of',direction:'forward'});
+    const u=await r.createConnection({sourceId:a.id,targetId:b.id,label:'friends'});await rejects(r.createConnection({sourceId:b.id,targetId:a.id,label:'Friends'}),'undirected reverse dup');
+    await r.updateConnection(c.id,{label:'Trades with',direction:'none',colour:'zzz',swap:true});
+    const got=(await r.linksOf(a.id)).find(l=>l.conn.id===c.id);eq([got.conn.label,got.conn.direction,got.conn.colour,got.conn.sourceId],['Trades with','none',LINK_COLOUR,b.id]);
+    await r.deleteConnection(u.id);eq((await r.linksOf(a.id)).length,2);await r.undo();eq((await r.linksOf(a.id)).length,3);await clean(r);
+  });
+  await t('connections: hide while an endpoint is deleted, return on undo; cross-project links',async()=>{
+    const r=fresh(),p=await proj(r,'P'),q=await proj(r,'Q'),a=await r.createBubble(p.rootBubbleId,inp('a')),b=await r.createBubble(q.rootBubbleId,inp('b')),s=await r.createBubble(p.rootBubbleId,inp('s'));
+    await r.createConnection({sourceId:a.id,targetId:s.id,label:'near'});await r.createConnection({sourceId:a.id,targetId:b.id,label:'far',direction:'forward'});
+    const lvl=async()=>r.connectionsForLevel(new Set([a.id,s.id]));
+    let L=await lvl();eq([L.internal.length,L.extCount.get(a.id)],[1,1]);
+    const info=(await r.linksOf(a.id)).find(l=>l.otherId===b.id).other;eq(info.path,'Q \u203a b');
+    await r.deleteBubble(b.id);L=await lvl();eq([L.internal.length,L.extCount.get(a.id)||0],[1,0],'hidden');eq((await r.linksOf(a.id)).length,1);
+    await r.undo();L=await lvl();eq(L.extCount.get(a.id),1,'back');
+    await r.deleteProject(q.id);L=await lvl();eq(L.extCount.get(a.id)||0,0,'project in trash hides links');await rejects(r.createConnection({sourceId:a.id,targetId:b.id,label:'x'}));
+    await r.deleteBubble(s.id);L=await r.connectionsForLevel(new Set([a.id]));eq(L.internal.length,0);await clean(r);
+  });
+
+  // ===== Stage 2: Trash =====
+  await t('Trash: list, restore, blocked restore, purge (also removes links and clears undo)',async()=>{
+    const r=fresh(),p=await proj(r),a=await r.createBubble(p.rootBubbleId,inp('a')),b=await r.createBubble(a.id,inp('b')),c=await r.createBubble(p.rootBubbleId,inp('c'));
+    await r.createConnection({sourceId:b.id,targetId:c.id,label:'l'});
+    await r.deleteBubble(b.id);await r.deleteBubble(a.id);await r.deleteBubble(c.id);
+    let tr=await r.listTrash();eq(tr.map(g=>g.title).sort(),['a','b','c']);eq(tr.find(g=>g.title==='a').count,0);
+    const gb=tr.find(g=>g.title==='b');await rejects(r.restoreTrash(gb.opId),'parent is trashed');
+    await r.restoreTrash(tr.find(g=>g.title==='a').opId);await r.restoreTrash(gb.opId);eq(await kids(r,a.id),['b']);await clean(r);
+    await r.undo();eq(await kids(r,a.id),[]);
+    await r.deleteProject(p.id);tr=await r.listTrash();eq(tr.some(g=>g.kind==='project'),true);
+    const gp=tr.find(g=>g.kind==='project');await r.purgeTrash(gp.opId);
+    eq((await r.s.getAll('projects')).length,0);eq((await r.s.getAll('bubbles')).length,0,'all bubbles purged');eq((await r.s.getAll('connections')).length,0);
+    ok(!r.canUndo&&!r.canRedo);await clean(r);
+  });
+  await t('integrity checker detects injected corruption',async()=>{
+    const st=new MemoryStore(),r=new Repo(st),p=await proj(r),a=await r.createBubble(p.rootBubbleId,inp('a')),b=await r.createBubble(a.id,inp('b'));
+    await clean(r);
+    await st.batch([{t:'bubbles',v:{...a,parentId:b.id}}]);ok((await r.checkIntegrity()).some(x=>/cycle/.test(x)),'cycle');
+    await st.batch([{t:'bubbles',v:a}]);await st.batch([{t:'bubbles',v:{...b,parentId:'ghost'}}]);ok((await r.checkIntegrity()).some(x=>/missing parent/.test(x)),'orphan');
+    await st.batch([{t:'bubbles',v:b},{t:'connections',v:{id:'c1',sourceId:a.id,targetId:'ghost',label:'',direction:'none',colour:'#fff',deletedAt:null}}]);ok((await r.checkIntegrity()).some(x=>/missing end/.test(x)),'dangling link');
+  });
+  await t('regression: moving a bubble to another project also moves its trashed contents',async()=>{
+    const r=fresh(),p=await proj(r,'P'),q=await proj(r,'Q'),a=await r.createBubble(p.rootBubbleId,inp('a')),b=await r.createBubble(a.id,inp('b'));
+    await r.deleteBubble(b.id);await r.reparent(a.id,q.rootBubbleId);eq((await r.s.get('bubbles',b.id)).projectId,q.id);
+    await r.restoreTrash((await r.listTrash())[0].opId);await clean(r);ok(await r.validatePath([q.rootBubbleId,a.id,b.id]));
+  });
+
+  // ===== Stage 2: randomised stress test with a fixed seed =====
+  await t('stress: 400 random operations keep the data valid; undo-all then redo-all reproduces it exactly',async()=>{
+    let seed=12345;const rnd=n=>{seed=(seed*1103515245+12345)&0x7fffffff;return(seed>>>8)%n};
+    const r=fresh();await proj(r,'P0');await proj(r,'P1');let errors=0,done=0;
+    const pick=async(f)=>{const all=(await r.allBubblePaths()).filter(f||(()=>true));return all.length?all[rnd(all.length)]:null};
+    for(let i=0;i<400;i++){
+      const k=rnd(14);
+      try{
+        if(k<4){const par=await pick();if(par)await r.createBubble(par.id,inp('n'+i,PALETTE[rnd(8)]))}
+        else if(k===4){const b=await pick(x=>x.parentId);if(b)await r.moveBubble(b.id,rnd(900)-450,rnd(900)-450)}
+        else if(k===5){const b=await pick(x=>x.parentId),to=await pick();if(b&&to)await r.reparent(b.id,to.id)}
+        else if(k===6){const b=await pick(x=>x.parentId&&x.depth<6);if(b)await r.duplicateBubble(b.id)}
+        else if(k===7){const b=await pick(x=>x.parentId);if(b)await r.deleteBubble(b.id)}
+        else if(k===8||k===9){const a=await pick(),b=await pick();if(a&&b)await r.createConnection({sourceId:a.id,targetId:b.id,label:'l'+rnd(3),direction:rnd(2)?'forward':'none'})}
+        else if(k===10){await r.undo()}
+        else if(k===11){await r.redo()}
+        else if(k===12){const g=(await r.listTrash())[0];if(g)await r.restoreTrash(g.opId)}
+        else{const ps=await r.listProjects();if(ps.length<4&&rnd(3)===0)await r.createProject(inp('P'+i));else if(ps.length){const kind=['radial','tree','grid','freeform'][rnd(4)];const par=await pick();if(par)await r.applyLayout(par.id,kind)}}
+        done++;
+      }catch(e){errors++}
+      if(i%25===0)eq(await r.checkIntegrity(),[],'integrity after op '+i);
+    }
+    await clean(r);const final=await snap(r);
+    while(await r.undo()){}await clean(r);while(await r.redo()){}await clean(r);eq(await snap(r),final,'undo-all/redo-all round trip');
+    ok(done>200,'enough operations succeeded: '+done);return done+' ok, '+errors+' rejected (expected: cycles, duplicates, nothing to undo)';
+  });
+  await t('speed: 150 siblings, layout, level connection query',async()=>{
+    const r=fresh(),p=await proj(r);const t0=Date.now();const ids=[];
+    for(let i=0;i<150;i++)ids.push((await r.createBubble(p.rootBubbleId,inp('n'+i))).id);
+    for(let i=0;i<60;i++)await r.createConnection({sourceId:ids[i],targetId:ids[i+1],label:'x'+i});
+    await r.applyLayout(p.rootBubbleId,'radial');const L=await r.connectionsForLevel(new Set(ids));eq(L.internal.length,60);return(Date.now()-t0)+' ms (memory store)';
+  });
+
+  // ===== real IndexedDB (browser only) =====
   if(typeof indexedDB!=='undefined'){
-    await t('REAL IndexedDB: data persists after closing and reopening',async()=>{
+    await t('REAL IndexedDB: everything persists across close/reopen, incl. connections, Trash and layout',async()=>{
       const name='bm-selftest-'+newId();
       try{
-        const s1=await IdbStore.open(name);const r1=new Repo(s1);
-        const p=await r1.createProject(inp('Persisted'));const b=await r1.createBubble(p.rootBubbleId,inp('child'));
-        await r1.moveBubble(b.id,55,66);await r1.saveSettings({...DEFAULT_SETTINGS,theme:'light'});s1.close();
-        const s2=await IdbStore.open(name);const r2=new Repo(s2);
-        const ps=await r2.listProjects();eq(ps.length,1);eq(ps[0].title,'Persisted');
-        const k=await r2.listChildren(p.rootBubbleId);eq([k[0].title,k[0].x,k[0].y],['child',55,66]);
-        eq((await r2.getSettings()).theme,'light');
-        const rec=await r2.deleteBubble(b.id);eq((await r2.listChildren(p.rootBubbleId)).length,0);await r2.restore(rec);
-        eq((await r2.listChildren(p.rootBubbleId)).length,1);ok(await r2.validatePath([p.rootBubbleId,b.id]));
-        s2.close();
+        const s1=await IdbStore.open(name),r1=new Repo(s1),p=await proj(r1,'Persisted'),a=await r1.createBubble(p.rootBubbleId,inp('a')),b=await r1.createBubble(p.rootBubbleId,inp('b'));
+        await r1.createConnection({sourceId:a.id,targetId:b.id,label:'knows',direction:'forward'});await r1.applyLayout(p.rootBubbleId,'radial');await r1.deleteBubble(b.id);await r1.saveSettings({...DEFAULT_SETTINGS,gridSnap:true});s1.close();
+        const s2=await IdbStore.open(name),r2=new Repo(s2);
+        eq((await r2.listProjects()).length,1);eq(await kids(r2,p.rootBubbleId),['a']);eq((await r2.listTrash()).map(g=>g.title),['b']);
+        eq((await r2.getSettings()).gridSnap,true);eq((await r2.s.getAll('connections')).length,1);
+        await r2.restoreTrash((await r2.listTrash())[0].opId);eq((await r2.linksOf(a.id)).length,1);await clean(r2);
+        const x=await r2.applyLayout(p.rootBubbleId,'freeform');ok(x>=1);s2.close();
+      }finally{indexedDB.deleteDatabase(name)}
+    });
+    await t('REAL IndexedDB: Stage 1 database (v1) upgrades to v2 without losing data',async()=>{
+      const name='bm-migrate-'+newId();
+      try{
+        const P={id:'p1',title:'Old',description:'',colour:'#7aa2ff',rootBubbleId:'b1',x:0,y:0,createdAt:1,updatedAt:1,deletedAt:null};
+        const B={id:'b1',projectId:'p1',parentId:null,title:'Old',description:'',colour:'#7aa2ff',x:0,y:0,size:1,createdAt:1,updatedAt:1,deletedAt:null,metadata:{}};
+        const C={...B,id:'b2',parentId:'b1',title:'Child',x:150,y:40};
+        await new Promise((res,rej)=>{
+          const q=indexedDB.open(name,1);
+          q.onupgradeneeded=()=>{const db=q.result;db.createObjectStore('projects',{keyPath:'id'});const b=db.createObjectStore('bubbles',{keyPath:'id'});b.createIndex('parentId','parentId');b.createIndex('projectId','projectId');db.createObjectStore('settings',{keyPath:'key'})};
+          q.onsuccess=()=>{const db=q.result,tx=db.transaction(['projects','bubbles','settings'],'readwrite');tx.objectStore('projects').put(P);tx.objectStore('bubbles').put(B);tx.objectStore('bubbles').put(C);tx.objectStore('settings').put({key:'app',theme:'light',floatingEnabled:false,reducedMotion:'system'});tx.oncomplete=()=>{db.close();res()};tx.onerror=()=>rej(tx.error)};
+          q.onerror=()=>rej(q.error);
+        });
+        const s=await IdbStore.open(name),r=new Repo(s);
+        eq((await r.listProjects()).map(x=>x.title),['Old']);eq(await kids(r,'b1'),['Child']);const st=await r.getSettings();eq([st.theme,st.floatingEnabled,st.gridSnap],['light',false,false]);
+        const n=await r.createBubble('b1',inp('New'));await r.createConnection({sourceId:n.id,targetId:'b2',label:'ok'});await r.moveProject('p1',5,5);await r.updateProject('p1',inp('Renamed'));
+        await r.duplicateProject('p1');await clean(r);s.close();
       }finally{indexedDB.deleteDatabase(name)}
     });
   }
@@ -485,26 +855,26 @@ function h(tag,attrs,...kids){
   for(const c of kids.flat())if(c!=null)e.append(c);
   return e;
 }
+const svgEl=(tag,attrs)=>{const e=document.createElementNS(SVGNS,tag);for(const k in(attrs||{}))e.setAttribute(k,attrs[k]);return e};
 function hashStr(s){let x=2166136261;for(let i=0;i<s.length;i++){x^=s.charCodeAt(i);x=Math.imul(x,16777619)}return x>>>0}
-// Drift amplitude (<=9px per axis) is smaller than half the 28px layout gap, so neighbours cannot collide.
+// Drift amplitude (<=9px per axis) is below half the 28px layout gap, so neighbours cannot collide.
 function driftFor(id){const x=hashStr(id),f=s=>((x>>>s)%100)/100;return{ax:5+f(0)*4,ay:5+f(8)*4,wx:.35+f(16)*.2,wy:.3+f(4)*.2,px:f(12)*6.28,py:f(20)*6.28}}
 
-// One zoomable/pannable level of bubbles. Position, drift and camera are written straight to the DOM (no re-render per frame).
+// One zoomable/pannable level. Positions, drift, lines and camera are written straight to the DOM (no re-render per frame).
 class Workspace{
   constructor(o){
-    this.o=o;this.cam={...o.camera};this.floating=!!o.floating;this.frozen=false;this.raf=0;
-    this.els=new Map();this.lines=new Map();this.pos=new Map();this.rad=new Map();this.dr=new Map();this.items=[];
+    this.o=o;this.cam={...o.camera};this.floating=!!o.floating;this.frozen=false;this.raf=0;this.pinned=null;
+    this.els=new Map();this.lines=new Map();this.pos=new Map();this.disp=new Map();this.rad=new Map();this.dr=new Map();this.items=[];this.conns=[];
     this.dragging=null;this.ptrs=new Map();
     this.g={mode:'idle',id:'',sx:0,sy:0,bx:0,by:0,moved:false,long:false,timer:0,cam0:null,d0:1,k0:1,pw:null,onCore:false};
-    this.svg=document.createElementNS(SVGNS,'svg');
-    this.svg.setAttribute('class','links');this.svg.setAttribute('width','1');this.svg.setAttribute('height','1');this.svg.setAttribute('aria-hidden','true');
+    this.svg=svgEl('svg',{class:'links',width:1,height:1,'aria-hidden':'true'});
+    this.cg=svgEl('g');this.svg.append(this.cg);
     this.world=h('div',{class:'world'},this.svg);
     this.root=h('div',{class:'layer'},this.world);
     this._loop=now=>{this.placeAll(now/1000,true);this.raf=requestAnimationFrame(this._loop)};
     if(o.showCore){
       this.core=h('div',{class:'core',role:'button',tabindex:'0','data-core':'1',onkeydown:e=>{
-        if(this.frozen)return;
-        if(e.key==='Enter'||e.key===' '){e.preventDefault();this.o.onCore&&this.o.onCore()}
+        if(this.frozen)return;if(e.key==='Enter'||e.key===' '){e.preventDefault();this.o.onCore&&this.o.onCore()}
       }},h('span',{class:'clamp'}));
       this.world.append(this.core);this.setCore(o.coreTitle,o.coreColour);
     }
@@ -513,10 +883,12 @@ class Workspace{
     r.addEventListener('pointermove',e=>this.move(e));
     r.addEventListener('pointerup',e=>this.up(e));
     r.addEventListener('pointercancel',e=>this.up(e));
+    r.addEventListener('pointerover',e=>{if(e.pointerType!=='mouse'||this.frozen)return;const t=e.target.closest&&e.target.closest('[data-bubble-id]');this.highlight(t?t.dataset.bubbleId:this.pinned)});
+    r.addEventListener('focusin',e=>{const t=e.target.closest&&e.target.closest('[data-bubble-id]');if(t)this.highlight(t.dataset.bubbleId)});
+    r.addEventListener('focusout',()=>this.highlight(this.pinned));
     r.addEventListener('contextmenu',e=>{
       e.preventDefault();if(this.frozen)return;
-      const t=e.target.closest&&e.target.closest('[data-bubble-id]');
-      if(t)this.o.onMenu(t.dataset.bubbleId);
+      const t=e.target.closest&&e.target.closest('[data-bubble-id]');if(t)this.o.onMenu(t.dataset.bubbleId);
     });
     r.addEventListener('wheel',e=>{
       if(this.frozen)return;e.preventDefault();
@@ -524,7 +896,7 @@ class Workspace{
       const pw={x:(p.x-c.x)/c.k,y:(p.y-c.y)/c.k};
       this.cam={k:nk,x:p.x-nk*pw.x,y:p.y-nk*pw.y};this.applyCam();this.emitCam();
     },{passive:false});
-    this.applyCam();this.setItems(o.items);this.syncMotion();
+    this.applyCam();this.setItems(o.items);this.setConnections(o.conns||[]);this.syncMotion();
   }
   rel(cx,cy){const b=this.root.getBoundingClientRect();return{x:cx-(b.left+b.width/2),y:cy-(b.top+b.height/2)}}
   applyCam(){const c=this.cam;this.world.style.transform='translate3d('+c.x+'px,'+c.y+'px,0) scale('+c.k+')'}
@@ -532,9 +904,8 @@ class Workspace{
   resetView(){this.cam={...DEFAULT_CAMERA};this.applyCam();this.emitCam()}
   setCore(title,colour){
     if(!this.core)return;
-    this.core.style.setProperty('--c',colour||DEFAULT_COLOUR);
-    this.core.firstChild.textContent=title||'';
-    this.core.setAttribute('aria-label','Edit '+(title||'this bubble'));
+    this.core.style.setProperty('--c',colour||DEFAULT_COLOUR);this.core.firstChild.textContent=title||'';
+    this.core.setAttribute('aria-label','Actions for '+(title||'this bubble'));
   }
   setFloating(f){if(this.floating!==f){this.floating=f;this.syncMotion()}}
   freeze(){this.frozen=true;this.root.classList.add('frozen');this.stopLoop();this.cancelGesture()}
@@ -549,7 +920,7 @@ class Workspace{
   setItems(items){
     this.items=items;const ids=new Set(items.map(i=>i.id));
     for(const id of[...this.els.keys()])if(!ids.has(id)){
-      this.els.get(id).remove();this.els.delete(id);this.pos.delete(id);this.rad.delete(id);this.dr.delete(id);
+      this.els.get(id).remove();this.els.delete(id);this.pos.delete(id);this.disp.delete(id);this.rad.delete(id);this.dr.delete(id);
       const ln=this.lines.get(id);if(ln){ln.remove();this.lines.delete(id)}
     }
     items.forEach((it,idx)=>{
@@ -558,37 +929,82 @@ class Workspace{
       if(!el){
         el=h('div',{class:'bubble pop',role:'button',tabindex:'0','data-bubble-id':it.id,'aria-keyshortcuts':'Enter M',
           onkeydown:e=>this.key(e,it.id),ondragstart:e=>e.preventDefault()},
-          h('div',{class:'bubble__inner',style:'--d:'+Math.min(100+idx*25,500)+'ms'},h('span',{class:'bubble__label'})));
+          h('div',{class:'bubble__inner',style:'--d:'+Math.min(100+idx*25,500)+'ms'},h('span',{class:'bubble__label'})),h('span',{class:'badge',hidden:true}));
         this.els.set(it.id,el);this.world.append(el);
         el.firstChild.addEventListener('animationend',()=>el.classList.remove('pop'),{once:true});
         this.dr.set(it.id,driftFor(it.id));
-        if(this.o.showCore){
-          const ln=document.createElementNS(SVGNS,'line');
-          ln.setAttribute('x1','0');ln.setAttribute('y1','0');ln.setAttribute('stroke-opacity','.4');
-          ln.setAttribute('stroke-width','1.5');ln.setAttribute('stroke-linecap','round');
-          this.svg.append(ln);this.lines.set(it.id,ln);
-        }
+        if(this.o.showCore){const ln=svgEl('line',{x1:0,y1:0,'stroke-opacity':.4,'stroke-width':1.5,'stroke-linecap':'round'});this.svg.insertBefore(ln,this.cg);this.lines.set(it.id,ln)}
       }
       el.style.width=el.style.height=(r*2)+'px';
-      el.style.setProperty('--c',it.colour);el.style.setProperty('--fs',fs+'px');
-      el.dataset.tone=readableTone(it.colour);
-      el.setAttribute('aria-label','Open '+it.title);
+      el.style.setProperty('--c',it.colour);el.style.setProperty('--fs',fs+'px');el.dataset.tone=readableTone(it.colour);
+      el.setAttribute('aria-label','Open '+it.title+(it.ext?', '+it.ext+' link'+(it.ext>1?'s':'')+' elsewhere':''));
       const lab=el.firstChild.firstChild;lab.textContent=it.title;lab.title=it.title;
+      const bd=el.lastChild;bd.hidden=!it.ext;bd.textContent=it.ext?'\u21c4 '+it.ext:'';
       const ln=this.lines.get(it.id);if(ln)ln.setAttribute('stroke',it.colour);
       this.rad.set(it.id,r);
       if(this.dragging!==it.id)this.pos.set(it.id,{x:it.x,y:it.y});
       el.tabIndex=this.frozen?-1:0;
     });
     this.placeAll(typeof performance!=='undefined'?performance.now()/1000:0,this.floating&&!this.frozen);
+    if(this.conns.length)this.highlight(this.hl);
   }
+
+  // ----- connection lines: curved, with optional arrowhead and label; pairs with several links fan out -----
+  setConnections(list){
+    this.cg.textContent='';this.conns=[];const groups=new Map();
+    for(const c of list){const k=[c.a,c.b].sort().join('|');if(!groups.has(k))groups.set(k,[]);groups.get(k).push(c)}
+    for(const arr of groups.values())arr.forEach((c,i)=>{
+      const path=svgEl('path',{stroke:c.colour}),tip=svgEl('polygon',{fill:c.colour}),txt=svgEl('text');
+      txt.textContent=c.label||'';tip.style.display=c.direction==='forward'?'':'none';
+      const g=svgEl('g',{class:'conn'});g.append(path,tip,txt);this.cg.append(g);
+      this.conns.push({...c,off:(i-(arr.length-1)/2)*34,g,path,tip,txt});
+    });
+    this.updateConns();this.highlight(this.hl);
+  }
+  np(id){
+    if(id==='__core')return this.core?{x:0,y:0,r:CORE_RADIUS}:null;
+    const p=this.disp.get(id);return p?{x:p.x,y:p.y,r:this.rad.get(id)||46}:null;
+  }
+  updateConns(only){
+    for(const c of this.conns){
+      if(only&&c.a!==only&&c.b!==only)continue;
+      const A=this.np(c.a),B=this.np(c.b);
+      if(!A||!B){c.g.style.display='none';continue}
+      const dx=B.x-A.x,dy=B.y-A.y,d=Math.hypot(dx,dy);
+      if(d<A.r+B.r+6){c.g.style.display='none';continue}
+      c.g.style.display='';
+      const mx=(A.x+B.x)/2-dy/d*c.off*2,my=(A.y+B.y)/2+dx/d*c.off*2;
+      const da=Math.hypot(mx-A.x,my-A.y)||1,db=Math.hypot(mx-B.x,my-B.y)||1;
+      const sx=A.x+(mx-A.x)/da*A.r,sy=A.y+(my-A.y)/da*A.r,ex=B.x+(mx-B.x)/db*B.r,ey=B.y+(my-B.y)/db*B.r;
+      c.path.setAttribute('d','M'+sx.toFixed(1)+' '+sy.toFixed(1)+'Q'+mx.toFixed(1)+' '+my.toFixed(1)+' '+ex.toFixed(1)+' '+ey.toFixed(1));
+      if(c.direction==='forward'){
+        const tx=(ex-mx)/db,ty=(ey-my)/db,bx=ex-tx*12,by=ey-ty*12;
+        c.tip.setAttribute('points',ex.toFixed(1)+','+ey.toFixed(1)+' '+(bx-ty*6).toFixed(1)+','+(by+tx*6).toFixed(1)+' '+(bx+ty*6).toFixed(1)+','+(by-tx*6).toFixed(1));
+      }
+      if(c.label){c.txt.setAttribute('x',((sx+2*mx+ex)/4).toFixed(1));c.txt.setAttribute('y',((sy+2*my+ey)/4-5).toFixed(1))}
+    }
+  }
+  highlight(id){
+    this.hl=id||null;
+    for(const el of this.els.values())el.classList.remove('hl','linked');
+    for(const c of this.conns)c.g.classList.remove('hl');
+    if(!this.hl)return;
+    const me=this.els.get(this.hl);if(me)me.classList.add('hl');
+    for(const c of this.conns)if(c.a===this.hl||c.b===this.hl){
+      c.g.classList.add('hl');const o=this.els.get(c.a===this.hl?c.b:c.a);if(o)o.classList.add('linked');
+    }
+  }
+  pin(id){this.pinned=id||null;this.highlight(this.pinned)}
+
   placeOne(id,t,drift){
     const p=this.pos.get(id),el=this.els.get(id);if(!p||!el)return;
     const r=this.rad.get(id)||46;let x=p.x,y=p.y;
     if(drift&&this.dragging!==id){const d=this.dr.get(id);if(d){x+=d.ax*Math.sin(d.wx*t+d.px);y+=d.ay*Math.sin(d.wy*t+d.py)}}
+    this.disp.set(id,{x,y});
     el.style.transform='translate3d('+(x-r).toFixed(2)+'px,'+(y-r).toFixed(2)+'px,0)';
     const ln=this.lines.get(id);if(ln){ln.setAttribute('x2',x.toFixed(2));ln.setAttribute('y2',y.toFixed(2))}
   }
-  placeAll(t,drift){for(const id of this.pos.keys())this.placeOne(id,t,drift)}
+  placeAll(t,drift){for(const id of this.pos.keys())this.placeOne(id,t,drift);this.updateConns()}
 
   key(e,id){
     if(this.frozen)return;
@@ -596,11 +1012,14 @@ class Workspace{
     else if(e.key==='ContextMenu'||e.key==='F2'||(e.shiftKey&&e.key==='F10')||e.key.toLowerCase()==='m'){e.preventDefault();this.o.onMenu(id)}
   }
 
-  // ----- gestures: tap opens, drag moves a bubble, empty drag pans, two fingers pinch, long-press opens the menu -----
+  // ----- gestures: tap opens, drag moves a bubble (optionally snapped), empty drag pans, two fingers pinch, long-press opens the menu -----
   endBubble(commit){
     const g=this.g;window.clearTimeout(g.timer);
     const el=this.els.get(g.id);if(el)el.classList.remove('is-pressed','is-dragging');
-    if(commit&&g.moved){const p=this.pos.get(g.id);if(p)this.o.onMove(g.id,Math.round(p.x),Math.round(p.y))}
+    if(commit&&g.moved){
+      const p=this.pos.get(g.id),sn=this.o.getSnap?this.o.getSnap():0;
+      if(p){if(sn){p.x=snapTo(p.x,sn);p.y=snapTo(p.y,sn)}this.dragging=null;this.placeOne(g.id,0,false);this.updateConns(g.id);this.o.onMove(g.id,Math.round(p.x),Math.round(p.y))}
+    }
     this.dragging=null;
   }
   cancelGesture(){if(this.g.mode==='bubble')this.endBubble(false);this.g.mode='idle';this.ptrs.clear()}
@@ -614,8 +1033,7 @@ class Workspace{
       if(g.mode==='bubble')this.endBubble(g.moved);
       const[a,b]=[...this.ptrs.values()];
       g.mode='pinch';g.d0=Math.hypot(a.x-b.x,a.y-b.y)||1;g.k0=cam.k;
-      const m=this.rel((a.x+b.x)/2,(a.y+b.y)/2);g.pw={x:(m.x-cam.x)/cam.k,y:(m.y-cam.y)/cam.k};
-      return;
+      const m=this.rel((a.x+b.x)/2,(a.y+b.y)/2);g.pw={x:(m.x-cam.x)/cam.k,y:(m.y-cam.y)/cam.k};return;
     }
     if(this.ptrs.size>2)return;
     g.sx=e.clientX;g.sy=e.clientY;g.moved=false;g.long=false;g.cam0={...cam};g.onCore=false;
@@ -626,20 +1044,14 @@ class Workspace{
       g.timer=window.setTimeout(()=>{
         if(g.mode==='bubble'&&!g.moved){g.long=true;try{navigator.vibrate&&navigator.vibrate(15)}catch(_){}this.o.onMenu(id)}
       },LONG_PRESS_MS);
-    }else{
-      g.mode='pan';g.onCore=!!(e.target.closest&&e.target.closest('[data-core]'));
-    }
+    }else{g.mode='pan';g.onCore=!!(e.target.closest&&e.target.closest('[data-core]'))}
   }
   move(e){
     const q=this.ptrs.get(e.pointerId);if(!q)return;
-    q.x=e.clientX;q.y=e.clientY;const g=this.g;
-    const dx=e.clientX-g.sx,dy=e.clientY-g.sy;
+    q.x=e.clientX;q.y=e.clientY;const g=this.g,dx=e.clientX-g.sx,dy=e.clientY-g.sy;
     if(g.mode==='bubble'){
-      if(!g.moved&&Math.hypot(dx,dy)>TAP_SLOP){
-        g.moved=true;window.clearTimeout(g.timer);this.dragging=g.id;
-        const el=this.els.get(g.id);if(el)el.classList.add('is-dragging');
-      }
-      if(g.moved){const k=this.cam.k;this.pos.set(g.id,{x:g.bx+dx/k,y:g.by+dy/k});this.placeOne(g.id,0,false)}
+      if(!g.moved&&Math.hypot(dx,dy)>TAP_SLOP){g.moved=true;window.clearTimeout(g.timer);this.dragging=g.id;const el=this.els.get(g.id);if(el)el.classList.add('is-dragging')}
+      if(g.moved){const k=this.cam.k;this.pos.set(g.id,{x:g.bx+dx/k,y:g.by+dy/k});this.placeOne(g.id,0,false);this.updateConns(g.id)}
     }else if(g.mode==='pan'){
       if(!g.moved&&Math.hypot(dx,dy)>TAP_SLOP)g.moved=true;
       if(g.moved||!g.onCore){this.cam={...this.cam,x:g.cam0.x+dx,y:g.cam0.y+dy};this.applyCam()}
@@ -654,16 +1066,12 @@ class Workspace{
     const g=this.g;
     if(g.mode==='bubble'){
       const id=g.id,tap=!g.moved&&!g.long&&e.type==='pointerup';
-      this.endBubble(true);g.mode='idle';
-      if(tap)this.o.onOpen(id);
+      this.endBubble(true);g.mode='idle';if(tap)this.o.onOpen(id);
     }else if(g.mode==='pan'){
       g.mode='idle';
       if(g.onCore&&!g.moved&&e.type==='pointerup'&&this.o.onCore)this.o.onCore();
       else if(g.moved||!g.onCore)this.emitCam();
-    }else if(g.mode==='pinch'){
-      this.emitCam();
-      if(this.ptrs.size===0)g.mode='idle';
-    }
+    }else if(g.mode==='pinch'){this.emitCam();if(this.ptrs.size===0)g.mode='idle'}
   }
 }
 // </WORKSPACE>
@@ -684,20 +1092,26 @@ const effFloat=v=>S.settings.floatingEnabled&&!reduced()&&v.items.length<=AUTO_F
 
 // ---------- data -> view ----------
 async function loadView(path){
+  let items,title='Home',colour=DEFAULT_COLOUR,crumbs=[],coreId=null,coreProject=null;
   if(!path.length){
-    const ps=await S.repo.listProjects();
-    return{uid:++S.uid,path,title:'Home',colour:DEFAULT_COLOUR,crumbs:[],
-      items:ps.map(p=>({id:p.id,openId:p.rootBubbleId,title:p.title,description:p.description,colour:p.colour,x:p.x,y:p.y,size:HOME_SIZE}))};
+    items=(await S.repo.listProjects()).map(p=>({id:p.id,openId:p.rootBubbleId,title:p.title,description:p.description,colour:p.colour,x:p.x,y:p.y,size:HOME_SIZE}));
+  }else{
+    const bs=await S.repo.getBubbles(path),tip=bs[bs.length-1];
+    title=tip.title;colour=tip.colour;crumbs=bs.map(b=>b.title);coreId=tip.id;coreProject=tip.parentId===null?tip.projectId:null;
+    items=(await S.repo.listChildren(tip.id)).map(b=>({id:b.id,openId:b.id,title:b.title,description:b.description,colour:b.colour,x:b.x,y:b.y,size:b.size}));
   }
-  const bs=await S.repo.getBubbles(path),tip=bs[bs.length-1],kids=await S.repo.listChildren(tip.id);
-  return{uid:++S.uid,path,title:tip.title,colour:tip.colour,crumbs:bs.map(b=>b.title),
-    items:kids.map(b=>({id:b.id,openId:b.id,title:b.title,description:b.description,colour:b.colour,x:b.x,y:b.y,size:b.size}))};
+  const ids=new Set(items.map(i=>i.openId));if(coreId)ids.add(coreId);
+  const{internal,extCount}=await S.repo.connectionsForLevel(ids);
+  const idOf=new Map(items.map(i=>[i.openId,i.id]));if(coreId)idOf.set(coreId,'__core');
+  items.forEach(i=>{i.ext=extCount.get(i.openId)||0});
+  const conns=internal.map(c=>({id:c.id,a:idOf.get(c.sourceId),b:idOf.get(c.targetId),label:c.label,direction:c.direction,colour:c.colour}));
+  return{uid:++S.uid,path,title,colour,crumbs,items,conns,coreId,coreProject};
 }
 async function reloadView(){
   const cur=S.view;if(!cur)return;
   let f;try{f=await loadView(cur.path)}catch(e){console.error(e);return}
   if(S.view!==cur)return;
-  S.view=f;S.ws.setItems(f.items);S.ws.setCore(f.title,f.colour);S.ws.setFloating(effFloat(f));renderChrome();
+  S.view=f;S.ws.setItems(f.items);S.ws.setConnections(f.conns);S.ws.setCore(f.title,f.colour);S.ws.setFloating(effFloat(f));renderChrome();
 }
 // Runs a storage write and reports honestly: 'Saved' only after the transaction committed.
 async function run(fn,quiet){
@@ -721,6 +1135,37 @@ function toast(text,actionLabel,onAction,ms){
   if(actionLabel)t.append(h('button',{type:'button',onclick:()=>{box.textContent='';window.clearTimeout(S.toastTimer);onAction&&onAction()}},actionLabel));
   box.append(t);S.toastTimer=window.setTimeout(()=>{box.textContent=''},ms||(actionLabel?9000:4500));
 }
+// Offers Undo for the change that was just made, but only while it is still the latest change.
+function toastUndo(text){
+  const entry=S.repo.lastEntry;
+  toast(text,'Undo',async()=>{
+    if(S.repo.undoStack[S.repo.undoStack.length-1]!==entry){toast('Other changes were made since. Use the Trash or the Undo button.');return}
+    await doUndo();
+  },10000);
+}
+
+// ---------- undo / redo ----------
+async function afterHistory(){
+  const cur=S.view;let p=cur.path;
+  while(p.length&&!(await S.repo.validatePath(p)))p=p.slice(0,-1);
+  if(p.length!==cur.path.length){history.replaceState({bm:1,path:p},'');await navigate(p,false)}
+  else await reloadView();
+}
+async function doUndo(){
+  if(!S.repo.canUndo){toast('Nothing to undo');return}
+  const r=await run(()=>S.repo.undo());if(!r.ok)return;
+  await afterHistory();toast('Undid: '+r.value);
+}
+async function doRedo(){
+  if(!S.repo.canRedo){toast('Nothing to redo');return}
+  const r=await run(()=>S.repo.redo());if(!r.ok)return;
+  await afterHistory();toast('Redid: '+r.value);
+}
+function updateHistoryButtons(){
+  const u=$('#undoBtn'),r=$('#redoBtn');
+  u.disabled=!S.repo.canUndo;r.disabled=!S.repo.canRedo;
+  u.title=S.repo.canUndo?'Undo: '+S.repo.undoLabel:'Nothing to undo';r.title=S.repo.canRedo?'Redo: '+S.repo.redoLabel:'Nothing to redo';
+}
 
 // ---------- chrome (header, breadcrumbs, empty state, buttons) ----------
 function renderChrome(){
@@ -742,11 +1187,9 @@ function renderChrome(){
   fb.textContent='Float: '+(on?'on':'off');fb.setAttribute('aria-pressed',String(on));
   document.body.dataset.float=on&&!reduced()?'on':'off';
   const emptyHome=depth===0&&v.items.length===0;
-  $('#empty').hidden=!emptyHome;
-  $('#hint').hidden=!(depth>0&&v.items.length===0);
-  $('#fab').hidden=emptyHome;
+  $('#empty').hidden=!emptyHome;$('#hint').hidden=!(depth>0&&v.items.length===0);$('#fab').hidden=emptyHome;
   $('#fab').setAttribute('aria-label',depth===0?'New project':'New bubble inside '+v.title);
-  updateRecenter();
+  updateRecenter();updateHistoryButtons();
 }
 function updateRecenter(){
   const c=S.ws&&S.ws.cam;
@@ -756,27 +1199,21 @@ function openLevelList(){
   const v=S.view,labels=['Home',...v.crumbs];
   openOverlay('Go to level','sheet',true,(box,close)=>{
     const list=h('div',{class:'menu'});
-    labels.forEach((l,d)=>{
-      const last=d===labels.length-1;
-      list.append(h('button',{type:'button',class:'btn',disabled:last,onclick:()=>{close();jumpTo(d)}},'\u00a0'.repeat(d*2)+(d?'\u21b3 ':'')+l+(last?'  (here)':'')));
-    });
+    labels.forEach((l,d)=>{const last=d===labels.length-1;
+      list.append(h('button',{type:'button',class:'btn',disabled:last,onclick:()=>{close();jumpTo(d)}},'\u00a0'.repeat(d*2)+(d?'\u21b3 ':'')+l+(last?'  (here)':'')))});
     box.append(list);
   });
 }
 
 // ---------- navigation ----------
-function viewPos(item,cam){
-  const r=$('#stage').getBoundingClientRect();
-  return{W:r.width||innerWidth,H:r.height||innerHeight,x:(r.width||innerWidth)/2+cam.x+item.x*cam.k,y:(r.height||innerHeight)/2+cam.y+item.y*cam.k,r:Math.max(20,radiusFor(item.size)*cam.k)};
-}
+function stageSize(){const r=$('#stage').getBoundingClientRect();return{W:r.width||innerWidth,H:r.height||innerHeight}}
 function computeOrigin(kind,cur,next){
-  const r=$('#stage').getBoundingClientRect(),W=r.width||innerWidth,H=r.height||innerHeight;
-  const fb={x:W/2,y:H/2,r:60,colour:DEFAULT_COLOUR,W,H};
+  const{W,H}=stageSize(),fb={x:W/2,y:H/2,r:60,colour:DEFAULT_COLOUR,W,H};
   let item,cam;
   if(kind==='enter'){item=cur.items.find(i=>i.openId===next.path[next.path.length-1]);cam=S.ws?S.ws.cam:DEFAULT_CAMERA}
   else if(kind==='back'){item=next.items.find(i=>i.openId===cur.path[cur.path.length-1]);cam=S.cams.get(camKey(next.path))||DEFAULT_CAMERA}
   if(!item)return fb;
-  const p=viewPos(item,cam);return{x:p.x,y:p.y,r:p.r,colour:item.colour,W:p.W,H:p.H};
+  return{x:W/2+cam.x+item.x*cam.k,y:H/2+cam.y+item.y*cam.k,r:Math.max(20,radiusFor(item.size)*cam.k),colour:item.colour,W,H};
 }
 async function navigate(newPath,push){
   const cur=S.view;if(!cur||samePath(cur.path,newPath))return;
@@ -787,8 +1224,7 @@ async function navigate(newPath,push){
   if(push)history.pushState({bm:1,path:newPath},'');
   const kind=newPath.length>cur.path.length&&isPrefix(cur.path,newPath)?'enter':newPath.length<cur.path.length&&isPrefix(newPath,cur.path)?'back':'swap';
   const origin=computeOrigin(kind,cur,next),oldWs=S.ws;
-  oldWs.freeze();
-  S.cams.set(camKey(cur.path),{...oldWs.cam});
+  oldWs.freeze();S.cams.set(camKey(cur.path),{...oldWs.cam});
   S.view=next;S.ws=mountWorkspace(next);
   renderChrome();setStatus('');
   runTransition(kind,origin,oldWs,S.ws);
@@ -796,8 +1232,8 @@ async function navigate(newPath,push){
 function mountWorkspace(v){
   const key=camKey(v.path);
   const ws=new Workspace({
-    items:v.items,showCore:v.path.length>0,coreTitle:v.title,coreColour:v.colour,
-    camera:S.cams.get(key)||DEFAULT_CAMERA,floating:effFloat(v),
+    items:v.items,conns:v.conns,showCore:v.path.length>0,coreTitle:v.title,coreColour:v.colour,
+    camera:S.cams.get(key)||DEFAULT_CAMERA,floating:effFloat(v),getSnap:()=>S.settings.gridSnap?GRID:0,
     onOpen:openItem,onMenu:openItemMenu,onMove:onMoveItem,onCore:openCoreMenu,
     onCamera:c=>{S.cams.set(key,c);updateRecenter()}
   });
@@ -831,30 +1267,30 @@ function runTransition(kind,o,oldWs,newWs){
 function finishTransition(){
   const t=S.trans;if(!t)return;S.trans=null;window.clearTimeout(t.timer);
   for(const a of t.anims){try{a.cancel()}catch(_){}}
-  t.oldWs.destroy();t.newWs.root.style.transformOrigin='';
-  $('#ripple').style.display='none';
+  t.oldWs.destroy();t.newWs.root.style.transformOrigin='';$('#ripple').style.display='none';
 }
-
 function openItem(id){
   const cur=S.view;if(!cur||S.overlay)return;
   const it=cur.items.find(i=>i.id===id);if(!it)return;
   navigate([...cur.path,it.openId],true);
 }
+// Cross-level / cross-project navigation (used by links): walks the real parent chain to the target.
+async function goToBubble(bubbleId){
+  try{const path=(await S.repo.pathTo(bubbleId)).map(b=>b.id);navigate(path,true)}
+  catch(e){toast('Could not open that bubble: '+e.message)}
+}
 function jumpTo(depth){
   const cur=S.view;if(!cur||depth>=cur.path.length||depth<0)return;
   const target=cur.path.slice(0,depth);
   history.go(-(cur.path.length-depth));
-  window.setTimeout(()=>{ // fallback if the browser history did not cooperate
-    if(S.view===cur){history.replaceState({bm:1,path:target},'');navigate(target,false)}
-  },450);
+  window.setTimeout(()=>{if(S.view===cur){history.replaceState({bm:1,path:target},'');navigate(target,false)}},450);
 }
 const goBack=()=>{if(S.view&&S.view.path.length)jumpTo(S.view.path.length-1)};
-
 async function onPopState(e){
   if(S.ignorePop){S.ignorePop=false;return}
-  if(S.overlay){closeOverlay();S.ignorePop=true;history.go(1);return} // Back closes a dialog first
+  if(S.overlay){closeOverlay();S.ignorePop=true;history.go(1);return}
   const st=e.state;
-  if(st&&st.sentinel){history.back();return} // Back from Home leaves the app
+  if(st&&st.sentinel){history.back();return}
   let path=st&&Array.isArray(st.path)?st.path:[];
   if(!(await S.repo.validatePath(path))){path=[];history.replaceState({bm:1,path:[]},'')}
   navigate(path,false);
@@ -863,6 +1299,7 @@ async function onMoveItem(id,x,y){
   const v=S.view,home=v.path.length===0,it=v.items.find(i=>i.id===id);
   if(it){it.x=x;it.y=y}
   await run(()=>home?S.repo.moveProject(id,x,y):S.repo.moveBubble(id,x,y));
+  S.ws.updateConns();
 }
 // </APP>
 
@@ -891,100 +1328,242 @@ function openOverlay(title,variant,dismiss,build){
 function closeOverlay(){
   const o=S.overlay;if(!o)return;S.overlay=null;
   document.removeEventListener('keydown',o.onKey,true);o.bd.remove();
+  if(S.ws)S.ws.pin(null);
   try{o.prev&&o.prev.focus&&o.prev.focus()}catch(_){}
 }
-
-function itemForm(box,o){
-  let colour=normaliseHex(o.initial.colour)||DEFAULT_COLOUR;
-  const title=h('input',{type:'text','data-autofocus':'',maxlength:MAX_TITLE,autocomplete:'off',value:o.initial.title||'','aria-label':'Title'});
-  const desc=h('textarea',{rows:'3','aria-label':'Description'});desc.value=o.initial.description||'';
-  const err=h('p',{class:'err',role:'alert'});
-  const sw=h('div',{class:'swatches'});
-  const custom=h('input',{type:'color',class:'swatch custom','aria-label':'Custom colour',value:colour});
-  const refresh=()=>{
-    sw.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.c===colour)));
-    custom.value=colour;
-  };
-  PALETTE.forEach(c=>sw.append(h('button',{type:'button',class:'swatch','data-c':c,'aria-label':'Colour '+c,style:'background:'+c,onclick:()=>{colour=c;refresh()}})));
-  custom.addEventListener('input',()=>{colour=normaliseHex(custom.value)||colour;refresh()});
-  sw.append(custom);
-  const submit=h('button',{type:'submit',class:'btn primary'},o.submitLabel);
-  const sync=()=>{submit.disabled=!title.value.trim()};
-  title.addEventListener('input',sync);sync();
+const seg=(opts,get,set)=>{ // segmented buttons
+  const wrap=h('div',{class:'seg'});
+  const paint=()=>wrap.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===String(get()))));
+  opts.forEach(([v,l])=>wrap.append(h('button',{type:'button',class:'btn','data-v':v,onclick:()=>{set(v);paint()}},l)));
+  paint();return wrap;
+};
+function swatches(get,set,extra){
+  const sw=h('div',{class:'swatches'}),custom=h('input',{type:'color',class:'swatch custom','aria-label':'Custom colour',value:get()});
+  const paint=()=>{sw.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.c===get())));custom.value=get()};
+  [...PALETTE,...(extra||[])].forEach(c=>sw.append(h('button',{type:'button',class:'swatch','data-c':c,'aria-label':'Colour '+c,style:'background:'+c,onclick:()=>{set(c);paint()}})));
+  custom.addEventListener('input',()=>{set(normaliseHex(custom.value)||get());paint()});
+  sw.append(custom);paint();return sw;
+}
+function formShell(box,o,fields){
+  const err=h('p',{class:'err',role:'alert'}),submit=h('button',{type:'submit',class:'btn primary'},o.submitLabel);
   let busy=false;
   const form=h('form',{novalidate:'',onsubmit:async e=>{
-    e.preventDefault();if(busy||!title.value.trim())return;
-    busy=true;submit.disabled=true;err.textContent='';
-    try{await o.onSubmit({title:title.value.trim(),description:desc.value.trim(),colour});o.close()}
-    catch(ex){err.textContent=ex&&ex.message||'Something went wrong.';busy=false;sync()}
-  }},
-    h('label',{class:'field'},h('span',{},'Title'),title),
-    h('label',{class:'field'},h('span',{},'Description (optional)'),desc),
-    h('fieldset',{class:'field'},h('legend',{},'Colour'),sw),err,
-    h('div',{class:'actions'},h('button',{type:'button',class:'btn',onclick:o.close},'Cancel'),submit));
-  refresh();box.append(form);
+    e.preventDefault();if(busy||submit.disabled)return;busy=true;submit.disabled=true;err.textContent='';
+    try{await o.onSubmit();o.close()}catch(ex){err.textContent=ex&&ex.message||'Something went wrong.';busy=false;submit.disabled=false;if(o.sync)o.sync()}
+  }},...fields,err,h('div',{class:'actions'},h('button',{type:'button',class:'btn',onclick:o.close},'Cancel'),submit));
+  box.append(form);return submit;
+}
+const nearestSize=s=>String(SIZES.reduce((a,b)=>Math.abs(b[1]-(s||1))<Math.abs(a[1]-(s||1))?b:a)[1]);
+
+function itemForm(box,o){
+  let colour=normaliseHex(o.initial.colour)||DEFAULT_COLOUR,size=nearestSize(o.initial.size);
+  const title=h('input',{type:'text','data-autofocus':'',maxlength:MAX_TITLE,autocomplete:'off',value:o.initial.title||'','aria-label':'Title'});
+  const desc=h('textarea',{rows:'3','aria-label':'Description'});desc.value=o.initial.description||'';
+  const fields=[h('label',{class:'field'},h('span',{},'Title'),title),h('label',{class:'field'},h('span',{},'Description (optional)'),desc),
+    h('fieldset',{class:'field'},h('legend',{},'Colour'),swatches(()=>colour,c=>{colour=c}))];
+  if(o.withSize)fields.push(h('fieldset',{class:'field'},h('legend',{},'Size'),seg(SIZES.map(([l,v])=>[String(v),l]),()=>size,v=>{size=v})));
+  const submit=formShell(box,{...o,onSubmit:()=>o.onSubmit({title:title.value.trim(),description:desc.value.trim(),colour,size:Number(size)}),sync:()=>{submit.disabled=!title.value.trim()}},fields);
+  const sync=()=>{submit.disabled=!title.value.trim()};title.addEventListener('input',sync);sync();
+}
+
+// ---------- entities: what the actions menu works on (a project bubble, a child bubble, or the centre bubble) ----------
+const entOf=item=>{const home=S.view.path.length===0;return{bubbleId:item.openId,projectId:home?item.id:null,itemId:item.id,title:item.title,description:item.description,colour:item.colour,size:item.size,isProject:home,isCore:false}};
+async function coreEnt(){
+  const v=S.view,b=await S.repo.getBubble(v.coreId);
+  return{bubbleId:b.id,projectId:v.coreProject,itemId:null,title:b.title,description:b.description,colour:b.colour,size:b.size,isProject:!!v.coreProject,isCore:true};
+}
+function openItemMenu(id){
+  const item=S.view&&S.view.items.find(i=>i.id===id);if(!item||S.overlay)return;
+  openActions(entOf(item));
+}
+async function openCoreMenu(){
+  const v=S.view;if(!v||S.overlay||!v.coreId)return;
+  try{openActions(await coreEnt())}catch(e){toast('Could not open this bubble.')}
+}
+function openActions(ent){
+  if(S.ws&&ent.itemId)S.ws.pin(ent.itemId);
+  openOverlay(ent.title,'sheet',true,(box,close)=>{
+    const btn=(label,fn)=>h('button',{type:'button',class:'btn',onclick:()=>{close();fn()}},label);
+    box.append(h('div',{class:'menu'},
+      ent.isCore?null:btn('Open',()=>openItem(ent.itemId)),
+      btn('Rename / edit / colour',()=>openEdit(ent)),
+      btn('Connect to\u2026',()=>startConnect(ent)),
+      btn('Links\u2026',()=>openLinks(ent)),
+      ent.isProject?null:btn('Move to\u2026',()=>startMove(ent)),
+      btn('Duplicate',()=>doDuplicate(ent)),
+      btn('Delete\u2026',()=>openDelete(ent)),
+      h('button',{type:'button',class:'btn',onclick:close},'Close')));
+  });
 }
 
 function openCreate(){
   const v=S.view,home=v.path.length===0;
   openOverlay(home?'New project':'New bubble','modal',false,(box,close)=>{
-    itemForm(box,{initial:{colour:PALETTE[v.items.length%PALETTE.length]},submitLabel:'Create',close,onSubmit:async val=>{
-      const r=await run(()=>home?S.repo.createProject(val):S.repo.createBubble(v.path[v.path.length-1],val),true);
+    itemForm(box,{initial:{colour:PALETTE[v.items.length%PALETTE.length]},withSize:!home,submitLabel:'Create',close,onSubmit:async val=>{
+      const r=await run(()=>home?S.repo.createProject(val):S.repo.createBubble(v.coreId,val),true);
       if(!r.ok)throw r.error;
       if(home&&navigator.storage&&navigator.storage.persist)navigator.storage.persist().catch(()=>{});
       await reloadView();
     }});
   });
 }
-function openEdit(item,asProjectId){
-  const home=S.view.path.length===0;
-  openOverlay(home||asProjectId?'Edit project':'Edit bubble','modal',false,(box,close)=>{
-    itemForm(box,{initial:item,submitLabel:'Save',close,onSubmit:async val=>{
-      const r=await run(()=>asProjectId?S.repo.updateProject(asProjectId,val):home?S.repo.updateProject(item.id,val):S.repo.updateBubble(item.id,val),true);
-      if(!r.ok)throw r.error;
-      await reloadView();
+function openEdit(ent){
+  openOverlay(ent.isProject?'Edit project':'Edit bubble','modal',false,(box,close)=>{
+    itemForm(box,{initial:ent,withSize:!ent.isProject,submitLabel:'Save',close,onSubmit:async val=>{
+      const r=await run(()=>ent.isProject?S.repo.updateProject(ent.projectId,val):S.repo.updateBubble(ent.bubbleId,val),true);
+      if(!r.ok)throw r.error;await reloadView();
     }});
   });
 }
-function openItemMenu(id){
-  const item=S.view&&S.view.items.find(i=>i.id===id);if(!item||S.overlay)return;
-  openOverlay(item.title,'sheet',true,(box,close)=>{
-    box.append(h('div',{class:'menu'},
-      h('button',{type:'button',class:'btn',onclick:()=>{close();openItem(id)}},'Open'),
-      h('button',{type:'button',class:'btn',onclick:()=>{close();openEdit(item)}},'Rename / edit / colour'),
-      h('button',{type:'button',class:'btn',onclick:()=>{close();openDelete(item)}},'Delete\u2026'),
-      h('button',{type:'button',class:'btn',onclick:close},'Close')));
+
+// ---------- picker (search any bubble in any project) ----------
+async function openPicker(title,exclude,onPick){
+  let all;try{all=(await S.repo.allBubblePaths()).filter(x=>!exclude.has(x.id))}catch(e){toast('Could not load the list: '+e.message);return}
+  openOverlay(title,'modal',false,(box,close)=>{
+    box.classList.add('wide');
+    const q=h('input',{type:'text','data-autofocus':'',placeholder:'Search by name or location',autocomplete:'off','aria-label':'Search'}),list=h('div',{class:'list'});
+    const draw=()=>{
+      const s=q.value.trim().toLowerCase(),m=all.filter(x=>!s||x.path.toLowerCase().includes(s));list.textContent='';
+      m.slice(0,60).forEach(x=>list.append(h('button',{type:'button',class:'item',onclick:()=>{close();onPick(x)}},h('span',{},x.title),h('small',{},x.path))));
+      if(!m.length)list.append(h('p',{class:'note'},'Nothing matches.'));
+      if(m.length>60)list.append(h('p',{class:'note'},'Showing 60 of '+m.length+'. Type to narrow the list.'));
+    };
+    q.addEventListener('input',draw);draw();
+    box.append(q,list,h('div',{class:'actions'},h('button',{type:'button',class:'btn',onclick:close},'Cancel')));
   });
 }
-async function openCoreMenu(){
-  const v=S.view;if(!v||S.overlay||!v.path.length)return;
-  try{
-    const b=await S.repo.getBubble(v.path[v.path.length-1]);
-    openEdit({id:b.id,title:b.title,description:b.description,colour:b.colour},b.parentId===null?b.projectId:null);
-  }catch(e){toast('Could not open this bubble.')}
+
+// ---------- connections ----------
+function connForm(box,o){
+  let colour=o.initial.colour||LINK_COLOUR,dir=o.initial.dir||'none';
+  const label=h('input',{type:'text','data-autofocus':'',maxlength:80,autocomplete:'off',placeholder:'e.g. Rival of, Trades with, Influences','aria-label':'Relationship label',value:o.initial.label||''});
+  const T=s=>s.length>22?s.slice(0,21)+'\u2026':s;
+  formShell(box,{...o,onSubmit:()=>o.onSubmit({label:label.value,dir,colour})},[
+    h('p',{class:'note'},'\u201c'+T(o.thisTitle)+'\u201d and \u201c'+T(o.otherTitle)+'\u201d'),
+    h('label',{class:'field'},h('span',{},'Label (optional)'),label),
+    h('fieldset',{class:'field'},h('legend',{},'Direction'),seg([['none','Plain link'],['out','\u201c'+T(o.thisTitle)+'\u201d \u2192 other'],['in','Other \u2192 \u201c'+T(o.thisTitle)+'\u201d']],()=>dir,v=>{dir=v})),
+    h('fieldset',{class:'field'},h('legend',{},'Line colour'),swatches(()=>colour,c=>{colour=c},[LINK_COLOUR]))]);
 }
-async function openDelete(item){
-  const home=S.view.path.length===0;let n=0;
-  try{n=home?await S.repo.countProjectBubbles(item.id):await S.repo.countDescendants(item.id)}catch(_){}
-  openOverlay(home?'Delete project?':'Delete bubble?','modal',false,(box,close)=>{
+function startConnect(ent){
+  openPicker('Connect \u201c'+ent.title+'\u201d to\u2026',new Set([ent.bubbleId]),other=>{
+    openOverlay('New connection','modal',false,(box,close)=>{
+      connForm(box,{thisTitle:ent.title,otherTitle:other.title,initial:{},submitLabel:'Connect',close,onSubmit:async v=>{
+        const src=v.dir==='in'?other.id:ent.bubbleId,dst=v.dir==='in'?ent.bubbleId:other.id;
+        const r=await run(()=>S.repo.createConnection({sourceId:src,targetId:dst,label:v.label,direction:v.dir==='none'?'none':'forward',colour:v.colour}),true);
+        if(!r.ok)throw r.error;await reloadView();toastUndo('Connected');
+      }});
+    });
+  });
+}
+function editConn(ent,l){
+  const c=l.conn,dir=c.direction==='none'?'none':c.sourceId===ent.bubbleId?'out':'in';
+  openOverlay('Edit connection','modal',false,(box,close)=>{
+    connForm(box,{thisTitle:ent.title,otherTitle:l.other.title,initial:{label:c.label,dir,colour:c.colour},submitLabel:'Save',close,onSubmit:async v=>{
+      const swap=(v.dir==='out'&&c.sourceId!==ent.bubbleId)||(v.dir==='in'&&c.sourceId===ent.bubbleId);
+      const r=await run(()=>S.repo.updateConnection(c.id,{label:v.label,direction:v.dir==='none'?'none':'forward',colour:v.colour,swap}),true);
+      if(!r.ok)throw r.error;await reloadView();
+    }});
+  });
+}
+async function openLinks(ent){
+  let links;try{links=await S.repo.linksOf(ent.bubbleId)}catch(e){toast('Could not load links: '+e.message);return}
+  openOverlay('Links of \u201c'+ent.title+'\u201d','modal',true,(box,close)=>{
+    box.classList.add('wide');
+    const list=h('div',{class:'list'});
+    if(!links.length)list.append(h('p',{class:'note'},'No links yet. Use \u201cConnect to\u2026\u201d to link this idea to another one, even in a different project.'));
+    for(const l of links){
+      const arrow=l.conn.direction==='none'?'\u2194':l.outgoing?'\u2192':'\u2190';
+      list.append(h('div',{class:'rowline'},
+        h('div',{class:'t'},arrow+' '+l.other.title+(l.conn.label?'  \u00b7 '+l.conn.label:''),h('small',{},l.other.path)),
+        h('button',{type:'button',class:'btn',onclick:()=>{close();goToBubble(l.otherId)}},'Go'),
+        h('button',{type:'button',class:'btn',onclick:()=>{close();editConn(ent,l)}},'Edit'),
+        h('button',{type:'button',class:'btn',onclick:async()=>{close();const r=await run(()=>S.repo.deleteConnection(l.conn.id));if(r.ok){await reloadView();toastUndo('Link removed')}}},'Remove')));
+    }
+    box.append(list,h('div',{class:'actions'},h('button',{type:'button',class:'btn',onclick:close},'Close')));
+  });
+}
+
+// ---------- move / duplicate / delete ----------
+async function startMove(ent){
+  let ex;try{ex=new Set([ent.bubbleId,...(await S.repo.descendantIds(ent.bubbleId,true))])}catch(e){toast(e.message);return}
+  openPicker('Move \u201c'+ent.title+'\u201d into\u2026',ex,async target=>{
+    const r=await run(()=>S.repo.reparent(ent.bubbleId,target.id));if(!r.ok)return;
+    if(r.value===null){toast('It is already there.');return}
+    await afterHistory();toastUndo('Moved into \u201c'+target.title+'\u201d');
+  });
+}
+async function doDuplicate(ent){
+  const r=await run(()=>ent.isProject?S.repo.duplicateProject(ent.projectId):S.repo.duplicateBubble(ent.bubbleId));
+  if(r.ok){await reloadView();toastUndo('Duplicated \u201c'+ent.title+'\u201d')}
+}
+async function openDelete(ent){
+  let n=0;try{n=ent.isProject?await S.repo.countProjectBubbles(ent.projectId):await S.repo.countDescendants(ent.bubbleId)}catch(_){}
+  openOverlay(ent.isProject?'Delete project?':'Delete bubble?','modal',false,(box,close)=>{
     box.append(
-      h('p',{},'\u201C'+item.title+'\u201D '+(n?'contains '+n+' bubble'+(n===1?'':'s')+' that will be removed along with it.':'has nothing inside it.')),
-      h('p',{class:'note'},'Nothing is erased immediately, and you can tap Undo straight after. A Trash screen for later recovery arrives in Stage 2.'),
+      h('p',{},'\u201c'+ent.title+'\u201d '+(n?'contains '+n+' bubble'+(n===1?'':'s')+' that will go with it.':'has nothing inside it.')),
+      h('p',{class:'note'},'It moves to the Trash (menu \u2192 Trash), where you can restore it later. Links to it are hidden meanwhile and come back if you restore it.'),
       h('div',{class:'actions'},h('button',{type:'button',class:'btn',onclick:close,'data-autofocus':''},'Cancel'),
         h('button',{type:'button',class:'btn danger',onclick:async()=>{
           close();
-          const r=await run(()=>home?S.repo.deleteProject(item.id):S.repo.deleteBubble(item.id));
+          const r=await run(()=>ent.isProject?S.repo.deleteProject(ent.projectId):S.repo.deleteBubble(ent.bubbleId));
           if(!r.ok)return;
-          await reloadView();
-          toast('Deleted \u201C'+item.title+'\u201D','Undo',async()=>{
-            const u=await run(()=>S.repo.restore(r.value));
-            if(u.ok){await reloadView();toast('Restored')}
-          },10000);
+          await afterHistory();toastUndo('Deleted \u201c'+ent.title+'\u201d');
         }},'Delete')));
   });
 }
 
-// ---------- settings ----------
+// ---------- arrange, trash, menu, settings ----------
+async function applyLayoutKind(k){
+  const parent=S.view.path.length?S.view.coreId:null;
+  const r=await run(()=>S.repo.applyLayout(parent,k));if(!r.ok)return;
+  await reloadView();
+  if(r.value){toastUndo(k==='freeform'?'Restored your hand-placed positions':'Arranged: '+k)}
+  else toast(k==='freeform'?'Nothing to restore \u2014 positions are already hand-placed.':'Nothing to arrange here yet.');
+  if(S.settings.defaultLayout!==k)changeSettings({defaultLayout:k});
+}
+function openLayout(){
+  openOverlay('Arrange bubbles','sheet',true,(box,close)=>{
+    const kinds=[['freeform','Freeform \u2014 restore my hand-placed positions'],['radial','Radial \u2014 rings around the centre'],['tree','Tree \u2014 rows beneath the centre'],['grid','Grid \u2014 even squares']];
+    const snap=h('input',{type:'checkbox',role:'switch','aria-label':'Snap to grid while dragging'});snap.checked=S.settings.gridSnap;
+    snap.addEventListener('change',()=>changeSettings({gridSnap:snap.checked}));
+    box.append(
+      h('div',{class:'menu'},...kinds.map(([k,l])=>h('button',{type:'button',class:'btn',onclick:()=>{close();applyLayoutKind(k)}},(S.settings.defaultLayout===k?'\u2713 ':'')+l))),
+      h('p',{class:'note'},'Arranging never loses anything: Freeform brings your own positions back, and Undo reverses any arrangement.'),
+      h('label',{class:'row'},h('span',{},'Snap to grid while dragging'),snap),
+      h('div',{class:'actions'},h('button',{type:'button',class:'btn primary',onclick:close},'Done')));
+  });
+}
+async function openTrash(){
+  let groups;try{groups=await S.repo.listTrash()}catch(e){toast('Could not read the Trash: '+e.message);return}
+  openOverlay('Trash','modal',true,(box,close)=>{
+    box.classList.add('wide');
+    box.append(h('p',{class:'note'},'Deleted items stay here until you delete them forever. Restoring puts them back where they were.'));
+    const list=h('div',{class:'list'});
+    if(!groups.length)list.append(h('p',{class:'note'},'The Trash is empty.'));
+    for(const g of groups){
+      let armed=false,timer=0;
+      const purge=h('button',{type:'button',class:'btn',onclick:async()=>{
+        if(!armed){armed=true;purge.textContent='Sure?';purge.classList.add('danger');timer=window.setTimeout(()=>{armed=false;purge.textContent='Delete forever';purge.classList.remove('danger')},4000);return}
+        window.clearTimeout(timer);close();
+        const r=await run(()=>S.repo.purgeTrash(g.opId));if(r.ok){await reloadView();toast('Deleted forever. Undo history was cleared.')}
+      }},'Delete forever');
+      list.append(h('div',{class:'rowline'},
+        h('div',{class:'t'},(g.kind==='project'?'Project: ':'')+g.title,h('small',{},(g.count?g.count+' item'+(g.count===1?'':'s')+' inside \u00b7 ':'')+new Date(g.deletedAt).toLocaleString())),
+        h('button',{type:'button',class:'btn primary',onclick:async()=>{const r=await run(()=>S.repo.restoreTrash(g.opId));if(r.ok){close();await afterHistory();toastUndo('Restored \u201c'+g.title+'\u201d')}}},'Restore'),purge));
+    }
+    box.append(list,h('div',{class:'actions'},h('button',{type:'button',class:'btn',onclick:close},'Close')));
+  });
+}
+function openMenu(){
+  openOverlay('Menu','sheet',true,(box,close)=>{
+    const btn=(label,fn,dis)=>h('button',{type:'button',class:'btn',disabled:dis,onclick:()=>{close();fn()}},label);
+    box.append(h('div',{class:'menu'},
+      btn('Undo'+(S.repo.canUndo?': '+S.repo.undoLabel:''),doUndo,!S.repo.canUndo),
+      btn('Redo'+(S.repo.canRedo?': '+S.repo.redoLabel:''),doRedo,!S.repo.canRedo),
+      btn('Arrange bubbles\u2026',openLayout),btn('Trash\u2026',openTrash),btn('Settings\u2026',openSettings),
+      h('button',{type:'button',class:'btn',onclick:close},'Close')));
+  });
+}
 function applyTheme(){
   const mq=window.matchMedia&&window.matchMedia('(prefers-color-scheme: light)');
   let t=S.settings.theme;if(t==='system')t=mq&&mq.matches?'light':'dark';
@@ -995,29 +1574,17 @@ function applySettings(){
   applyTheme();document.documentElement.dataset.motion=reduced()?'reduced':'full';
   if(S.view){S.ws.setFloating(effFloat(S.view));renderChrome()}
 }
-async function changeSettings(patch){
-  S.settings={...S.settings,...patch};applySettings();
-  await run(()=>S.repo.saveSettings(S.settings));
-}
+async function changeSettings(patch){S.settings={...S.settings,...patch};applySettings();await run(()=>S.repo.saveSettings(S.settings))}
 function openSettings(){
   openOverlay('Settings','sheet',true,(box,close)=>{
-    const seg=(label,opts,key,hint)=>{
-      const wrap=h('div',{class:'seg'});
-      const paint=()=>wrap.querySelectorAll('button').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.v===S.settings[key])));
-      opts.forEach(([v,l])=>wrap.append(h('button',{type:'button',class:'btn','data-v':v,onclick:async()=>{await changeSettings({[key]:v});paint()}},l)));
-      paint();
-      return h('fieldset',{class:'field'},h('legend',{},label),wrap,hint?h('p',{class:'note'},hint):null);
-    };
-    const sw=h('input',{type:'checkbox',role:'switch','aria-label':'Floating bubbles'});sw.checked=S.settings.floatingEnabled;
-    sw.addEventListener('change',()=>changeSettings({floatingEnabled:sw.checked}));
+    const group=(label,opts,key,hint)=>h('fieldset',{class:'field'},h('legend',{},label),seg(opts,()=>S.settings[key],v=>changeSettings({[key]:v})),hint?h('p',{class:'note'},hint):null);
+    const sw=(label,key)=>{const i=h('input',{type:'checkbox',role:'switch','aria-label':label});i.checked=S.settings[key];i.addEventListener('change',()=>changeSettings({[key]:i.checked}));return h('label',{class:'row'},h('span',{},label),i)};
     box.append(
-      seg('Theme',[['dark','Dark'],['light','Light'],['system','System']],'theme'),
-      seg('Reduced motion',[['system','Follow device'],['on','Always'],['off','Never']],'reducedMotion','Reduced motion stops floating and replaces the travel animation with a quick fade.'),
-      h('label',{class:'row'},h('span',{},'Floating bubbles'),sw),
+      group('Theme',[['dark','Dark'],['light','Light'],['system','System']],'theme'),
+      group('Reduced motion',[['system','Follow device'],['on','Always'],['off','Never']],'reducedMotion','Reduced motion stops floating and replaces the travel animation with a quick fade.'),
+      sw('Floating bubbles','floatingEnabled'),sw('Snap to grid while dragging','gridSnap'),
       h('p',{class:'note'},'Your ideas are stored only in this browser on this device. Clearing browser data or a storage clean-up can erase them. Backup export is planned for Stage 4 and is not available yet.'),
-      h('div',{class:'actions'},
-        h('button',{type:'button',class:'btn',onclick:()=>{close();showSelfTests()}},'Run self-test'),
-        h('button',{type:'button',class:'btn primary',onclick:close},'Done')));
+      h('div',{class:'actions'},h('button',{type:'button',class:'btn',onclick:()=>{close();showSelfTests()}},'Run self-test'),h('button',{type:'button',class:'btn primary',onclick:close},'Done')));
   });
 }
 async function showSelfTests(){
@@ -1040,12 +1607,13 @@ async function init(){
       console.error(e);S.memoryOnly=true;S.repo=new Repo(new MemoryStore());
       showBanner('Browser storage is unavailable here, so nothing you create will be kept after closing. Try a normal (non-private) browser window.');
     }
+    S.repo.onHistory(updateHistoryButtons);
     try{S.settings=await S.repo.getSettings()}catch(e){console.error(e)}
     applyTheme();document.documentElement.dataset.motion=reduced()?'reduced':'full';
+    try{const bad=await S.repo.checkIntegrity();if(bad.length)console.warn('Bubble Mind integrity warnings:',bad)}catch(e){console.error(e)}
     let path=[];const st=history.state;
-    if(st&&st.bm&&Array.isArray(st.path)){
-      if(await S.repo.validatePath(st.path))path=st.path;else history.replaceState({bm:1,path:[]},'');
-    }else if(st&&st.bm&&st.sentinel){history.pushState({bm:1,path:[]},'')}
+    if(st&&st.bm&&Array.isArray(st.path)){if(await S.repo.validatePath(st.path))path=st.path;else history.replaceState({bm:1,path:[]},'')}
+    else if(st&&st.bm&&st.sentinel){history.pushState({bm:1,path:[]},'')}
     else{history.replaceState({bm:1,sentinel:true},'');history.pushState({bm:1,path:[]},'')}
     S.view=await loadView(path);S.ws=mountWorkspace(S.view);renderChrome();
 
@@ -1057,18 +1625,20 @@ async function init(){
     $('#fab').addEventListener('click',()=>{if(!S.overlay)openCreate()});
     $('#backBtn').addEventListener('click',goBack);
     $('#floatBtn').addEventListener('click',()=>changeSettings({floatingEnabled:!S.settings.floatingEnabled}));
-    $('#settingsBtn').addEventListener('click',()=>{if(!S.overlay)openSettings()});
+    $('#menuBtn').addEventListener('click',()=>{if(!S.overlay)openMenu()});
+    $('#undoBtn').addEventListener('click',()=>{if(!S.overlay)doUndo()});
+    $('#redoBtn').addEventListener('click',()=>{if(!S.overlay)doRedo()});
     $('#recenter').addEventListener('click',()=>S.ws.resetView());
     document.addEventListener('keydown',e=>{
-      if(e.key!=='Escape'||S.overlay||e.defaultPrevented)return;
-      const t=e.target;if(t&&/^(INPUT|TEXTAREA)$/.test(t.tagName))return;
-      goBack();
-    });
-    if(window.matchMedia){
-      for(const q of['(prefers-color-scheme: light)','(prefers-reduced-motion: reduce)']){
-        const mq=window.matchMedia(q);if(mq.addEventListener)mq.addEventListener('change',applySettings);
+      const t=e.target,typing=t&&(/^(INPUT|TEXTAREA)$/.test(t.tagName)||t.isContentEditable);
+      if((e.ctrlKey||e.metaKey)&&!typing&&!S.overlay){
+        const k=e.key.toLowerCase();
+        if(k==='z'){e.preventDefault();e.shiftKey?doRedo():doUndo();return}
+        if(k==='y'){e.preventDefault();doRedo();return}
       }
-    }
+      if(e.key==='Escape'&&!S.overlay&&!e.defaultPrevented&&!typing)goBack();
+    });
+    if(window.matchMedia){for(const q of['(prefers-color-scheme: light)','(prefers-reduced-motion: reduce)']){const mq=window.matchMedia(q);if(mq.addEventListener)mq.addEventListener('change',applySettings)}}
     // Every write is committed to IndexedDB before the UI says 'Saved', so there is nothing to flush on close.
     window.__bm={S};
     if(location.hash==='#selftest')showSelfTests();

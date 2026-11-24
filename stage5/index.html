@@ -8,6 +8,7 @@
   <title>Bubble Mind — Stage 5 Foundation</title>
   <link rel="manifest" href="./manifest.webmanifest">
   <link rel="stylesheet" href="./story-studio.css">
+  <link rel="stylesheet" href="./openrouter-model-picker.css">
   <meta name="application-name" content="Bubble Mind">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -983,6 +984,7 @@ function openAIAssistant(){
   d.append(forget);
   const model=makeInput('Model ID from OpenRouter','text',aiModel,'Example: openai/gpt-4o-mini');
   model.addEventListener('input',()=>{aiModel=model.value.trim();check.checked=false});
+  window.BubbleMindModelPicker?.mount(model);
   const scopeLabel=el('label','ai-field'),scope=el('select','ai-input');
   scopeLabel.append(el('span','','Select idea context'));
   const homeOption=el('option','','Home — main bubbles');homeOption.value='';scope.append(homeOption);
@@ -1381,6 +1383,7 @@ window.BubbleMindStudioBridge=Object.freeze({
 window.BubbleMindStage2Test={snapshot,byId,kids,change,undo,redo,descendants,isAncestor,layoutPositions,orbitPosition,getState:()=>state};
 })();
 </script>
+<script src="./openrouter-model-picker.js"></script>
 <script src="./story-studio.js"></script>
 </body>
 </html>

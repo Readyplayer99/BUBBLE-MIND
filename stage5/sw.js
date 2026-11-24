@@ -1,5 +1,5 @@
-const CACHE='bubble-mind-stage5-v3';
-const ASSETS=['./','./index.html','./manifest.webmanifest','./story-studio.css','./story-studio.js','./icon.svg'];
+const CACHE='bubble-mind-stage5-v4';
+const ASSETS=['./','./index.html','./manifest.webmanifest','./story-studio.css','./story-studio.js','./openrouter-model-picker.js','./openrouter-model-picker.css','./icon.svg'];
 self.addEventListener('install',event=>{
  event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)).then(()=>self.skipWaiting()));
 });

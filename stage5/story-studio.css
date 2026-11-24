@@ -1,43 +1,38 @@
 
-/* Stage 5 — one natural AI chat, including files and approval-only mind-map creation */
-.overlay .dialog.unified-dialog{width:min(96vw,860px);max-height:min(94dvh,960px);overflow-y:auto;display:flex;flex-direction:column;gap:9px;padding:16px;box-sizing:border-box}
-.unified-dialog>h2{margin:0;font-size:20px}
-.unified-dialog>.dialog-sub{margin:0;font-size:12px;line-height:1.5}
-.unified-settings{border:1px solid #91a9d05f;border-radius:11px;padding:8px 10px;background:#142642b8;flex:none}
-.unified-settings summary{font-size:13px;cursor:pointer;color:#d7e7ff;font-weight:650;padding:4px}
-.unified-field{display:grid;gap:5px;margin:8px 0;font-size:12px;color:#d5e4fa;font-weight:600}
-.unified-input{display:block;box-sizing:border-box;width:100%;min-height:39px;border-radius:10px;border:1px solid #819cc58f;background:#0e1f3b;color:#eaf4ff;padding:9px 11px;font:13px/1.45 system-ui,sans-serif;resize:vertical}
-.unified-input::placeholder{color:#abbcda}
-.unified-dialog>textarea.unified-input{min-height:80px;max-height:220px;flex:none}
-.unified-history{display:flex;flex-direction:column;gap:10px;min-height:200px;max-height:44dvh;overflow:auto;padding:12px;background:#081527b8;border:1px solid #8298bf6b;border-radius:13px;overscroll-behavior:contain}
-.unified-welcome{padding:20px 12px;text-align:center;color:#cbdcf7;font-size:14px;line-height:1.65}
-.unified-message{max-width:min(92%,690px);padding:11px 13px;border-radius:13px;line-height:1.6;font-size:13px;flex:none;overflow-wrap:anywhere}
-.unified-message strong{display:block;font-size:11px;margin-bottom:6px;color:#e5edff}
-.unified-message-text{white-space:pre-wrap;overflow-wrap:anywhere}
-.unified-user{align-self:flex-end;background:#344e7e;border:1px solid #6688c899}
-.unified-assistant{align-self:flex-start;background:#1e3352;border:1px solid #718cb077}
-.unified-help{font-size:12px;line-height:1.5;color:#b8cbeb;margin:0}
-.unified-file{min-height:35px;font-size:12px;padding:6px}
-.unified-consent{display:flex;align-items:flex-start;gap:8px;color:#dceaff;font-size:12px;line-height:1.5}
-.unified-consent input,.unified-include input{accent-color:#a9c9ff;margin-top:3px}
-.unified-buttons,.unified-options{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
-.unified-buttons button,.unified-options button{min-height:38px;font-size:12px}
-.unified-options{justify-content:flex-end}
-.unified-status{font-size:12px;line-height:1.5;color:#c7d6f4;margin:0;white-space:pre-wrap}
-.unified-review{display:grid;gap:10px;padding:12px;background:#152a4d;border:1px solid #8eb0e680;border-radius:13px;min-width:0}
-.unified-review h3{margin:0;font-size:17px}
-.unified-tree{display:grid;gap:9px;max-height:380px;overflow:auto;min-width:0;overscroll-behavior:contain}
-.unified-tree-row{display:grid;gap:7px;padding:10px 12px;border-radius:10px;border-left:3px solid #a0bafa;background:#0e1d36;min-width:0}
-.unified-tree-row textarea{min-height:57px}
-.unified-tree-path{font-size:11px;color:#aac5ef;font-weight:700}
-.unified-include{display:flex;align-items:center;gap:8px;color:#edf4ff;font-size:12px}
-.unified-work:empty{display:none}
-.unified-dialog button:disabled{opacity:.5;cursor:wait}
+/* Stage 5: dedicated full-screen AI chat, independent from the bubble map */
+.overlay:has(.unified-dialog){inset:0!important;padding:0!important;margin:0!important;background:#080f22!important;align-items:stretch!important;justify-content:stretch!important}
+.overlay .dialog.unified-dialog{position:fixed!important;inset:0!important;width:100vw!important;max-width:none!important;height:100dvh!important;max-height:none!important;border:0!important;border-radius:0!important;margin:0!important;padding:0!important;box-sizing:border-box!important;background:linear-gradient(160deg,#111e38,#081224 68%)!important;color:#eef4ff!important;display:flex!important;flex-direction:column!important;gap:0!important;overflow:hidden!important}
+.unified-dialog>.unified-app-toolbar{height:56px;min-height:56px;box-sizing:border-box;display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 14px;border-bottom:1px solid #8fa4cd4f;background:#152541;flex:none}
+.unified-app-toolbar strong{font-size:17px;letter-spacing:-.3px}
+.unified-app-toolbar button{min-height:36px;padding:7px 12px;font-size:12px}
+.unified-dialog>h2,.unified-dialog>.dialog-sub{display:none}
+.unified-dialog>.unified-settings{margin:9px 14px 0;max-height:40dvh;overflow:auto;flex:none;z-index:3}
+.unified-dialog>.unified-history{flex:1 1 auto;min-height:0;max-height:none!important;border:0;border-radius:0;background:none;margin:0;padding:20px clamp(13px,7vw,100px);gap:16px;overflow:auto;overscroll-behavior:contain}
+.unified-dialog>.unified-history .unified-message{max-width:min(86%,780px);font-size:14px;padding:12px 15px;line-height:1.7}
+.unified-dialog>.unified-work{flex:0 1 auto;max-height:50dvh;overflow:auto;margin:0 clamp(12px,7vw,100px)}
+.unified-dialog>.unified-work:empty{display:none}
+.unified-dialog>textarea.unified-input{margin:8px clamp(12px,7vw,100px) 0;width:calc(100% - 2*clamp(12px,7vw,100px));max-height:140px;min-height:65px;flex:none}
+.unified-dialog>input.unified-file{margin:7px clamp(12px,7vw,100px) 0;width:calc(100% - 2*clamp(12px,7vw,100px));flex:none}
+.unified-dialog>.unified-help,.unified-dialog>.unified-send-note,.unified-dialog>.unified-status{margin:5px clamp(12px,7vw,100px);flex:none;font-size:11px;line-height:1.45}
+.unified-dialog>.unified-send-note{color:#a5bad8}
+.unified-dialog>.unified-buttons{padding:6px clamp(12px,7vw,100px);flex:none}
+.unified-dialog>.unified-buttons button{min-height:38px}
+.unified-dialog>.unified-options{padding:0 clamp(12px,7vw,100px) 8px;flex:none}
+.unified-remember{display:flex;align-items:center;gap:8px;font-size:13px;color:#e9f3ff;margin:8px 0}
+.unified-remember input{accent-color:#9cbcf2}
+.unified-security{font-size:11px;line-height:1.55;color:#c9c2ae;margin:8px 0}
+.unified-send-note{font-size:11px;color:#a9bfdf}
 @media(max-width:760px){
- .overlay .dialog.unified-dialog{width:calc(100vw - 14px);max-height:94dvh;padding:11px;gap:8px}
- .unified-history{min-height:180px;max-height:38dvh;padding:8px}
- .unified-message{max-width:96%;font-size:13px}
- .unified-buttons button{flex:1 1 auto;padding:8px 9px}
- .unified-options button{padding:6px 9px}
- .unified-tree{max-height:44dvh}
+ .unified-dialog>.unified-app-toolbar{height:50px;min-height:50px;padding:6px 9px}
+ .unified-app-toolbar button{padding:6px 8px;min-height:36px}
+ .unified-dialog>.unified-history{padding:12px 9px;gap:11px}
+ .unified-dialog>.unified-history .unified-message{max-width:94%;font-size:13px;padding:10px 12px}
+ .unified-dialog>.unified-settings{margin:6px 8px 0}
+ .unified-dialog>.unified-work{margin:0 8px;max-height:40dvh}
+ .unified-dialog>textarea.unified-input{margin:5px 8px 0;width:calc(100% - 16px);min-height:60px}
+ .unified-dialog>input.unified-file{margin:4px 8px 0;width:calc(100% - 16px);font-size:11px}
+ .unified-dialog>.unified-help,.unified-dialog>.unified-send-note,.unified-dialog>.unified-status{margin:3px 8px;font-size:10px}
+ .unified-dialog>.unified-buttons{padding:4px 8px}
+ .unified-dialog>.unified-buttons button{flex:1 1 auto;font-size:11px;padding:6px 8px}
+ .unified-dialog>.unified-options{padding:2px 8px 5px}
 }

@@ -1,0 +1,14 @@
+
+/* Stage 5 OpenRouter model discovery */
+.or-model-picker{display:grid;gap:8px;min-width:0;margin:8px 0 12px;padding:10px;border:1px solid #8299c46b;border-radius:11px;background:#1424408c}
+.or-model-buttons{display:flex;flex-wrap:wrap;gap:7px}
+.or-model-buttons button{font-size:12px;min-height:36px}
+.or-model-buttons button:disabled{opacity:.5;cursor:wait}
+.or-model-status,.or-model-details{margin:0;font-size:12px;line-height:1.5;color:#b6cbed;overflow-wrap:anywhere}
+.or-model-filters{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.or-model-filters[hidden],.or-model-select[hidden],.or-model-details[hidden]{display:none!important}
+.or-model-search{flex:1 1 160px;box-sizing:border-box;min-width:0;min-height:37px;border-radius:8px;background:#0a1830;color:#eef4ff;border:1px solid #829bcc8f;padding:8px 10px;font:13px system-ui,sans-serif}
+.or-model-free{display:flex;align-items:center;gap:6px;font-size:12px;color:#d7e6ff;white-space:nowrap}
+.or-model-free input{accent-color:#9cbaff}
+.or-model-select{box-sizing:border-box;display:block;max-width:100%;width:100%;min-height:42px;border-radius:9px;padding:8px;background:#10203c;color:#eef5ff;border:1px solid #849dd09e;font:13px system-ui,sans-serif}
+@media(max-width:600px){.or-model-buttons button{flex:1}.or-model-filters{align-items:stretch}}

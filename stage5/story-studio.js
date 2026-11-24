@@ -249,7 +249,7 @@ function chatView(container){
 function openStudio(){
  dialog('Story Studio — Import & Brainstorm','Convert an existing story or a brainstorming session into a parent bubble and titled child bubbles. Approve the structure before creation.',d=>{
   const tabs=el('div','studio-tabs'),documentTab=btn('Import document','soft-button',()=>show('document')),
-  chatTab=btn('Brainstorm book','soft-button',()=>show('chat')),content=el('div','');
+  chatTab=btn('Brainstorm Idea','soft-button',()=>show('chat')),content=el('div','');
   tabs.append(documentTab,chatTab);d.append(tabs,content);
   function show(tab){
    sessions.tab=tab;documentTab.setAttribute('aria-pressed',String(tab==='document'));

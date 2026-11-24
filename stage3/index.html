@@ -195,6 +195,21 @@ background-size:100% 100%,100% 100%,100% 100%,163px 173px,227px 193px,283px 239p
 .home-new-control button{pointer-events:auto;background:#21375be8;box-shadow:0 4px 20px #050b1cc4}
 .home-map-help{font-size:12px;color:#aabce0;text-align:center;padding:0 8px}
 @media(max-width:680px){.home-map-view{height:65dvh;min-height:320px}.home-map-top{margin-top:4px}.home-map-help{font-size:11px}}
+
+/* Home search and independent motion controls */
+.home-map-top{position:relative;justify-content:flex-start}
+.home-search-wrap{position:relative;flex:1;min-width:min(230px,100%);max-width:420px;z-index:8}
+.home-search{display:block;width:100%;min-height:40px;border-radius:12px;border:1px solid #9eBAed8c;background:#0a1934d9;color:#f2f7ff;padding:9px 13px;font:inherit;font-size:14px;outline-offset:2px}
+.home-search::placeholder{color:#a9bbe1}
+.home-search-results{position:absolute;top:calc(100% + 4px);left:0;right:0;max-height:270px;overflow-y:auto;border:1px solid #99b4e38c;background:#152644f5;border-radius:12px;box-shadow:0 14px 30px #0008;padding:5px}
+.home-search-results[hidden]{display:none!important}
+.home-search-result{display:block;width:100%;text-align:left;padding:10px 12px;border:0;background:transparent;color:#eef3ff;min-height:38px;font-size:13px}
+.home-search-result:hover,.home-search-result:focus-visible{background:#486ca288}
+.home-search-empty{display:block;padding:10px;color:#a8bddf;font-size:13px}
+.home-static-toggle{white-space:nowrap}
+.home-static-toggle[aria-pressed=true]{background:#46638c;border-color:#bfd3ff;color:#fff}
+.home-found .bubble{outline:6px solid #aed0ff;outline-offset:8px;box-shadow:0 0 0 12px #669dff35,0 0 55px #9bc6ff88;z-index:5}
+@media(max-width:680px){.home-map-top{gap:8px}.home-search-wrap{min-width:100%;max-width:none}.home-map-top>.help-text{display:none}}
 </style>
 </head>
 <body>
@@ -222,7 +237,7 @@ document.getElementById("preview-fallback")?.remove();
    Deliberately does NOT use, modify, or import the user's original application. */
 (()=>{'use strict';
 const KEY='bubble-mind-stage3-v1',STAGE1_KEY='bubble-mind-stage2-v1',PALETTE=['#9bb5ff','#8bd8ca','#d5a1ee','#f0c180','#ee9da9','#9fce97','#73c6ed','#f18ec6'];
-const state={nodes:[],links:[],notes:{},motion:true,motionOverride:false,layout:'orbit',currentId:null,transition:false,pan:{x:0,y:0,k:1},past:[],future:[],dragHappened:false};
+const state={nodes:[],links:[],notes:{},motion:true,motionOverride:false,homeStatic:false,layout:'orbit',currentId:null,transition:false,pan:{x:0,y:0,k:1},past:[],future:[],dragHappened:false};
 const byId=id=>state.nodes.find(n=>n.id===id)||null;
 const kids=id=>state.nodes.filter(n=>n.parentId===id);
 const id=()=>globalThis.crypto?.randomUUID?.()||'bm-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
@@ -244,7 +259,7 @@ function scrub(raw){
  state.nodes=clean;
  state.notes=(raw.notes&&typeof raw.notes==='object'&&!Array.isArray(raw.notes))?Object.fromEntries(Object.entries(raw.notes).filter(([k,v])=>ids.has(k)&&typeof v==='string').map(([k,v])=>[k,v.slice(0,500000)])):{};
  state.links=Array.isArray(raw.links)?raw.links.filter(l=>l&&typeof l.id==='string'&&ids.has(l.from)&&ids.has(l.to)&&l.from!==l.to).slice(0,20000).map(l=>({id:l.id,from:l.from,to:l.to,label:String(l.label||'').slice(0,90),color:normalHex(l.color)})):[];
- state.motion=raw.motion!==false;state.motionOverride=raw.motionOverride===true;state.layout=['orbit','grid','free'].includes(raw.layout)?raw.layout:'orbit';
+ state.motion=raw.motion!==false;state.motionOverride=raw.motionOverride===true;state.homeStatic=raw.homeStatic===true;state.layout=['orbit','grid','free'].includes(raw.layout)?raw.layout:'orbit';
 }
 function load(){
  try{
@@ -261,9 +276,9 @@ function load(){
   }
  }catch(e){refs.save.textContent='Storage unavailable — changes may not persist';console.warn(e)}
 }
-function persist(){try{localStorage.setItem(KEY,JSON.stringify({version:3,nodes:state.nodes,notes:state.notes,links:state.links,motion:state.motion,motionOverride:state.motionOverride,layout:state.layout}));refs.save.textContent='Saved on this device';return true}catch(e){console.error(e);refs.save.textContent='Save failed — storage unavailable';toast('Could not save to this browser');return false}}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify({version:3,nodes:state.nodes,notes:state.notes,links:state.links,motion:state.motion,motionOverride:state.motionOverride,homeStatic:state.homeStatic,layout:state.layout}));refs.save.textContent='Saved on this device';return true}catch(e){console.error(e);refs.save.textContent='Save failed — storage unavailable';toast('Could not save to this browser');return false}}
 let activeNote=null;
-function snapshot(){return JSON.stringify({nodes:state.nodes,notes:state.notes,links:state.links,motion:state.motion,motionOverride:state.motionOverride,layout:state.layout})}
+function snapshot(){return JSON.stringify({nodes:state.nodes,notes:state.notes,links:state.links,motion:state.motion,motionOverride:state.motionOverride,homeStatic:state.homeStatic,layout:state.layout})}
 function record(){state.past.push(snapshot());if(state.past.length>45)state.past.shift();state.future=[]}
 function change(action,msg){record();try{action()}catch(e){const old=state.past.pop();Object.assign(state,JSON.parse(old));console.error(e);toast(e.message||'Operation failed');return false}const saved=persist();render();if(msg)toast(saved?msg:msg+' (not saved — check browser storage)');return true}
 function undo(){if(!state.past.length)return toast('Nothing to undo');state.future.push(snapshot());Object.assign(state,JSON.parse(state.past.pop()));if(state.currentId&&!byId(state.currentId))state.currentId=null;persist();render();toast('Undone')}
@@ -314,6 +329,56 @@ function scatterHomeIdeas(nodes){
  return placed;
 }
 let homeScene=null,homeItems=[],homeFrameTime=0;
+function setHomeZoom(next){
+ if(!homeScene)return;
+ const {stage,layer,zoom,zl}=homeScene;
+ homeZoom=Math.max(.01,Math.min(1,next));
+ stage.style.width=(HOME_SIZE*homeZoom)+'px';
+ stage.style.height=(HOME_SIZE*homeZoom)+'px';
+ layer.style.transform='scale('+homeZoom+')';
+ zoom.value=String(Math.round(homeZoom*100));
+ zl.textContent=(homeZoom*100).toFixed(1)+'%';
+}
+function focusHomeIdea(id){
+ if(!homeScene)return;
+ const target=homeItems.find(item=>item.id===id);if(!target)return;
+ setHomeZoom(.8);
+ const {view}=homeScene;
+ const maxX=Math.max(0,view.scrollWidth-view.clientWidth),maxY=Math.max(0,view.scrollHeight-view.clientHeight);
+ const cx=target.x*homeZoom-view.clientWidth/2,cy=target.y*homeZoom-view.clientHeight/2;
+ view.scrollTo({left:Math.max(0,Math.min(maxX,cx)),top:Math.max(0,Math.min(maxY,cy)),behavior:'smooth'});
+ for(const item of homeItems)item.el.classList.toggle('home-found',item===target);
+ const bubble=target.el.querySelector('.bubble');
+ if(bubble){bubble.setAttribute('title','Search result: '+(byId(id)?.title||'Idea'));setTimeout(()=>{if(target.el.isConnected)target.el.classList.remove('home-found')},4500)}
+}
+function createHomeSearch(top){
+ const wrap=el('div','home-search-wrap');
+ const input=el('input','home-search');input.type='search';input.placeholder='Find a bubble in this galaxy…';
+ input.setAttribute('aria-label','Find a home bubble by name');
+ const matches=el('div','home-search-results');matches.hidden=true;
+ const draw=()=>{
+  const q=input.value.trim().toLocaleLowerCase();matches.replaceChildren();
+  if(!q){matches.hidden=true;return}
+  const found=top.filter(n=>n.title.toLocaleLowerCase().includes(q)).slice(0,12);
+  for(const n of found){
+   const result=btn(n.title,'home-search-result',()=>{input.value=n.title;matches.hidden=true;focusHomeIdea(n.id)});
+   result.setAttribute('aria-label','Find '+n.title+' in the home galaxy');
+   matches.append(result);
+  }
+  if(!found.length)matches.append(el('span','home-search-empty','No matching main bubbles'));
+  matches.hidden=false;
+ };
+ input.addEventListener('input',draw);
+ input.addEventListener('keydown',e=>{if(e.key==='Enter'&&matches.firstElementChild?.tagName==='BUTTON'){e.preventDefault();matches.firstElementChild.click()}if(e.key==='Escape')matches.hidden=true});
+ input.addEventListener('blur',()=>setTimeout(()=>{matches.hidden=true},180));
+ wrap.append(input,matches);return wrap;
+}
+function setHomeStatic(next,button){
+ state.homeStatic=next;
+ persist();
+ if(button){button.textContent=next?'Home: Static':'Home: Floating';button.setAttribute('aria-pressed',String(next));button.title=next?'Resume home galaxy movement':'Freeze home bubbles in place'}
+ if(next)stopBubbleFloat();else startBubbleFloat();
+}
 function renderHome(){
  homeScene=null;homeItems=[];homeFrameTime=0;
  const top=kids(null);
@@ -326,6 +391,11 @@ function renderHome(){
   return;
  }
  const strip=el('div','home-map-top');
+ strip.append(createHomeSearch(top));
+ const toggle=btn(state.homeStatic?'Home: Static':'Home: Floating','map-control home-static-toggle',()=>setHomeStatic(!state.homeStatic,toggle));
+ toggle.setAttribute('aria-pressed',String(state.homeStatic));
+ toggle.title=state.homeStatic?'Resume home galaxy movement':'Freeze home bubbles in place';
+ strip.append(toggle);
  strip.append(el('span','help-text',top.length+' ideas · Galaxy workspace · 250 extra-large slots'));
  const zoom=el('input','home-zoom');zoom.type='range';zoom.min='1';zoom.max='100';zoom.value=String(Math.round(homeZoom*100));zoom.step='1';
  zoom.setAttribute('aria-label','Home galaxy zoom');
@@ -334,13 +404,9 @@ function renderHome(){
   const old=homeZoom,newZoom=Number(zoom.value)/100;
   const midX=homeScene.view.scrollLeft+homeScene.view.clientWidth/2;
   const midY=homeScene.view.scrollTop+homeScene.view.clientHeight/2;
-  homeZoom=newZoom;
-  homeScene.stage.style.width=(HOME_SIZE*newZoom)+'px';
-  homeScene.stage.style.height=(HOME_SIZE*newZoom)+'px';
-  homeScene.layer.style.transform='scale('+newZoom+')';
+  setHomeZoom(newZoom);
   homeScene.view.scrollLeft=midX*newZoom/old-homeScene.view.clientWidth/2;
   homeScene.view.scrollTop=midY*newZoom/old-homeScene.view.clientHeight/2;
-  zl.textContent=Math.round(newZoom*100)+'%';
  });
  const zoomGroup=el('label','home-zoom-group');zoomGroup.append('Zoom ',zoom,zl);
  zoomGroup.append(btn('Fit all','map-control',()=>fitHomeWorkspace()));strip.append(zoomGroup);refs.world.append(strip);
@@ -559,7 +625,7 @@ function stopBubbleFloat(){
 }
 function startBubbleFloat(){
  stopBubbleFloat();
- if(!state.motion||reduced()||document.hidden)return;
+ if(!state.motion||reduced()||document.hidden||(homeScene&&state.homeStatic))return;
  const home=[...refs.world.querySelectorAll('.empty-world .bubble-create.bubble-floating')];
  floatEls=home;
  const homeItemsSoft=home.map(el=>{const seed=floatHash(el.dataset.nodeId||el.textContent||'idea');return{el,phase:(seed%628)/100,speed:.22+(seed%23)/100}});
@@ -582,7 +648,7 @@ function startBubbleFloat(){
    const x=25*Math.sin(t*(item.speed*1.8)+item.phase),y=32*Math.sin(t*(item.speed*1.45)+item.phase*1.23);
    item.el.style.translate=x.toFixed(1)+'px '+y.toFixed(1)+'px';
   }
-  if(homeScene&&homeItems.length&&now-homeFrameTime>=30){
+  if(homeScene&&!state.homeStatic&&homeItems.length&&now-homeFrameTime>=30){
    const dt=Math.min(.05,(now-homeFrameTime||33)/1000),speed=.5;
    homeFrameTime=now;
    // A spatial grid limits collision checks when the home contains hundreds of bubbles.

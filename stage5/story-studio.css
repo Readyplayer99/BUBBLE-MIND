@@ -1,0 +1,26 @@
+
+.studio-tabs,.studio-buttons{display:flex;gap:7px;flex-wrap:wrap}
+.studio-tabs button[aria-pressed=true]{background:#435f9d;color:#fff;border-color:#91b5f5}
+.studio-group{display:grid;gap:7px;margin:10px 0}
+.studio-group label{font-size:12px;color:#ceddf4;font-weight:650}
+.studio-input{box-sizing:border-box;display:block;width:100%;min-height:42px;padding:10px 12px;border-radius:10px;color:#f0f6ff;background:#132541;border:1px solid #8eaad37c;font:14px/1.5 system-ui,sans-serif}
+.studio-textarea{min-height:100px;resize:vertical}
+.studio-status{font-size:12px;color:#b9ccee;line-height:1.55;white-space:pre-wrap}
+.studio-privacy{font-size:12px;line-height:1.55;padding:10px;background:#20335477;border:1px solid #8eabcf4f;border-radius:11px}
+.studio-check{display:flex;gap:9px;align-items:flex-start;font-size:12px;line-height:1.5;margin:8px 0;color:#e2ebff}
+.studio-check input{margin-top:3px;accent-color:#b3ccff}
+.studio-history{display:grid;gap:8px;max-height:245px;overflow-y:auto;border:1px solid #90a8d650;border-radius:11px;padding:10px;background:#09142780}
+.studio-message{padding:9px 10px;border-radius:10px;white-space:pre-wrap;overflow-wrap:anywhere;font-size:13px;line-height:1.5}
+.studio-user{background:#35518599}.studio-assistant{background:#233758a3}
+.studio-message strong{display:block;margin-bottom:4px;font-size:11px;color:#d7e6ff}
+.studio-review{display:grid;gap:10px;margin-top:14px}
+.studio-item{border:1px solid #8ba1d469;border-radius:11px;padding:10px;background:#1c30518a}
+.studio-item .studio-group{margin:5px 0}
+.studio-tree{max-height:390px;overflow:auto;display:grid;gap:8px}
+.studio-tree .studio-item{border-left:3px solid #9fbefa}
+.studio-tree .studio-node-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:7px}
+.studio-tree textarea{min-height:64px}
+.studio-review h3{margin:4px 0;font-size:16px}
+.studio-draft{max-height:120px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere;font-size:11px;color:#a9c1e3}
+.overlay .dialog:has(.studio-tabs){width:min(95vw,740px);max-height:90dvh;overflow-y:auto}
+@media(max-width:660px){.studio-tree .studio-node-row{grid-template-columns:1fr}.studio-tabs button{flex:1}}

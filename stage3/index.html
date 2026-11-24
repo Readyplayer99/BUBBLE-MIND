@@ -128,16 +128,13 @@ background-size:100% 100%,100% 100%,100% 100%,163px 173px,227px 193px,283px 239p
 .stage3-search{width:100%;padding:12px;border-radius:12px;background:#080e22;color:white;border:1px solid #a5b4e060}
 
 
-/* Bubble sizing and count badges — direct children (blue) and linked ideas (purple). */
+/* Bubble sizing — original inline child counts restored. */
 .bubble{flex:none;min-width:0;min-height:0}
 .map-node{width:var(--slot-size,112px);height:var(--slot-size,112px)}
 .map-centre{width:var(--core-size,154px);height:var(--core-size,154px);left:calc(var(--core-size,154px)/-2);top:calc(var(--core-size,154px)/-2)}
 .bubble-home,.bubble-focus{width:var(--bubble-size,136px);height:var(--bubble-size,136px)}
-.bubble-counts{position:absolute;right:-9px;top:-13px;z-index:8;display:flex;gap:4px;pointer-events:none}
-.bubble-count{display:grid;place-items:center;min-width:28px;height:28px;padding:2px 6px;border-radius:15px;border:1px solid #d5e3ff84;color:white;font-size:12px;font-weight:800;box-shadow:0 3px 14px #000a}
-.bubble-count.child{background:#35518f}.bubble-count.link{background:#583f83}
 .home-grid .bubble-slot{min-height:var(--slot-height,170px)}
-@media(max-width:600px){.bubble-counts{top:-9px;right:-11px}.bubble-count{min-width:25px;height:25px;padding:1px 5px;font-size:11px}}
+
 </style>
 </head>
 <body>
@@ -230,19 +227,16 @@ function navigate(id){if(state.transition||id===state.currentId)return;state.tra
 function renderHeader(){$('app').classList.toggle('inside',!!state.currentId);refs.crumbs.replaceChildren();const path=getPath(state.currentId);const home=btn('Home','crumb-link',()=>navigate(null));refs.crumbs.append(home);for(const item of path){refs.crumbs.append(el('span','crumb-divider','›'));const b=item.id===state.currentId?el('span','crumb-current',item.title):btn(item.title,'crumb-link',()=>navigate(item.id));refs.crumbs.append(b)}const title=state.currentId?byId(state.currentId)?.title:'Your ideas, in motion.';refs.intro.replaceChildren();refs.intro.append(el('p','eyebrow','BUBBLE MIND · STAGE 3'),el('h1','',title||(state.nodes.length?'Your ideas, in motion.':'Every universe begins with a thought.')),el('p','sub',state.currentId?'Create, connect, arrange or explore the thoughts inside this bubble.':state.nodes.length?'Each bubble is a world of ideas. Tap to explore.':'Start with one idea and build from there.'));refs.motion.classList.toggle('selected',state.motion);refs.motion.setAttribute('aria-pressed',String(state.motion));refs.motion.title=state.motion?'Pause bubbles':'Animate bubbles';$('new-button').title='Create a new bubble'}
 function renderHome(){const top=kids(null);if(!top.length){const area=el('div','empty-world');const bubble=btn('Begin an idea','bubble bubble-create'+(state.motion?' bubble-floating':''),()=>addNode(null));bubble.style.setProperty('--bubble-color','#9bb5ff');area.append(bubble,el('p','empty-hint','Every universe begins with a thought.'));refs.world.append(area);if(state.past.length||state.future.length){const controls=el('div','map-toolbar');controls.append(btn('Undo','soft-button',undo),btn('Redo','soft-button',redo));refs.world.append(controls)}return}const grid=el('div','home-grid');for(const n of top){const slot=el('div','bubble-slot');slot.style.setProperty('--slot-height',Math.max(170,bubbleDiameter(n,'home')+38)+'px');slot.append(bubbleButton(n,'bubble-home'));slot.append(editIcon(n));grid.append(slot)}const s=el('div','bubble-slot');s.append(btn('+\nNew idea','bubble bubble-create',()=>addNode(null)));grid.append(s);refs.world.append(grid);const tools=el('div','map-toolbar');tools.append(btn('Undo','soft-button',undo),btn('Redo','soft-button',redo));refs.world.append(tools)}
 function bubbleDiameter(n,context='map'){const base=context==='home'?136:context==='centre'?154:112;return Math.round(base*Math.max(.7,Math.min(1.4,Number(n.size)||1)))}
-function bubbleCounts(n){const child=kids(n.id).length,linked=new Set();for(const l of state.links){if(l.from===n.id&&byId(l.to))linked.add(l.to);if(l.to===n.id&&byId(l.from))linked.add(l.from)}return{child,linked:linked.size}}
 function bubbleButton(n,cls=''){
  const b=btn('',`bubble ${cls} ${state.motion&&!reduced()?'bubble-floating':''}`,()=>navigate(n.id));
  const context=cls.includes('bubble-home')?'home':cls.includes('bubble-focus')?'centre':'map',size=bubbleDiameter(n,context);
  b.dataset.nodeId=n.id;b.title='Open '+n.title+' · Tab to add a child';
  b.style.setProperty('--bubble-color',n.color);b.style.setProperty('--bubble-size',size+'px');
  b.append(el('span','bubble-label',n.title));
- const counts=bubbleCounts(n),badges=el('span','bubble-counts');
- if(counts.child){const e=el('span','bubble-count child',String(counts.child));e.title=counts.child+' direct children';badges.append(e)}
- if(counts.linked){const e=el('span','bubble-count link','↗'+counts.linked);e.title=counts.linked+' linked ideas';badges.append(e)}
- if(badges.childNodes.length)b.append(badges);
+ const count=kids(n.id).length;
+ if(count)b.append(el('span','bubble-sub',`${count} thought${count===1?'':'s'}`));
  if(state.notes[n.id])b.append(el('span','bubble-sub','✎ Notes'));
- b.setAttribute('aria-label','Open '+n.title+'. '+counts.child+' child bubbles and '+counts.linked+' linked ideas');
+ b.setAttribute('aria-label','Open '+n.title);
  return b;
 }
 function editIcon(n){const b=btn('✎','bubble-edit',()=>editNode(n.id));b.setAttribute('aria-label','Edit '+n.title);return b}

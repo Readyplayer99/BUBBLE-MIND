@@ -181,6 +181,20 @@ background-size:100% 100%,100% 100%,100% 100%,163px 173px,227px 193px,283px 239p
 
 .tether-mode-label{font-size:11px;color:#bdd7ff;border:1px solid #8cafec66;background:#1e3765b3;padding:7px 10px;border-radius:999px;white-space:nowrap}
 @media(orientation:landscape) and (max-height:550px){.tether-mode-label{display:none}}
+
+/* Stage 3 large-scale home galaxy: 16x16 extra-large capacity (256 positions). */
+.home-map-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:12px 0 9px}
+.home-zoom-group{display:flex;align-items:center;gap:8px;color:#bfd0ed;font-size:12px}
+.home-zoom{width:115px;accent-color:#a4baff}.home-zoom-label{min-width:38px}
+.home-map-view{width:100%;height:min(67dvh,720px);min-height:360px;overflow:auto;overscroll-behavior:contain;position:relative;border:2px solid #8caef5a8;border-radius:18px;background:radial-gradient(ellipse at 40% 35%,#483a8a33,transparent 50%),radial-gradient(ellipse at 70% 75%,#2167b744,transparent 65%),#081126;box-shadow:inset 0 0 35px #080d24,0 10px 30px #04061288}
+.home-map-stage{position:relative;min-width:0;min-height:0;overflow:hidden}
+.home-map-layer{position:absolute;top:0;left:0;width:4200px;height:4200px;transform-origin:0 0;contain:layout style}
+.home-free-slot{position:absolute;display:flex;align-items:center;justify-content:center;width:var(--slot-size,190px);height:var(--slot-size,190px);will-change:transform}
+.home-free-slot .bubble-home{flex:none}.home-free-slot .bubble-edit{right:-8px;bottom:7px}
+.home-new-control{position:sticky;left:12px;top:12px;z-index:4;width:max-content;pointer-events:none;transform:translate(0,0)}
+.home-new-control button{pointer-events:auto;background:#21375be8;box-shadow:0 4px 20px #050b1cc4}
+.home-map-help{font-size:12px;color:#aabce0;text-align:center;padding:0 8px}
+@media(max-width:680px){.home-map-view{height:65dvh;min-height:320px}.home-map-top{margin-top:4px}.home-map-help{font-size:11px}}
 </style>
 </head>
 <body>
@@ -271,7 +285,62 @@ function connections(nodeId){const n=byId(nodeId);if(!n)return;dialog('Connectio
 function goTo(id){if(!id||!byId(id))return;state.currentId=id;state.pan={x:0,y:0,k:1};render()}
 function navigate(id){if(state.transition||id===state.currentId)return;state.transition=true;const old=refs.world.querySelector('.map-viewport')||refs.world.querySelector('.bubble-home')||refs.world.querySelector('.bubble-create');if(!old||reduced()){state.currentId=id;state.pan={x:0,y:0,k:1};render();state.transition=false;return}const portal=el('div','portal');portal.style.cssText='left:calc(50% - 65px);top:calc(50% - 65px);width:130px;height:130px;opacity:.85';$('portal-root').append(portal);const anim=portal.animate([{transform:'scale(.7)',opacity:0},{transform:'scale(14)',opacity:.98}],{duration:330,easing:'cubic-bezier(.2,.7,.25,1)',fill:'forwards'});anim.finished.catch(()=>{}).then(()=>{state.currentId=id;state.pan={x:0,y:0,k:1};render();return portal.animate([{opacity:1},{opacity:0}],{duration:160,fill:'forwards'}).finished.catch(()=>{})}).finally(()=>{portal.remove();state.transition=false})}
 function renderHeader(){$('app').classList.toggle('inside',!!state.currentId);refs.crumbs.replaceChildren();const path=getPath(state.currentId);const home=btn('Home','crumb-link',()=>navigate(null));refs.crumbs.append(home);for(const item of path){refs.crumbs.append(el('span','crumb-divider','›'));const b=item.id===state.currentId?el('span','crumb-current',item.title):btn(item.title,'crumb-link',()=>navigate(item.id));refs.crumbs.append(b)}const title=state.currentId?byId(state.currentId)?.title:'Your ideas, in motion.';refs.intro.replaceChildren();refs.intro.append(el('p','eyebrow','BUBBLE MIND · STAGE 3'),el('h1','',title||(state.nodes.length?'Your ideas, in motion.':'Every universe begins with a thought.')),el('p','sub',state.currentId?'Create, connect, arrange or explore the thoughts inside this bubble.':state.nodes.length?'Each bubble is a world of ideas. Tap to explore.':'Start with one idea and build from there.'));document.body.classList.toggle('motion-override',state.motionOverride);const animated=state.motion&&!reduced();refs.motion.classList.toggle('selected',animated);refs.motion.setAttribute('aria-pressed',String(animated));refs.motion.title=state.motion&&reduced()?'Motion blocked by your system settings — tap to enable here':animated?'Pause bubbles':'Animate bubbles';$('new-button').title='Create a new bubble'}
-function renderHome(){const top=kids(null);if(!top.length){const area=el('div','empty-world');const bubble=btn('Begin an idea','bubble bubble-create'+(state.motion?' bubble-floating':''),()=>addNode(null));bubble.style.setProperty('--bubble-color','#9bb5ff');area.append(bubble,el('p','empty-hint','Every universe begins with a thought.'));refs.world.append(area);if(state.past.length||state.future.length){const controls=el('div','map-toolbar');controls.append(btn('Undo','soft-button',undo),btn('Redo','soft-button',redo));refs.world.append(controls)}return}const grid=el('div','home-grid');for(const n of top){const slot=el('div','bubble-slot');slot.style.setProperty('--slot-height',Math.max(170,bubbleDiameter(n,'home')+38)+'px');slot.append(bubbleButton(n,'bubble-home'));slot.append(editIcon(n));grid.append(slot)}const s=el('div','bubble-slot');s.append(btn('+\nNew idea','bubble bubble-create',()=>addNode(null)));grid.append(s);refs.world.append(grid);const tools=el('div','map-toolbar');tools.append(btn('Undo','soft-button',undo),btn('Redo','soft-button',redo));refs.world.append(tools)}
+const HOME_SIZE=4200,HOME_PAD=25,HOME_PITCH=255;
+let homeScene=null,homeItems=[],homeFrameTime=0;
+function renderHome(){
+ homeScene=null;homeItems=[];homeFrameTime=0;
+ const top=kids(null);
+ if(!top.length){
+  const area=el('div','empty-world');
+  const bubble=btn('Begin an idea','bubble bubble-create'+(state.motion?' bubble-floating':''),()=>addNode(null));
+  bubble.style.setProperty('--bubble-color','#9bb5ff');
+  area.append(bubble,el('p','empty-hint','Every universe begins with a thought.'));refs.world.append(area);
+  if(state.past.length||state.future.length){const controls=el('div','map-toolbar');controls.append(btn('Undo','soft-button',undo),btn('Redo','soft-button',redo));refs.world.append(controls)}
+  return;
+ }
+ const strip=el('div','home-map-top');
+ strip.append(el('span','help-text',top.length+' ideas · Galaxy workspace · 250 extra-large slots'));
+ const zoom=el('input','home-zoom');zoom.type='range';zoom.min='35';zoom.max='100';zoom.value=String(Math.round(homeZoom*100));zoom.step='5';
+ zoom.setAttribute('aria-label','Home galaxy zoom');
+ const zl=el('span','home-zoom-label',Math.round(homeZoom*100)+'%');
+ zoom.addEventListener('input',()=>{
+  const old=homeZoom,newZoom=Number(zoom.value)/100;
+  const midX=homeScene.view.scrollLeft+homeScene.view.clientWidth/2;
+  const midY=homeScene.view.scrollTop+homeScene.view.clientHeight/2;
+  homeZoom=newZoom;
+  homeScene.stage.style.width=(HOME_SIZE*newZoom)+'px';
+  homeScene.stage.style.height=(HOME_SIZE*newZoom)+'px';
+  homeScene.layer.style.transform='scale('+newZoom+')';
+  homeScene.view.scrollLeft=midX*newZoom/old-homeScene.view.clientWidth/2;
+  homeScene.view.scrollTop=midY*newZoom/old-homeScene.view.clientHeight/2;
+  zl.textContent=Math.round(newZoom*100)+'%';
+ });
+ const zoomGroup=el('label','home-zoom-group');zoomGroup.append('Zoom ',zoom,zl);
+ strip.append(zoomGroup);refs.world.append(strip);
+ const view=el('div','home-map-view');view.setAttribute('aria-label','Large bordered home galaxy: scroll to explore');
+ view.tabIndex=0;const stage=el('div','home-map-stage'),layer=el('div','home-map-layer');
+ stage.style.width=(HOME_SIZE*homeZoom)+'px';stage.style.height=(HOME_SIZE*homeZoom)+'px';
+ layer.style.transform='scale('+homeZoom+')';stage.append(layer);view.append(stage);
+ const cols=16,slotP=HOME_PITCH;
+ for(let i=0;i<top.length;i++){
+  const n=top[i],diameter=bubbleDiameter(n,'home'),radius=diameter/2;
+  const col=i%cols,row=Math.floor(i/cols);
+  const x=HOME_PAD+col*slotP+(slotP/2),y=HOME_PAD+row*slotP+(slotP/2);
+  const slot=el('div','home-free-slot');slot.style.setProperty('--slot-size',diameter+'px');
+  slot.style.left=(x-radius)+'px';slot.style.top=(y-radius)+'px';
+  const bubble=bubbleButton(n,'bubble-home');slot.append(bubble,editIcon(n));layer.append(slot);
+  homeItems.push({el:slot,id:n.id,x,y,vx:0,vy:0,r:radius,seed:floatHash(n.id),phase:(floatHash(n.id)%628)/100});
+ }
+ homeScene={view,stage,layer};
+ const control=el('div','home-new-control');
+ control.append(btn('+ New idea','map-control',()=>addNode(null)));
+ view.append(control);refs.world.append(view);
+ refs.world.append(el('p','home-map-help','Scroll to explore the galaxy · Use zoom to see more ideas · Bubbles stay within the border'));
+ const toolbar=el('div','map-toolbar');toolbar.append(btn('Undo','soft-button',undo),btn('Redo','soft-button',redo));refs.world.append(toolbar);
+ // Start in the top-left, where the first ideas are located.
+ view.scrollLeft=0;view.scrollTop=0;
+}
+let homeZoom=1;
 function bubbleDiameter(n,context='map'){const base=context==='home'?136:context==='centre'?154:112;return Math.round(base*Math.max(.7,Math.min(1.4,Number(n.size)||1)))}
 function bubbleButton(n,cls=''){
  const b=btn('',`bubble ${cls} ${state.motion&&!reduced()?'bubble-floating':''}`,()=>navigate(n.id));
@@ -454,9 +523,9 @@ function stopBubbleFloat(){
 function startBubbleFloat(){
  stopBubbleFloat();
  if(!state.motion||reduced()||document.hidden)return;
- const home=[...refs.world.querySelectorAll('.bubble-home.bubble-floating,.bubble-create.bubble-floating')];
+ const home=[...refs.world.querySelectorAll('.empty-world .bubble-create.bubble-floating')];
  floatEls=home;
- const homeItems=home.map(el=>{const seed=floatHash(el.dataset.nodeId||el.textContent||'idea');return{el,phase:(seed%628)/100,speed:.22+(seed%23)/100}});
+ const homeItemsSoft=home.map(el=>{const seed=floatHash(el.dataset.nodeId||el.textContent||'idea');return{el,phase:(seed%628)/100,speed:.22+(seed%23)/100}});
  if(viewport&&canvas&&display.size){
   const baseline=new Map([...display].map(([id,p])=>[id,{x:p.x,y:p.y}]));
   const items=[...display.keys()].map(id=>{
@@ -470,11 +539,58 @@ function startBubbleFloat(){
  const tick=now=>{
   if(!state.motion||reduced()||document.hidden){stopBubbleFloat();return}
   if(!floatStart)floatStart=now;
-  const t=(now-floatStart)/1000;
-  for(const item of homeItems){
+  const t=(now-floatStart)/2000;
+  for(const item of homeItemsSoft){
    if(!item.el.isConnected)continue;
    const x=25*Math.sin(t*(item.speed*1.8)+item.phase),y=32*Math.sin(t*(item.speed*1.45)+item.phase*1.23);
    item.el.style.translate=x.toFixed(1)+'px '+y.toFixed(1)+'px';
+  }
+  if(homeScene&&homeItems.length&&now-homeFrameTime>=30){
+   const dt=Math.min(.05,(now-homeFrameTime||33)/1000),speed=.5;
+   homeFrameTime=now;
+   // A spatial grid limits collision checks when the home contains hundreds of bubbles.
+   const cellSize=240,cells=new Map();
+   for(const o of homeItems){
+    const cellX=Math.floor(o.x/cellSize),cellY=Math.floor(o.y/cellSize);
+    const key=cellX+','+cellY;
+    if(!cells.has(key))cells.set(key,[]);
+    cells.get(key).push(o);
+   }
+   const maxPerStep=1.05; // about 30px/sec at the 30fps update target
+   for(const item of homeItems){
+    const s=item.seed;
+    const a=item.phase;
+    // Each bubble has an independent, slowly wandering destination, not a tiny home-slot bob.
+    const goalX=HOME_SIZE/2+Math.sin(t*(.052+(s%11)*.006)+a)*((HOME_SIZE/2)-item.r-HOME_PAD);
+    const goalY=HOME_SIZE/2+Math.cos(t*(.046+(s%13)*.006)+a*1.3)*((HOME_SIZE/2)-item.r-HOME_PAD);
+    let dx=goalX-item.x,dy=goalY-item.y,mag=Math.hypot(dx,dy)||1;
+    let vx=dx/mag*.96,vy=dy/mag*.96;
+    // Gently avoid near neighbours, without sharp collision impulses.
+    const gx=Math.floor(item.x/cellSize),gy=Math.floor(item.y/cellSize);
+    let avx=0,avy=0;
+    for(let xx=-1;xx<=1;xx++)for(let yy=-1;yy<=1;yy++){
+     const neighbours=cells.get((gx+xx)+','+(gy+yy))||[];
+     for(const other of neighbours){
+      if(other===item)continue;
+      let ax=item.x-other.x,ay=item.y-other.y,dist=Math.hypot(ax,ay);
+      const near=item.r+other.r+18;
+      if(dist<near+48){
+       if(dist<.01){const angle=item.phase-other.phase+1;ax=Math.cos(angle);ay=Math.sin(angle);dist=1}
+       const weight=Math.max(0,(near+48-dist)/(near+48));
+       avx+=ax/dist*weight;avy+=ay/dist*weight;
+      }
+     }
+    }
+    vx+=Math.max(-2,Math.min(2,avx))*.95;
+    vy+=Math.max(-2,Math.min(2,avy))*.95;
+    const vm=Math.hypot(vx,vy)||1;
+    vx=vx/vm*maxPerStep;vy=vy/vm*maxPerStep;
+    item.vx=item.vx*.93+vx*.07;item.vy=item.vy*.93+vy*.07;
+    item.x=Math.min(HOME_SIZE-item.r-HOME_PAD,Math.max(item.r+HOME_PAD,item.x+item.vx));
+    item.y=Math.min(HOME_SIZE-item.r-HOME_PAD,Math.max(item.r+HOME_PAD,item.y+item.vy));
+    item.el.style.transform='translate('+(item.x-item.r).toFixed(2)+'px,'+(item.y-item.r).toFixed(2)+'px)';
+    item.el.style.left='0px';item.el.style.top='0px';
+   }
   }
   if(floatMap){
    const fm=floatMap,items=fm.items;
@@ -493,7 +609,7 @@ function startBubbleFloat(){
    // Crowded maps need smaller, slower wandering instead of stronger collisions.
    // Every positional change is limited per frame, including collision adjustments.
    const density=Math.min(1,Math.sqrt(7/Math.max(items.length,7)));
-   const speedLimit=1.5*density+.45;
+   const speedLimit=(1.5*density+.45)*.5;
    const targetLimit=155*density;
    const candidates=items.map(item=>{
     const a=item.phase,slow=item.slow;

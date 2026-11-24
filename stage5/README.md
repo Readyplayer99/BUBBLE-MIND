@@ -45,3 +45,15 @@ Future Stage 5 AI development will be optional and should require explicit user 
 - One save action creates the selected parent/child hierarchy with notes. Existing projects stay unchanged; undo is available through Bubble Mind's edit history.
 - Model discovery remains in the collapsible AI Settings panel. Credentials stay in app memory and are not in localStorage, sessionStorage or backups.
 - The actual OpenRouter model responses and phone layout require user testing. Models may charge for requests.
+
+## AI Chat v2 and detail sub-nodes
+- **AI Chat** is a dedicated full-screen workspace with its own **Settings** panel.
+- Send a normal message without an approval checkbox. **Analyze Document** and **Approve & Create Bubbles** retain separate deliberate actions; no automatic bubble changes.
+- OpenRouter settings include **Remember API key on this device** (opt-in). Saved credentials use browser localStorage in plain text. **Security note:** scripts running under the same GitHub Pages origin, third-party libraries, and browser extensions may be able to access it. Use a spending-limited key, not a management key. Settings include **Forget saved API key**. Credentials are never exported with mind maps.
+- Chat messages are stored locally for continuity across reloads. Earlier messages remain in local chat history. When context gets too long, the app sends earlier excerpts to the model to form a rolling summary before continuing; this can involve paid API calls and may lose some nuance, so check important details.
+- Conversation replies stream into the chat. If output is cut off due to model output limits, up to six continuation requests are attempted. If still unfinished, the app preserves the received text and displays a warning; no implementation can guarantee third-party replies never end prematurely.
+- Detail **sub-nodes** are not structural child bubbles. Each bubble can have several, displayed on its parent map as a small "Details" chip only when they exist. Clicking opens an information editor; long text stays off the galaxy view.
+- To create a detail sub-node for a location, tap the location's ellipsis → **Detail sub-node**. A central bubble also offers **Detail sub-node** in its toolbar.
+- Detail sub-nodes are included in JSON backups, merge/restore, markdown, CSV and undo/redo and are copied/deleted with their owning branches.
+- AI bubble-map proposals may include detail sub-nodes. Each proposed sub-node can be reviewed, edited or excluded before bulk import.
+- Installed Stage 5 will update offline cache version v6 on next online visit; refresh once to load the new files.

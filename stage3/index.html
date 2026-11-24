@@ -490,44 +490,80 @@ function startBubbleFloat(){
    const w=viewport.clientWidth/(state.pan.k||1),h=viewport.clientHeight/(state.pan.k||1);
    const left=-w/2-state.pan.x/(state.pan.k||1),right=w/2-state.pan.x/(state.pan.k||1);
    const top=-h/2-state.pan.y/(state.pan.k||1),bottom=h/2-state.pan.y/(state.pan.k||1);
-   for(const item of items){
-    // Slow changing targets make each node wander naturally around its anchored location.
+   // Crowded maps need smaller, slower wandering instead of stronger collisions.
+   // Every positional change is limited per frame, including collision adjustments.
+   const density=Math.min(1,Math.sqrt(7/Math.max(items.length,7)));
+   const speedLimit=1.5*density+.45;
+   const targetLimit=155*density;
+   const candidates=items.map(item=>{
     const a=item.phase,slow=item.slow;
-    // Visible, independent motion: each node follows its own wandering path
-    // approximately 85-140 map pixels from its anchor, instead of a tiny bob.
+    const wander=item.orbit*density;
     const tx=item.initial.x+cx
-      +Math.sin(t*(.54+slow*.18)+a)*item.orbit
-      +Math.sin(t*.91+a*1.73)*22;
+      +Math.sin(t*(.54+slow*.18)+a)*wander
+      +Math.sin(t*.91+a*1.73)*22*density;
     const ty=item.initial.y+cy
-      +Math.cos(t*(.42+slow*.16)+a*1.29)*item.orbit*.82
-      +Math.sin(t*.77+a*.73)*23;
-    item.vx=(item.vx+(tx-item.x)*.095)*.84;
-    item.vy=(item.vy+(ty-item.y)*.095)*.84;
-    item.x+=item.vx;item.y+=item.vy;
-    // Tether: an independent child can wander, but cannot drift away from its own layout anchor.
-    const dx=item.x-(item.initial.x+cx),dy=item.y-(item.initial.y+cy);
-    const travel=Math.hypot(dx,dy),range=155;
-    if(travel>range){const k=range/travel;item.x=item.initial.x+cx+dx*k;item.y=item.initial.y+cy+dy*k;item.vx*=.55;item.vy*=.55}
-    // The center is fixed for editing. Children never cover the parent.
-    const px=item.x-cx,py=item.y-cy,d=Math.hypot(px,py),minD=centreRadius+item.r+19;
-    if(d<minD){const k=minD/Math.max(d,.01);item.x=cx+px*k;item.y=cy+py*k;item.vx*=.45;item.vy*=.45}
-    // Keep initially visible children within the viewport; off-screen user layout is never overwritten.
-    const m=item.r+12;
-    if(item.initial.x>=left+m&&item.initial.x<=right-m){
-     item.x=Math.max(left+m,Math.min(right-m,item.x));
-    }
-    if(item.initial.y>=top+m&&item.initial.y<=bottom-m){
-     item.y=Math.max(top+m,Math.min(bottom-m,item.y));
-    }
+      +Math.cos(t*(.42+slow*.16)+a*1.29)*wander*.82
+      +Math.sin(t*.77+a*.73)*23*density;
+    const vx=(item.vx+(tx-item.x)*.045)*.89;
+    const vy=(item.vy+(ty-item.y)*.045)*.89;
+    const velocity=Math.hypot(vx,vy)||1;
+    const cap=Math.min(1,speedLimit/velocity);
+    return {item,x:item.x+vx*cap,y:item.y+vy*cap};
+   });
+   // Soft local separation: no hard teleporting bubbles on collision.
+   // Each neighbour contributes only a small bounded correction to the target.
+   const pushes=new Array(candidates.length).fill(null).map(()=>({x:0,y:0}));
+   for(let i=0;i<candidates.length;i++)for(let j=i+1;j<candidates.length;j++){
+    const a=candidates[i],b=candidates[j];
+    const dx=b.x-a.x,dy=b.y-a.y,dist=Math.hypot(dx,dy)||.0001;
+    const ideal=a.item.r+b.item.r+12;
+    if(dist>=ideal)continue;
+    const overlap=Math.min(ideal-dist,ideal*.35);
+    const force=Math.min(.55,overlap*.013);
+    // For coincident bubbles, use a stable angle instead of dividing by near zero.
+    const angle=(i*1.67+j*2.39);
+    const nx=dist<.01?Math.cos(angle):dx/dist;
+    const ny=dist<.01?Math.sin(angle):dy/dist;
+    pushes[i].x-=nx*force;pushes[i].y-=ny*force;
+    pushes[j].x+=nx*force;pushes[j].y+=ny*force;
    }
-   // Gentle collision separation prevents children from piling on top of each other.
-   for(let i=0;i<items.length;i++)for(let j=i+1;j<items.length;j++){
-    const a=items[i],b=items[j],dx=b.x-a.x,dy=b.y-a.y;
-    const dist=Math.hypot(dx,dy)||1,min=a.r+b.r+12;
-    if(dist<min){
-     const move=(min-dist)*.36,nx=dx/dist,ny=dy/dist;
-     a.x-=nx*move;a.y-=ny*move;b.x+=nx*move;b.y+=ny*move;
+   for(let i=0;i<candidates.length;i++){
+    const {item}=candidates[i],proposed=candidates[i];
+    let x=proposed.x+Math.max(-.8,Math.min(.8,pushes[i].x));
+    let y=proposed.y+Math.max(-.8,Math.min(.8,pushes[i].y));
+    // Use a soft tether and parent avoidance; don't snap to either boundary.
+    const anchorX=item.initial.x+cx,anchorY=item.initial.y+cy;
+    const tetherDist=Math.hypot(x-anchorX,y-anchorY);
+    if(tetherDist>targetLimit&&tetherDist>0){
+      const excess=Math.min(.6,(tetherDist-targetLimit)*.035);
+      x-=(x-anchorX)/tetherDist*excess;
+      y-=(y-anchorY)/tetherDist*excess;
     }
+    const parentDx=x-cx,parentDy=y-cy,parentDist=Math.hypot(parentDx,parentDy);
+    const safe=centreRadius+item.r+18;
+    if(parentDist<safe){
+      const angle=item.phase+i*1.38;
+      const nx=parentDist>.01?parentDx/parentDist:Math.cos(angle);
+      const ny=parentDist>.01?parentDy/parentDist:Math.sin(angle);
+      const avoid=Math.min(.85,(safe-parentDist)*.026);
+      x+=nx*avoid;y+=ny*avoid;
+    }
+    // Keep currently visible nodes inside the view, without sudden snapping.
+    const margin=item.r+12;
+    if(item.initial.x>=left+margin&&item.initial.x<=right-margin){
+      if(x<left+margin)x+=Math.min(.8,(left+margin-x)*.05);
+      if(x>right-margin)x-=Math.min(.8,(x-(right-margin))*.05);
+    }
+    if(item.initial.y>=top+margin&&item.initial.y<=bottom-margin){
+      if(y<top+margin)y+=Math.min(.8,(top+margin-y)*.05);
+      if(y>bottom-margin)y-=Math.min(.8,(y-(bottom-margin))*.05);
+    }
+    const stepX=x-item.x,stepY=y-item.y,step=Math.hypot(stepX,stepY);
+    const maxStep=speedLimit;
+    if(step>maxStep){x=item.x+stepX/step*maxStep;y=item.y+stepY/step*maxStep}
+    item.vx=(x-item.x)*.85;
+    item.vy=(y-item.y)*.85;
+    item.x=x;item.y=y;
    }
    for(const item of items){
     item.slot.style.translate=(item.x-item.initial.x).toFixed(1)+'px '+(item.y-item.initial.y).toFixed(1)+'px';

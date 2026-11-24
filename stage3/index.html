@@ -150,6 +150,30 @@ background-size:100% 100%,100% 100%,100% 100%,163px 173px,227px 193px,283px 239p
 .note-preview h2{font-size:24px;margin:8px 0}.note-preview h3{font-size:19px;margin:7px 0}
 .note-preview p{margin:5px 0;white-space:pre-wrap}.note-preview a{color:#afd5ff;text-decoration:underline}
 .note-preview input{margin-right:9px}.note-format-help{font-size:12px;color:#b7c8eb;margin:0 0 6px}
+
+/* Stage 3 landscape: compact controls with an Actions menu. */
+.landscape-actions{display:none}
+@media(orientation:landscape) and (max-height:550px){
+ .app-shell.inside .topbar{height:42px;padding:4px 10px}
+ .app-shell.inside .brand-sub{display:none}
+ .app-shell.inside .brand-symbol{transform:scale(.75)}
+ .app-shell.inside .brand-title{font-size:17px}
+ .app-shell.inside .header-create{padding:5px 8px}
+ .app-shell.inside .stage3-action{min-height:29px;padding:4px 7px;font-size:11px}
+ .app-shell.inside .footer,.app-shell.inside .intro,.app-shell.inside .crumbs{display:none}
+ .app-shell.inside .map-toolbar,.app-shell.inside .map-help,.app-shell.inside .map-pan-help,.app-shell.inside .map-summary{display:none}
+ .app-shell.inside .map-controls{margin:0 0 3px;gap:4px;flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start}
+ .app-shell.inside .map-controls .map-control{padding:4px 8px;min-height:29px;font-size:11px;flex:none}
+ .app-shell.inside .map-controls .map-control:nth-last-child(2){display:none}
+ .app-shell.inside .landscape-actions{display:inline-flex}
+ .app-shell.inside .bubble-world{padding:0}
+ .app-shell.inside .map-viewport{min-height:0;height:auto;flex:1}
+}
+@media(prefers-reduced-motion:reduce){
+ body.motion-override .map-node .bubble-floating,body.motion-override .bubble-home.bubble-floating,body.motion-override .bubble-create.bubble-floating{
+  animation:visible-bubble-float 4.5s ease-in-out infinite!important
+ }
+}
 </style>
 </head>
 <body>
@@ -177,7 +201,7 @@ document.getElementById("preview-fallback")?.remove();
    Deliberately does NOT use, modify, or import the user's original application. */
 (()=>{'use strict';
 const KEY='bubble-mind-stage3-v1',STAGE1_KEY='bubble-mind-stage2-v1',PALETTE=['#9bb5ff','#8bd8ca','#d5a1ee','#f0c180','#ee9da9','#9fce97','#73c6ed','#f18ec6'];
-const state={nodes:[],links:[],notes:{},motion:true,layout:'orbit',currentId:null,transition:false,pan:{x:0,y:0,k:1},past:[],future:[],dragHappened:false};
+const state={nodes:[],links:[],notes:{},motion:true,motionOverride:false,layout:'orbit',currentId:null,transition:false,pan:{x:0,y:0,k:1},past:[],future:[],dragHappened:false};
 const byId=id=>state.nodes.find(n=>n.id===id)||null;
 const kids=id=>state.nodes.filter(n=>n.parentId===id);
 const id=()=>globalThis.crypto?.randomUUID?.()||'bm-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
@@ -186,7 +210,7 @@ const btn=(text,cls,fn)=>{const e=el('button',cls,text);e.type='button';e.addEve
 const $=id=>document.getElementById(id);
 const refs={world:$('world'),intro:$('intro'),crumbs:$('crumbs'),overlay:$('overlay-root'),toast:$('toast'),motion:$('motion-button'),save:$('save-status')};
 let toastTimer=null,canvas=null,viewport=null,svg=null,display=new Map(),press=null,panPress=null,portalBusy=false;
-const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches;
+const reduced=()=>matchMedia('(prefers-reduced-motion: reduce)').matches&&!state.motionOverride;
 function normalHex(x){return /^#[\da-f]{6}$/i.test(x)?x.toLowerCase():'#9bb5ff'}
 function scrub(raw){
  if(!raw||!Array.isArray(raw.nodes))return;
@@ -199,7 +223,7 @@ function scrub(raw){
  state.nodes=clean;
  state.notes=(raw.notes&&typeof raw.notes==='object'&&!Array.isArray(raw.notes))?Object.fromEntries(Object.entries(raw.notes).filter(([k,v])=>ids.has(k)&&typeof v==='string').map(([k,v])=>[k,v.slice(0,500000)])):{};
  state.links=Array.isArray(raw.links)?raw.links.filter(l=>l&&typeof l.id==='string'&&ids.has(l.from)&&ids.has(l.to)&&l.from!==l.to).slice(0,20000).map(l=>({id:l.id,from:l.from,to:l.to,label:String(l.label||'').slice(0,90),color:normalHex(l.color)})):[];
- state.motion=raw.motion!==false;state.layout=['orbit','grid','free'].includes(raw.layout)?raw.layout:'orbit';
+ state.motion=raw.motion!==false;state.motionOverride=raw.motionOverride===true;state.layout=['orbit','grid','free'].includes(raw.layout)?raw.layout:'orbit';
 }
 function load(){
  try{
@@ -216,9 +240,9 @@ function load(){
   }
  }catch(e){refs.save.textContent='Storage unavailable — changes may not persist';console.warn(e)}
 }
-function persist(){try{localStorage.setItem(KEY,JSON.stringify({version:3,nodes:state.nodes,notes:state.notes,links:state.links,motion:state.motion,layout:state.layout}));refs.save.textContent='Saved on this device';return true}catch(e){console.error(e);refs.save.textContent='Save failed — storage unavailable';toast('Could not save to this browser');return false}}
+function persist(){try{localStorage.setItem(KEY,JSON.stringify({version:3,nodes:state.nodes,notes:state.notes,links:state.links,motion:state.motion,motionOverride:state.motionOverride,layout:state.layout}));refs.save.textContent='Saved on this device';return true}catch(e){console.error(e);refs.save.textContent='Save failed — storage unavailable';toast('Could not save to this browser');return false}}
 let activeNote=null;
-function snapshot(){return JSON.stringify({nodes:state.nodes,notes:state.notes,links:state.links,motion:state.motion,layout:state.layout})}
+function snapshot(){return JSON.stringify({nodes:state.nodes,notes:state.notes,links:state.links,motion:state.motion,motionOverride:state.motionOverride,layout:state.layout})}
 function record(){state.past.push(snapshot());if(state.past.length>45)state.past.shift();state.future=[]}
 function change(action,msg){record();try{action()}catch(e){const old=state.past.pop();Object.assign(state,JSON.parse(old));console.error(e);toast(e.message||'Operation failed');return false}const saved=persist();render();if(msg)toast(saved?msg:msg+' (not saved — check browser storage)');return true}
 function undo(){if(!state.past.length)return toast('Nothing to undo');state.future.push(snapshot());Object.assign(state,JSON.parse(state.past.pop()));if(state.currentId&&!byId(state.currentId))state.currentId=null;persist();render();toast('Undone')}
@@ -239,7 +263,7 @@ function getPath(nodeId){const out=[],seen=new Set();let n=byId(nodeId);while(n&
 function connections(nodeId){const n=byId(nodeId);if(!n)return;dialog('Connections',`Label relationships for “${n.title}”. Links can go across projects.`,d=>{const list=el('div');const update=()=>{list.replaceChildren();const all=state.links.filter(l=>l.from===nodeId||l.to===nodeId);if(!all.length)list.append(el('p','help-text','No labelled relationships yet.'));for(const l of all){const other=byId(l.from===nodeId?l.to:l.from),row=el('div','rel-row'),txt=el('div');txt.append(el('strong','',other?.title||'Unknown bubble'),el('small','',l.label||'Related'));const acts=el('div','rel-actions');acts.append(btn('Go', '',()=>{close();goTo(other?.id)}),btn('Edit','',()=>{const v=prompt('Relationship label:',l.label);if(v!==null)change(()=>l.label=v.trim().slice(0,90),'Link updated');close();connections(nodeId)}),btn('×','',()=>{change(()=>state.links=state.links.filter(x=>x.id!==l.id),'Link removed');update()}));row.append(txt,acts);list.append(row)}};update();d.append(list);const section=el('div','dialog-section');section.append(el('h3','','New relationship'));const to=el('select'),label=field('Relationship label (e.g. allies with)');to.style.cssText='width:100%;padding:11px;background:#111b34;color:white;border:1px solid #56658b;border-radius:10px';for(const other of state.nodes){if(other.id===nodeId)continue;const opt=el('option','',getPath(other.id).map(x=>x.title).join(' / '));opt.value=other.id;to.append(opt)}section.append(to,label.box,btn('Add connection','primary-button',()=>{if(!to.value)return toast('No other bubble to link');if(state.links.some(l=>(l.from===nodeId&&l.to===to.value)||(l.to===nodeId&&l.from===to.value)))return toast('These bubbles are already linked');change(()=>state.links.push({id:id(),from:nodeId,to:to.value,label:label.input.value.trim().slice(0,90),color:'#d5a1ee'}),'Relationship created');label.input.value='';update()}));d.append(section)})}
 function goTo(id){if(!id||!byId(id))return;state.currentId=id;state.pan={x:0,y:0,k:1};render()}
 function navigate(id){if(state.transition||id===state.currentId)return;state.transition=true;const old=refs.world.querySelector('.map-viewport')||refs.world.querySelector('.bubble-home')||refs.world.querySelector('.bubble-create');if(!old||reduced()){state.currentId=id;state.pan={x:0,y:0,k:1};render();state.transition=false;return}const portal=el('div','portal');portal.style.cssText='left:calc(50% - 65px);top:calc(50% - 65px);width:130px;height:130px;opacity:.85';$('portal-root').append(portal);const anim=portal.animate([{transform:'scale(.7)',opacity:0},{transform:'scale(14)',opacity:.98}],{duration:330,easing:'cubic-bezier(.2,.7,.25,1)',fill:'forwards'});anim.finished.catch(()=>{}).then(()=>{state.currentId=id;state.pan={x:0,y:0,k:1};render();return portal.animate([{opacity:1},{opacity:0}],{duration:160,fill:'forwards'}).finished.catch(()=>{})}).finally(()=>{portal.remove();state.transition=false})}
-function renderHeader(){$('app').classList.toggle('inside',!!state.currentId);refs.crumbs.replaceChildren();const path=getPath(state.currentId);const home=btn('Home','crumb-link',()=>navigate(null));refs.crumbs.append(home);for(const item of path){refs.crumbs.append(el('span','crumb-divider','›'));const b=item.id===state.currentId?el('span','crumb-current',item.title):btn(item.title,'crumb-link',()=>navigate(item.id));refs.crumbs.append(b)}const title=state.currentId?byId(state.currentId)?.title:'Your ideas, in motion.';refs.intro.replaceChildren();refs.intro.append(el('p','eyebrow','BUBBLE MIND · STAGE 3'),el('h1','',title||(state.nodes.length?'Your ideas, in motion.':'Every universe begins with a thought.')),el('p','sub',state.currentId?'Create, connect, arrange or explore the thoughts inside this bubble.':state.nodes.length?'Each bubble is a world of ideas. Tap to explore.':'Start with one idea and build from there.'));refs.motion.classList.toggle('selected',state.motion);refs.motion.setAttribute('aria-pressed',String(state.motion));refs.motion.title=state.motion?'Pause bubbles':'Animate bubbles';$('new-button').title='Create a new bubble'}
+function renderHeader(){$('app').classList.toggle('inside',!!state.currentId);refs.crumbs.replaceChildren();const path=getPath(state.currentId);const home=btn('Home','crumb-link',()=>navigate(null));refs.crumbs.append(home);for(const item of path){refs.crumbs.append(el('span','crumb-divider','›'));const b=item.id===state.currentId?el('span','crumb-current',item.title):btn(item.title,'crumb-link',()=>navigate(item.id));refs.crumbs.append(b)}const title=state.currentId?byId(state.currentId)?.title:'Your ideas, in motion.';refs.intro.replaceChildren();refs.intro.append(el('p','eyebrow','BUBBLE MIND · STAGE 3'),el('h1','',title||(state.nodes.length?'Your ideas, in motion.':'Every universe begins with a thought.')),el('p','sub',state.currentId?'Create, connect, arrange or explore the thoughts inside this bubble.':state.nodes.length?'Each bubble is a world of ideas. Tap to explore.':'Start with one idea and build from there.'));document.body.classList.toggle('motion-override',state.motionOverride);const animated=state.motion&&!reduced();refs.motion.classList.toggle('selected',animated);refs.motion.setAttribute('aria-pressed',String(animated));refs.motion.title=state.motion&&reduced()?'Motion blocked by your system settings — tap to enable here':animated?'Pause bubbles':'Animate bubbles';$('new-button').title='Create a new bubble'}
 function renderHome(){const top=kids(null);if(!top.length){const area=el('div','empty-world');const bubble=btn('Begin an idea','bubble bubble-create'+(state.motion?' bubble-floating':''),()=>addNode(null));bubble.style.setProperty('--bubble-color','#9bb5ff');area.append(bubble,el('p','empty-hint','Every universe begins with a thought.'));refs.world.append(area);if(state.past.length||state.future.length){const controls=el('div','map-toolbar');controls.append(btn('Undo','soft-button',undo),btn('Redo','soft-button',redo));refs.world.append(controls)}return}const grid=el('div','home-grid');for(const n of top){const slot=el('div','bubble-slot');slot.style.setProperty('--slot-height',Math.max(170,bubbleDiameter(n,'home')+38)+'px');slot.append(bubbleButton(n,'bubble-home'));slot.append(editIcon(n));grid.append(slot)}const s=el('div','bubble-slot');s.append(btn('+\nNew idea','bubble bubble-create',()=>addNode(null)));grid.append(s);refs.world.append(grid);const tools=el('div','map-toolbar');tools.append(btn('Undo','soft-button',undo),btn('Redo','soft-button',redo));refs.world.append(tools)}
 function bubbleDiameter(n,context='map'){const base=context==='home'?136:context==='centre'?154:112;return Math.round(base*Math.max(.7,Math.min(1.4,Number(n.size)||1)))}
 function bubbleButton(n,cls=''){
@@ -282,15 +306,18 @@ function openNotes(nodeId,full=false){
  const closeNotes=(rerender=true)=>{save();activeNote=null;backdrop.remove();document.body.classList.remove('dialog-open');if(rerender)render()};
  activeNote={save,close:closeNotes};
  const toolbar=el('div','note-toolbar');const preview=el('div','note-preview');preview.hidden=true;preview.setAttribute('aria-label','Formatted notes preview');
- function insert(prefix,suffix='',placeholder='text'){const a=body.selectionStart,b=body.selectionEnd,val=body.value,selected=val.slice(a,b)||placeholder;body.value=val.slice(0,a)+prefix+selected+suffix+val.slice(b);body.focus();body.setSelectionRange(a+prefix.length,a+prefix.length+selected.length);status.textContent='Unsaved changes';clearTimeout(timer);timer=setTimeout(save,550)}
- for(const [name,pre,suf,placeholder] of [['H1','# ','','Heading'],['H2','## ','','Heading'],['Bold','**','**','bold'],['Italic','*','*','italic'],['List','- ','','item'],['Numbered','1. ','','item'],['Task','- [ ] ','','task'],['Link','[','](https://)','link text']]){const button=btn(name,'',()=>{if(!preview.hidden){preview.hidden=true;body.hidden=false;previewButton.textContent='Preview'}insert(pre,suf,placeholder)});button.title='Select text, then choose '+name;toolbar.append(button)}
- const previewButton=btn('Preview','stage3-action',()=>{
-  const showing=preview.hidden;preview.hidden=!showing;body.hidden=showing;
-  previewButton.textContent=showing?'Edit text':'Preview';
-  if(showing)displayNotePreview(preview,body.value);else body.focus();
- });toolbar.append(previewButton);
+ function insert(prefix,suffix='',placeholder='text'){const a=body.selectionStart,b=body.selectionEnd,val=body.value,selected=val.slice(a,b)||placeholder;body.value=val.slice(0,a)+prefix+selected+suffix+val.slice(b);body.setSelectionRange(a+prefix.length,a+prefix.length+selected.length);status.textContent='Saving…';clearTimeout(timer);timer=setTimeout(save,450)}
+ const formatOptions=[['Heading 1','# ','','Main heading'],['Heading 2','## ','','Subheading'],['Bold','**','**','bold text'],['Italic','*','*','italic text'],['Bullets','- ','','list item'],['Numbered','1. ','','list item'],['Checkbox','- [ ] ','','task'],['Link','[','](https://example.com)','link text']];
+ const previewButton=btn('Preview','stage3-action',()=>{const show=preview.hidden;preview.hidden=!show;body.hidden=show;previewButton.textContent=show?'Edit text':'Preview';if(show)displayNotePreview(preview,body.value);else body.focus()});
+ for(const [name,pre,suf,placeholder] of formatOptions){const b=btn(name,'',()=>{
+   if(!preview.hidden){preview.hidden=true;body.hidden=false}
+   insert(pre,suf,placeholder);
+   save();displayNotePreview(preview,body.value);preview.hidden=false;body.hidden=true;
+   previewButton.textContent='Edit text';status.textContent='Formatted '+name+' · tap Edit text to continue';
+ });b.title='Insert '+name+' and show its formatted result';toolbar.append(b)}
+ toolbar.append(previewButton);
  const expand=btn(full?'Quick view':'Full screen','stage3-action',()=>{save();closeNotes(false);openNotes(nodeId,!full)}),exit=btn('Close','stage3-action',closeNotes);
- bar.append(title,status,expand,exit);sheet.append(bar,el('p','note-format-help','Select text and choose H1 (heading), H2 (subheading), Bold, Italic, List, Numbered, Task or Link. Use Preview to see formatting.'),toolbar,body,preview);backdrop.append(sheet);document.body.append(backdrop);document.body.classList.add('dialog-open');
+ bar.append(title,status,expand,exit);sheet.append(bar,el('p','note-format-help','Select text, then choose a format. The result appears immediately. Tap Edit text to continue writing. No selection? The button inserts an example.'),toolbar,body,preview);backdrop.append(sheet);document.body.append(backdrop);document.body.classList.add('dialog-open');
  backdrop.addEventListener('pointerdown',e=>{if(e.target===backdrop)closeNotes()});
  body.addEventListener('input',()=>{status.textContent='Saving…';clearTimeout(timer);timer=setTimeout(save,550)});
  body.addEventListener('blur',save);body.addEventListener('keydown',e=>{if((e.ctrlKey||e.metaKey)&&e.key==='s'){e.preventDefault();save()}if(e.key==='Escape'){e.preventDefault();closeNotes()}});
@@ -346,7 +373,12 @@ function openOutline(){
  });
 }
 
-function renderInside(){const parent=byId(state.currentId);if(!parent){state.currentId=null;return renderHome()}const tools=el('div','map-controls');tools.append(el('span','help-text','Layout:'));for(const [mode,label] of [['orbit','Orbit'],['grid','Grid'],['free','Free']]){const b=btn(label,'map-control'+(state.layout===mode?' active':''),()=>change(()=>{if(mode==='free'&&state.layout!=='free'){const positions=layoutPositions(kids(state.currentId));for(const n of kids(state.currentId)){const p=positions.get(n.id);n.x=p.x;n.y=p.y}}state.layout=mode},`Layout: ${label}`));b.setAttribute('aria-pressed',String(state.layout===mode));tools.append(b)}tools.append(btn('Undo','map-control',undo),btn('Redo','map-control',redo),btn('Notes','map-control',()=>openNotes(parent.id)));refs.world.append(tools);
+function renderInside(){const parent=byId(state.currentId);if(!parent){state.currentId=null;return renderHome()}const tools=el('div','map-controls');tools.append(el('span','help-text','Layout:'));for(const [mode,label] of [['orbit','Orbit'],['grid','Grid'],['free','Free']]){const b=btn(label,'map-control'+(state.layout===mode?' active':''),()=>change(()=>{if(mode==='free'&&state.layout!=='free'){const positions=layoutPositions(kids(state.currentId));for(const n of kids(state.currentId)){const p=positions.get(n.id);n.x=p.x;n.y=p.y}}state.layout=mode},`Layout: ${label}`));b.setAttribute('aria-pressed',String(state.layout===mode));tools.append(b)}tools.append(btn('Undo','map-control',undo),btn('Redo','map-control',redo),btn('Notes','map-control',()=>openNotes(parent.id)));
+ tools.append(btn('Actions','map-control landscape-actions',()=>dialog('Bubble actions','Choose what to do inside this idea.',d=>{
+  const list=el('div','menu');
+  for(const [name,fn] of [['Write notes',()=>openNotes(parent.id)],['Add child bubble',()=>addNode(parent.id)],['Edit central idea',()=>editNode(parent.id)],['Relationships',()=>connections(parent.id)],['Back one level',()=>navigate(parent.parentId)]])list.append(btn(name,'soft-button',()=>{close();fn()}));
+  d.append(list)
+ })));refs.world.append(tools);
  viewport=el('div','map-viewport');viewport.setAttribute('aria-label','Idea mind map');canvas=el('div','map-canvas');svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.classList.add('map-svg');canvas.append(svg);const centre=el('div','map-centre');centre.style.setProperty('--core-size',bubbleDiameter(parent,'centre')+'px');const c=bubbleButton(parent,'bubble-focus');c.onclick=null;c.addEventListener('click',e=>{e.stopImmediatePropagation();editNode(parent.id)},true);centre.append(c);centre.append(btn('✎','map-chip',()=>editNode(parent.id)));canvas.append(centre);
  const children=kids(parent.id),positions=layoutPositions(children);display=new Map();children.forEach((n)=>{const p=positions.get(n.id);display.set(n.id,p);const slot=el('div','map-node');slot.dataset.id=n.id;slot.style.setProperty('--slot-size',bubbleDiameter(n)+'px');slot.style.transform=`translate(${p.x-bubbleDiameter(n)/2}px,${p.y-bubbleDiameter(n)/2}px)`;const bub=bubbleButton(n);bub.classList.toggle('bubble-floating',state.motion&&!reduced());slot.append(bub,btn('⋯','map-chip',()=>editNode(n.id)));canvas.append(slot);wireDrag(slot,n,p)});viewport.append(canvas);const panHelp=el('p','map-pan-help','Drag empty space to pan · Scroll or pinch to zoom');const reset=btn('Center view','map-control map-reset',()=>{state.pan={x:0,y:0,k:1};applyPan()});viewport.append(reset);refs.world.append(viewport,panHelp);applyPan();updateMapLinks();wirePan(viewport);
  const stats=el('div','map-summary',`${children.length} child bubbles · ${state.links.filter(l=>l.from===parent.id||l.to===parent.id||display.has(l.from)&&display.has(l.to)).length} labelled links`);refs.world.append(stats);
@@ -360,7 +392,8 @@ function refreshOnRotation(){syncViewportHeight();const w=window.innerWidth;if(M
 window.addEventListener('resize',refreshOnRotation);
 window.visualViewport?.addEventListener('resize',syncViewportHeight);
 window.addEventListener('orientationchange',()=>{clearTimeout(resizeDebounce);resizeDebounce=setTimeout(()=>{lastViewportWidth=window.innerWidth;syncViewportHeight();if(!activeNote&&!refs.overlay.firstChild)render()},260)})
-refs.motion.addEventListener('click',()=>{const next=!state.motion;change(()=>state.motion=next,next?'Floating enabled':'Floating paused');if(next&&reduced())toast('Your system reduced-motion setting keeps floating off')});
+refs.motion.addEventListener('click',()=>{if(state.motion&&reduced()){change(()=>{state.motion=true;state.motionOverride=true},'Floating enabled by your choice');return}
+ const next=!state.motion;change(()=>{state.motion=next;if(!next)state.motionOverride=false},next?'Floating enabled':'Floating paused')});
 $('new-button').addEventListener('click',()=>addNode(state.currentId));
 $('search-button').addEventListener('click',openSearch);
 $('outline-button').addEventListener('click',openOutline);

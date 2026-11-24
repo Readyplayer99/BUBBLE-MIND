@@ -429,6 +429,7 @@ let lastViewportWidth=window.innerWidth,resizeDebounce=0;
 function refreshOnRotation(){syncViewportHeight();const w=window.innerWidth;if(Math.abs(w-lastViewportWidth)>40){lastViewportWidth=w;clearTimeout(resizeDebounce);resizeDebounce=setTimeout(()=>{if(!activeNote&&!refs.overlay.firstChild)render()},200)}}
 window.addEventListener('resize',refreshOnRotation);
 window.visualViewport?.addEventListener('resize',syncViewportHeight);
+document.addEventListener('visibilitychange',()=>{if(document.hidden)stopBubbleFloat();else startBubbleFloat()});
 window.addEventListener('orientationchange',()=>{clearTimeout(resizeDebounce);resizeDebounce=setTimeout(()=>{lastViewportWidth=window.innerWidth;syncViewportHeight();if(!activeNote&&!refs.overlay.firstChild)render()},260)})
 refs.motion.addEventListener('click',()=>{
  if(state.motion&&reduced()){

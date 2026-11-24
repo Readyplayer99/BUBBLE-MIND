@@ -174,6 +174,10 @@ background-size:100% 100%,100% 100%,100% 100%,163px 173px,227px 193px,283px 239p
   animation:visible-bubble-float 4.5s ease-in-out infinite!important
  }
 }
+
+/* Stage 3 desktop motion: JavaScript controls the independent translate offset.
+   Disable competing keyframes so the toggle behaves identically on phone and PC. */
+.bubble-world .bubble-floating{animation:none!important}
 </style>
 </head>
 <body>
@@ -385,15 +389,54 @@ function renderInside(){const parent=byId(state.currentId);if(!parent){state.cur
  const bar=el('div','map-toolbar');bar.append(btn('✎ Write notes','soft-button',()=>openNotes(parent.id)),btn('Focus editor','soft-button',()=>openNotes(parent.id,true)),btn('＋ Add a bubble','soft-button',()=>addNode(parent.id)),btn('✎ Edit central idea','soft-button',()=>editNode(parent.id)),btn('↔ Relationships','soft-button',()=>connections(parent.id)),btn('← Back','soft-button',()=>navigate(parent.parentId)));refs.world.append(bar);refs.world.append(el('p','map-help','Tap to enter · Tab creates a child · ⋯ to edit, duplicate, move or connect · Free layout allows dragging'))}
 function wireDrag(slot,n,initial){const bubble=slot.querySelector('.bubble');let moving=false,sx=0,sy=0,bx=initial.x,by=initial.y,pid=-1;const start=e=>{if(e.button!==0&&e.pointerType==='mouse')return;e.stopPropagation();moving=false;sx=e.clientX;sy=e.clientY;pid=e.pointerId;bx=display.get(n.id).x;by=display.get(n.id).y;try{bubble.setPointerCapture(pid)}catch(_){}};const move=e=>{if(pid!==e.pointerId)return;e.stopPropagation();const dx=(e.clientX-sx)/state.pan.k,dy=(e.clientY-sy)/state.pan.k;if(!moving&&Math.hypot(dx,dy)<8)return;if(!moving){moving=true;record();slot.classList.add('dragged');if(state.layout!=='free'){const p=new Map(display);state.layout='free';for(const node of kids(state.currentId)){const pos=p.get(node.id);node.x=pos.x;node.y=pos.y}refs.world.querySelectorAll('.map-control').forEach(b=>{if(['Orbit','Grid','Free'].includes(b.textContent))b.classList.toggle('active',b.textContent==='Free')})}}const p={x:Math.round(bx+dx),y:Math.round(by+dy)};display.set(n.id,p);n.x=p.x;n.y=p.y;slot.style.transform=`translate(${p.x-bubbleDiameter(n)/2}px,${p.y-bubbleDiameter(n)/2}px)`;updateMapLinks()};const end=e=>{if(pid!==e.pointerId)return;e.stopPropagation();pid=-1;slot.classList.remove('dragged');if(moving){moving=false;state.dragHappened=true;state.future=[];persist();setTimeout(()=>{state.dragHappened=false},100);toast('Position saved');render()}else{navigate(n.id)}};bubble.addEventListener('pointerdown',start);bubble.addEventListener('pointermove',move);bubble.addEventListener('pointerup',end);bubble.addEventListener('pointercancel',()=>{pid=-1;moving=false;slot.classList.remove('dragged')});bubble.addEventListener('click',e=>{e.stopImmediatePropagation();e.preventDefault()},true);bubble.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();navigate(n.id)}});bubble.addEventListener('contextmenu',e=>{e.preventDefault();editNode(n.id)})}
 function wirePan(view){let pointers=new Map(),start=null,zoomStart=null;view.addEventListener('pointerdown',e=>{if(e.target.closest('.map-node,.map-centre,button'))return;view.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===1)start={x:e.clientX,y:e.clientY,panX:state.pan.x,panY:state.pan.y};if(pointers.size===2){const [a,b]=[...pointers.values()];zoomStart={distance:Math.hypot(a.x-b.x,a.y-b.y),k:state.pan.k}}});view.addEventListener('pointermove',e=>{if(!pointers.has(e.pointerId))return;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(pointers.size===1&&start){state.pan.x=start.panX+e.clientX-start.x;state.pan.y=start.panY+e.clientY-start.y;applyPan()}else if(pointers.size===2&&zoomStart){const [a,b]=[...pointers.values()];state.pan.k=Math.max(.35,Math.min(2.4,zoomStart.k*Math.hypot(a.x-b.x,a.y-b.y)/Math.max(1,zoomStart.distance)));applyPan()}});const end=e=>{pointers.delete(e.pointerId);if(pointers.size!==1)start=null;if(!pointers.size)zoomStart=null};view.addEventListener('pointerup',end);view.addEventListener('pointercancel',end);view.addEventListener('wheel',e=>{if(e.target.closest('button'))return;e.preventDefault();state.pan.k=Math.max(.35,Math.min(2.4,state.pan.k*Math.exp(-e.deltaY*.001)));applyPan()},{passive:false})}
-function render(){viewport=null;canvas=null;svg=null;display=new Map();renderHeader();refs.world.replaceChildren();state.currentId?renderInside():renderHome();syncViewportHeight()}
+// Motion runs on the individual translate property, separate from the canvas position.
+// This avoids desktop CSS animation specificity/reduced-motion clashes.
+let floatFrame=0, floatStart=0, floatEls=[];
+function stopBubbleFloat(){
+ if(floatFrame){cancelAnimationFrame(floatFrame);floatFrame=0}
+ for(const el of floatEls)el.style.removeProperty('translate');
+ floatEls=[];floatStart=0;
+}
+function startBubbleFloat(){
+ stopBubbleFloat();
+ if(!state.motion||reduced())return;
+ floatEls=[...refs.world.querySelectorAll('.bubble-floating')].filter(el=>!el.closest('.map-centre'));
+ if(!floatEls.length)return;
+ const seed=el=>{const id=el.dataset.nodeId||el.textContent||'bubble';let n=0;for(let i=0;i<id.length;i++)n=(n*31+id.charCodeAt(i))>>>0;return n};
+ const specs=floatEls.map(el=>{const n=seed(el);return{el,phase:(n%628)/100,slow:3.5+(n%17)/10}});
+ const tick=now=>{
+  if(!state.motion||reduced()||!document.body.contains(refs.world)||document.hidden){stopBubbleFloat();return}
+  if(!floatStart)floatStart=now;
+  const t=(now-floatStart)/1000;
+  for(const {el,phase,slow} of specs){
+   if(!el.isConnected)continue;
+   if(el.closest('.map-node.dragged')){el.style.translate='0px 0px';continue}
+   const x=5*Math.sin(t*.8+phase),y=11*Math.sin(t*1.4/slow*2+phase);
+   el.style.translate=x.toFixed(1)+'px '+y.toFixed(1)+'px';
+  }
+  floatFrame=requestAnimationFrame(tick);
+ };
+ floatFrame=requestAnimationFrame(tick);
+}
+function render(){
+ stopBubbleFloat();
+ viewport=null;canvas=null;svg=null;display=new Map();
+ renderHeader();refs.world.replaceChildren();state.currentId?renderInside():renderHome();syncViewportHeight();
+ startBubbleFloat();
+}
 function syncViewportHeight(){const h=window.visualViewport?.height||window.innerHeight;if(h>180)document.documentElement.style.setProperty('--bm-height',Math.round(h)+'px')}
 let lastViewportWidth=window.innerWidth,resizeDebounce=0;
 function refreshOnRotation(){syncViewportHeight();const w=window.innerWidth;if(Math.abs(w-lastViewportWidth)>40){lastViewportWidth=w;clearTimeout(resizeDebounce);resizeDebounce=setTimeout(()=>{if(!activeNote&&!refs.overlay.firstChild)render()},200)}}
 window.addEventListener('resize',refreshOnRotation);
 window.visualViewport?.addEventListener('resize',syncViewportHeight);
 window.addEventListener('orientationchange',()=>{clearTimeout(resizeDebounce);resizeDebounce=setTimeout(()=>{lastViewportWidth=window.innerWidth;syncViewportHeight();if(!activeNote&&!refs.overlay.firstChild)render()},260)})
-refs.motion.addEventListener('click',()=>{if(state.motion&&reduced()){change(()=>{state.motion=true;state.motionOverride=true},'Floating enabled by your choice');return}
- const next=!state.motion;change(()=>{state.motion=next;if(!next)state.motionOverride=false},next?'Floating enabled':'Floating paused')});
+refs.motion.addEventListener('click',()=>{
+ if(state.motion&&reduced()){
+  change(()=>{state.motion=true;state.motionOverride=true},'Floating enabled by your choice');return;
+ }
+ const next=!state.motion;
+ change(()=>{state.motion=next;if(!next)state.motionOverride=false},next?'Floating enabled':'Floating paused');
+});
 $('new-button').addEventListener('click',()=>addNode(state.currentId));
 $('search-button').addEventListener('click',openSearch);
 $('outline-button').addEventListener('click',openOutline);

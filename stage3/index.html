@@ -191,7 +191,7 @@ background-size:100% 100%,100% 100%,100% 100%,163px 173px,227px 193px,283px 239p
 .home-map-layer{position:absolute;top:0;left:0;width:4200px;height:4200px;transform-origin:0 0;contain:layout style}
 .home-free-slot{position:absolute;display:flex;align-items:center;justify-content:center;width:var(--slot-size,190px);height:var(--slot-size,190px);will-change:transform}
 .home-free-slot .bubble-home{flex:none}.home-free-slot .bubble-edit{right:-8px;bottom:7px}
-.home-new-control{position:sticky;left:12px;top:12px;z-index:4;width:max-content;pointer-events:none;transform:translate(0,0)}
+.home-new-control{position:sticky;left:12px;top:12px;z-index:4;width:max-content;height:0;pointer-events:none;transform:translate(0,0)}
 .home-new-control button{pointer-events:auto;background:#21375be8;box-shadow:0 4px 20px #050b1cc4}
 .home-map-help{font-size:12px;color:#aabce0;text-align:center;padding:0 8px}
 @media(max-width:680px){.home-map-view{height:65dvh;min-height:320px}.home-map-top{margin-top:4px}.home-map-help{font-size:11px}}
@@ -334,7 +334,7 @@ function renderHome(){
  homeScene={view,stage,layer};
  const control=el('div','home-new-control');
  control.append(btn('+ New idea','map-control',()=>addNode(null)));
- view.append(control);refs.world.append(view);
+ view.prepend(control);refs.world.append(view);
  refs.world.append(el('p','home-map-help','Scroll to explore the galaxy · Use zoom to see more ideas · Bubbles stay within the border'));
  const toolbar=el('div','map-toolbar');toolbar.append(btn('Undo','soft-button',undo),btn('Redo','soft-button',redo));refs.world.append(toolbar);
  // Start in the top-left, where the first ideas are located.

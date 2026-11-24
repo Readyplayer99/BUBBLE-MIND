@@ -133,6 +133,7 @@ function connection(container){
  key.control.addEventListener('input',store);model.control.addEventListener('input',store);
  panel.append(key.wrap,model.wrap,btn('Forget API key','soft-button',()=>{key.control.value='';store();toast('Key cleared')}));
  container.append(panel);
+ window.BubbleMindModelPicker?.mount(model.control);
 }
 function documentView(container){
  connection(container);

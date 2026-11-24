@@ -291,7 +291,7 @@ function buildSettings(host,status){
  let stored=null;try{stored=JSON.parse(localStorage.getItem(SETTINGS_KEY)||'null')}catch(_){}
  remember.checked=!!stored?.remember;
  checkLabel.append(remember,document.createTextNode(' Remember API key on this device'));
- const warning=el('p','unified-security','The key is saved in this browser’s local storage, unencrypted, if you enable Remember. Anyone with access to this browser or a malicious extension may be able to read it. Do not use this option on a shared device.');
+ const warning=el('p','unified-security','If Remember is enabled, the key is stored unencrypted in this browser. Other scripts on this website origin, browser extensions or anyone with access to this browser may be able to read it. Use a spending-limited key and avoid this on shared devices.');
  const sync=()=>{
   B.setAI(keyInput.value.trim(),modelInput.value.trim());
   try{
@@ -421,7 +421,7 @@ function studio(){
      review(tree,work,status);
      if(typed){chat.messages=transcript;composer.value='';chat.composerDraft='';save();renderHistory(history)}
     }
-   }catch(err){if(mode==='send'&&chat.messages.at(-1)?.role==='assistant'&&chat.messages.at(-1).content){save();status.textContent='Connection interrupted; received reply preserved. '+short(err.message,180)}else status.textContent=ctrl.signal.aborted?'Request canceled. No bubbles created.':'AI request failed: '+short(err.message,280)}
+   }catch(err){if(mode==='send'&&chat.messages.at(-1)?.role==='assistant'){if(chat.messages.at(-1).content){save();status.textContent='Connection interrupted; received reply preserved. '+short(err.message,180)}else{chat.messages.pop();save();renderHistory(history);status.textContent=ctrl.signal.aborted?'Reply canceled.':'AI request failed: '+short(err.message,280)}}else status.textContent=ctrl.signal.aborted?'Request canceled. No bubbles created.':'AI request failed: '+short(err.message,280)}
    finally{chat.abort=null;busy(false)}
   }
   composer.addEventListener('keydown',e=>{

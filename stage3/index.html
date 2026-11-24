@@ -210,6 +210,9 @@ background-size:100% 100%,100% 100%,100% 100%,163px 173px,227px 193px,283px 239p
 .home-static-toggle[aria-pressed=true]{background:#46638c;border-color:#bfd3ff;color:#fff}
 .home-found .bubble{outline:6px solid #aed0ff;outline-offset:8px;box-shadow:0 0 0 12px #669dff35,0 0 55px #9bc6ff88;z-index:5}
 @media(max-width:680px){.home-map-top{gap:8px}.home-search-wrap{min-width:100%;max-width:none}.home-map-top>.help-text{display:none}}
+.home-map-view{touch-action:none;cursor:grab}
+.home-map-view.home-panning{cursor:grabbing}
+.home-map-view .home-free-slot,.home-map-view .home-new-control{cursor:default}
 </style>
 </head>
 <body>
@@ -442,10 +445,75 @@ function renderHome(){
   view.scrollLeft=worldX*next-pointerX;
   view.scrollTop=worldY*next-pointerY;
  },{passive:false});
+ // Mouse drag and touch gestures operate on the home map, not on individual ideas.
+ // One pointer pans; two touch pointers pinch around their midpoint.
+ const activePointers=new Map();
+ let gesture=null,suppressClickUntil=0;
+ const point=e=>({x:e.clientX,y:e.clientY});
+ const midpoint=(a,b)=>({x:(a.x+b.x)/2,y:(a.y+b.y)/2});
+ const distance=(a,b)=>Math.hypot(a.x-b.x,a.y-b.y);
+ const minHomeZoom=()=>Math.min(1,Math.max(1,view.clientWidth-8)/HOME_SIZE,Math.max(1,view.clientHeight-8)/HOME_SIZE);
+ function startPan(p){
+  gesture={kind:'pan',origin:p,scrollX:view.scrollLeft,scrollY:view.scrollTop,moved:false};
+  view.classList.add('home-panning');
+ }
+ function startPinch(){
+  if(activePointers.size<2)return;
+  const [a,b]=[...activePointers.values()];
+  const mid=midpoint(a,b);
+  const rect=view.getBoundingClientRect();
+  const localX=mid.x-rect.left-view.clientLeft,localY=mid.y-rect.top-view.clientTop;
+  gesture={kind:'pinch',distance:Math.max(1,distance(a,b)),zoom:homeZoom,
+   worldX:(view.scrollLeft+localX)/homeZoom,worldY:(view.scrollTop+localY)/homeZoom,moved:true};
+  view.classList.add('home-panning');
+ }
+ view.addEventListener('pointerdown',e=>{
+  if(e.pointerType==='mouse'&&e.button!==0)return;
+  if(e.target.closest('.home-new-control,button,input'))return;
+  // Touch starts on a bubble may still become a two-finger pinch.
+  activePointers.set(e.pointerId,point(e));
+  if(activePointers.size===1){
+   if(e.target.closest('.home-free-slot'))gesture={kind:'bubble'};
+   else startPan(point(e));
+  }else if(activePointers.size===2)startPinch();
+  try{view.setPointerCapture(e.pointerId)}catch(_){}
+ });
+ view.addEventListener('pointermove',e=>{
+  if(!activePointers.has(e.pointerId))return;
+  activePointers.set(e.pointerId,point(e));
+  if(activePointers.size>=2){
+   if(gesture?.kind!=='pinch')startPinch();
+   const [a,b]=[...activePointers.values()];
+   const mid=midpoint(a,b),rect=view.getBoundingClientRect();
+   const localX=mid.x-rect.left-view.clientLeft,localY=mid.y-rect.top-view.clientTop;
+   const next=Math.max(minHomeZoom(),Math.min(1,gesture.zoom*distance(a,b)/gesture.distance));
+   setHomeZoom(next);
+   view.scrollLeft=gesture.worldX*next-localX;
+   view.scrollTop=gesture.worldY*next-localY;
+   suppressClickUntil=performance.now()+500;
+  }else if(gesture?.kind==='pan'){
+   const deltaX=e.clientX-gesture.origin.x,deltaY=e.clientY-gesture.origin.y;
+   if(Math.hypot(deltaX,deltaY)>5){gesture.moved=true;suppressClickUntil=performance.now()+500}
+   if(gesture.moved){view.scrollLeft=gesture.scrollX-deltaX;view.scrollTop=gesture.scrollY-deltaY}
+  }
+ });
+ const pointerEnd=e=>{
+  if(!activePointers.has(e.pointerId))return;
+  activePointers.delete(e.pointerId);
+  if(gesture?.moved||gesture?.kind==='pinch')suppressClickUntil=performance.now()+500;
+  if(activePointers.size===1){startPan([...activePointers.values()][0])}
+  else if(!activePointers.size){gesture=null;view.classList.remove('home-panning')}
+ };
+ view.addEventListener('pointerup',pointerEnd);
+ view.addEventListener('pointercancel',pointerEnd);
+ view.addEventListener('lostpointercapture',pointerEnd);
+ view.addEventListener('click',e=>{
+  if(performance.now()<suppressClickUntil){e.preventDefault();e.stopImmediatePropagation()}
+ },true);
  const control=el('div','home-new-control');
  control.append(btn('+ New idea','map-control',()=>addNode(null)));
  view.prepend(control);refs.world.append(view);
- refs.world.append(el('p','home-map-help','Mouse wheel to zoom · Fit all to reset · Every visit scatters the bubbles again'));
+ refs.world.append(el('p','home-map-help','Wheel or pinch to zoom · Drag empty space to move · Fit all to reset'));
  const toolbar=el('div','map-toolbar');toolbar.append(btn('Undo','soft-button',undo),btn('Redo','soft-button',redo));refs.world.append(toolbar);
  // Start with the entire galaxy in view, on phone and PC.
  fitHomeWorkspace();

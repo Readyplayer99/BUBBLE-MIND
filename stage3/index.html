@@ -472,11 +472,16 @@ function renderHome(){
   if(e.target.closest('.home-new-control,button,input'))return;
   // Touch starts on a bubble may still become a two-finger pinch.
   activePointers.set(e.pointerId,point(e));
+  const onBubble=!!e.target.closest('.home-free-slot');
   if(activePointers.size===1){
-   if(e.target.closest('.home-free-slot'))gesture={kind:'bubble'};
+   if(onBubble)gesture={kind:'bubble'};
    else startPan(point(e));
   }else if(activePointers.size===2)startPinch();
-  try{view.setPointerCapture(e.pointerId)}catch(_){}
+  // Capturing a simple tap on a button would retarget its click to the viewport.
+  // Do not capture a single bubble touch; its pointer events still bubble here.
+  if(!onBubble||activePointers.size>=2){
+   try{view.setPointerCapture(e.pointerId)}catch(_){}
+  }
  });
  view.addEventListener('pointermove',e=>{
   if(!activePointers.has(e.pointerId))return;

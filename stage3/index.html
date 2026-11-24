@@ -186,7 +186,7 @@ background-size:100% 100%,100% 100%,100% 100%,163px 173px,227px 193px,283px 239p
 .home-map-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin:12px 0 9px}
 .home-zoom-group{display:flex;align-items:center;gap:8px;color:#bfd0ed;font-size:12px}
 .home-zoom{width:115px;accent-color:#a4baff}.home-zoom-label{min-width:38px}
-.home-map-view{width:100%;height:min(67dvh,720px);min-height:360px;overflow:auto;overscroll-behavior:contain;position:relative;border:2px solid #8caef5a8;border-radius:18px;background:radial-gradient(ellipse at 40% 35%,#483a8a33,transparent 50%),radial-gradient(ellipse at 70% 75%,#2167b744,transparent 65%),#081126;box-shadow:inset 0 0 35px #080d24,0 10px 30px #04061288}
+.home-map-view{width:100%;height:min(67dvh,720px);min-height:360px;overflow:auto;overscroll-behavior:contain;position:relative;border:2px solid #8caef5a8;border-radius:18px;background:rgba(5,12,31,.13);box-shadow:inset 0 0 35px #080d2455,0 10px 30px #04061235}
 .home-map-stage{position:relative;min-width:0;min-height:0;overflow:hidden}
 .home-map-layer{position:absolute;top:0;left:0;width:4200px;height:4200px;transform-origin:0 0;contain:layout style}
 .home-free-slot{position:absolute;display:flex;align-items:center;justify-content:center;width:var(--slot-size,190px);height:var(--slot-size,190px);will-change:transform}
@@ -285,7 +285,34 @@ function connections(nodeId){const n=byId(nodeId);if(!n)return;dialog('Connectio
 function goTo(id){if(!id||!byId(id))return;state.currentId=id;state.pan={x:0,y:0,k:1};render()}
 function navigate(id){if(state.transition||id===state.currentId)return;state.transition=true;const old=refs.world.querySelector('.map-viewport')||refs.world.querySelector('.bubble-home')||refs.world.querySelector('.bubble-create');if(!old||reduced()){state.currentId=id;state.pan={x:0,y:0,k:1};render();state.transition=false;return}const portal=el('div','portal');portal.style.cssText='left:calc(50% - 65px);top:calc(50% - 65px);width:130px;height:130px;opacity:.85';$('portal-root').append(portal);const anim=portal.animate([{transform:'scale(.7)',opacity:0},{transform:'scale(14)',opacity:.98}],{duration:330,easing:'cubic-bezier(.2,.7,.25,1)',fill:'forwards'});anim.finished.catch(()=>{}).then(()=>{state.currentId=id;state.pan={x:0,y:0,k:1};render();return portal.animate([{opacity:1},{opacity:0}],{duration:160,fill:'forwards'}).finished.catch(()=>{})}).finally(()=>{portal.remove();state.transition=false})}
 function renderHeader(){$('app').classList.toggle('inside',!!state.currentId);refs.crumbs.replaceChildren();const path=getPath(state.currentId);const home=btn('Home','crumb-link',()=>navigate(null));refs.crumbs.append(home);for(const item of path){refs.crumbs.append(el('span','crumb-divider','›'));const b=item.id===state.currentId?el('span','crumb-current',item.title):btn(item.title,'crumb-link',()=>navigate(item.id));refs.crumbs.append(b)}const title=state.currentId?byId(state.currentId)?.title:'Your ideas, in motion.';refs.intro.replaceChildren();refs.intro.append(el('p','eyebrow','BUBBLE MIND · STAGE 3'),el('h1','',title||(state.nodes.length?'Your ideas, in motion.':'Every universe begins with a thought.')),el('p','sub',state.currentId?'Create, connect, arrange or explore the thoughts inside this bubble.':state.nodes.length?'Each bubble is a world of ideas. Tap to explore.':'Start with one idea and build from there.'));document.body.classList.toggle('motion-override',state.motionOverride);const animated=state.motion&&!reduced();refs.motion.classList.toggle('selected',animated);refs.motion.setAttribute('aria-pressed',String(animated));refs.motion.title=state.motion&&reduced()?'Motion blocked by your system settings — tap to enable here':animated?'Pause bubbles':'Animate bubbles';$('new-button').title='Create a new bubble'}
-const HOME_SIZE=4200,HOME_PAD=25,HOME_PITCH=255;
+const HOME_SIZE=4200,HOME_PAD=25;
+function scatterHomeIdeas(nodes){
+ const placed=[],cells=new Map(),size=240;
+ const random=Math.random;
+ const place=(p)=>{placed.push(p);const key=Math.floor(p.x/size)+','+Math.floor(p.y/size);if(!cells.has(key))cells.set(key,[]);cells.get(key).push(p)};
+ const free=(x,y,r)=>{const gx=Math.floor(x/size),gy=Math.floor(y/size);for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++)for(const p of cells.get((gx+dx)+','+(gy+dy))||[]){if(Math.hypot(p.x-x,p.y-y)<r+p.r+16)return false}return true};
+ const shuffled=[...nodes];
+ for(let i=shuffled.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[shuffled[i],shuffled[j]]=[shuffled[j],shuffled[i]]}
+ for(const node of shuffled){
+  const r=bubbleDiameter(node,'home')/2,edge=r+HOME_PAD;
+  let x=HOME_SIZE/2,y=HOME_SIZE/2,found=false;
+  for(let attempt=0;attempt<450;attempt++){
+   const tx=edge+random()*(HOME_SIZE-edge*2),ty=edge+random()*(HOME_SIZE-edge*2);
+   if(free(tx,ty,r)){x=tx;y=ty;found=true;break}
+  }
+  if(!found){
+   let best=-Infinity;
+   for(let attempt=0;attempt<100;attempt++){
+    const tx=edge+random()*(HOME_SIZE-edge*2),ty=edge+random()*(HOME_SIZE-edge*2);
+    let gap=HOME_SIZE;
+    for(const p of placed)gap=Math.min(gap,Math.hypot(p.x-tx,p.y-ty)-p.r-r);
+    if(gap>best){best=gap;x=tx;y=ty}
+   }
+  }
+  place({node,x,y,r});
+ }
+ return placed;
+}
 let homeScene=null,homeItems=[],homeFrameTime=0;
 function renderHome(){
  homeScene=null;homeItems=[];homeFrameTime=0;
@@ -300,7 +327,7 @@ function renderHome(){
  }
  const strip=el('div','home-map-top');
  strip.append(el('span','help-text',top.length+' ideas · Galaxy workspace · 250 extra-large slots'));
- const zoom=el('input','home-zoom');zoom.type='range';zoom.min='35';zoom.max='100';zoom.value=String(Math.round(homeZoom*100));zoom.step='5';
+ const zoom=el('input','home-zoom');zoom.type='range';zoom.min='1';zoom.max='100';zoom.value=String(Math.round(homeZoom*100));zoom.step='1';
  zoom.setAttribute('aria-label','Home galaxy zoom');
  const zl=el('span','home-zoom-label',Math.round(homeZoom*100)+'%');
  zoom.addEventListener('input',()=>{
@@ -316,31 +343,41 @@ function renderHome(){
   zl.textContent=Math.round(newZoom*100)+'%';
  });
  const zoomGroup=el('label','home-zoom-group');zoomGroup.append('Zoom ',zoom,zl);
- strip.append(zoomGroup);refs.world.append(strip);
+ zoomGroup.append(btn('Fit all','map-control',()=>fitHomeWorkspace()));strip.append(zoomGroup);refs.world.append(strip);
  const view=el('div','home-map-view');view.setAttribute('aria-label','Large bordered home galaxy: scroll to explore');
  view.tabIndex=0;const stage=el('div','home-map-stage'),layer=el('div','home-map-layer');
  stage.style.width=(HOME_SIZE*homeZoom)+'px';stage.style.height=(HOME_SIZE*homeZoom)+'px';
  layer.style.transform='scale('+homeZoom+')';stage.append(layer);view.append(stage);
- const cols=16,slotP=HOME_PITCH;
- for(let i=0;i<top.length;i++){
-  const n=top[i],diameter=bubbleDiameter(n,'home'),radius=diameter/2;
-  const col=i%cols,row=Math.floor(i/cols);
-  const x=HOME_PAD+col*slotP+(slotP/2),y=HOME_PAD+row*slotP+(slotP/2);
+ const positions=scatterHomeIdeas(top);
+ for(const p of positions){
+  const n=p.node,diameter=bubbleDiameter(n,'home'),radius=diameter/2;
+  const x=p.x,y=p.y;
   const slot=el('div','home-free-slot');slot.style.setProperty('--slot-size',diameter+'px');
   slot.style.left=(x-radius)+'px';slot.style.top=(y-radius)+'px';
   const bubble=bubbleButton(n,'bubble-home');slot.append(bubble,editIcon(n));layer.append(slot);
   homeItems.push({el:slot,id:n.id,x,y,vx:0,vy:0,r:radius,seed:floatHash(n.id),phase:(floatHash(n.id)%628)/100});
  }
- homeScene={view,stage,layer};
+ homeScene={view,stage,layer,zoom,zl};
  const control=el('div','home-new-control');
  control.append(btn('+ New idea','map-control',()=>addNode(null)));
  view.prepend(control);refs.world.append(view);
- refs.world.append(el('p','home-map-help','Scroll to explore the galaxy · Use zoom to see more ideas · Bubbles stay within the border'));
+ refs.world.append(el('p','home-map-help','Home starts zoomed out · Zoom to explore · Every visit scatters the bubbles again'));
  const toolbar=el('div','map-toolbar');toolbar.append(btn('Undo','soft-button',undo),btn('Redo','soft-button',redo));refs.world.append(toolbar);
- // Start in the top-left, where the first ideas are located.
- view.scrollLeft=0;view.scrollTop=0;
+ // Start with the entire galaxy in view, on phone and PC.
+ fitHomeWorkspace();
 }
 let homeZoom=1;
+function fitHomeWorkspace(){
+ if(!homeScene)return;
+ const {view,stage,layer,zoom,zl}=homeScene;
+ homeZoom=Math.min(1,Math.max(1,view.clientWidth-8)/HOME_SIZE,Math.max(1,view.clientHeight-8)/HOME_SIZE);
+ stage.style.width=(HOME_SIZE*homeZoom)+'px';
+ stage.style.height=(HOME_SIZE*homeZoom)+'px';
+ layer.style.transform='scale('+homeZoom+')';
+ zoom.value=String(Math.max(1,Math.round(homeZoom*100)));
+ zl.textContent=(homeZoom*100).toFixed(1)+'%';
+ view.scrollLeft=0;view.scrollTop=0;
+}
 function bubbleDiameter(n,context='map'){const base=context==='home'?136:context==='centre'?154:112;return Math.round(base*Math.max(.7,Math.min(1.4,Number(n.size)||1)))}
 function bubbleButton(n,cls=''){
  const b=btn('',`bubble ${cls} ${state.motion&&!reduced()?'bubble-floating':''}`,()=>navigate(n.id));

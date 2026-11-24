@@ -981,7 +981,7 @@ function openAIAssistant(){
   const forget=btn('Forget key','soft-button',()=>{aiKey='';key.value='';status.textContent='Key cleared from app memory'});
   d.append(forget);
   const model=makeInput('Model ID from OpenRouter','text',aiModel,'Example: openai/gpt-4o-mini');
-  model.addEventListener('input',()=>{aiModel=model.value.trim()});
+  model.addEventListener('input',()=>{aiModel=model.value.trim();check.checked=false});
   const scopeLabel=el('label','ai-field'),scope=el('select','ai-input');
   scopeLabel.append(el('span','','Select idea context'));
   const homeOption=el('option','','Home — main bubbles');homeOption.value='';scope.append(homeOption);
@@ -992,7 +992,7 @@ function openAIAssistant(){
   for(const [name,task] of Object.entries(aiTasks)){const opt=el('option','',task.label);opt.value=name;kind.append(opt)}
   kindLabel.append(kind);d.append(kindLabel);
   const guide=el('textarea','ai-input ai-guide');guide.rows=3;guide.placeholder='Optional directions — e.g. darker and more grounded ideas';
-  guide.setAttribute('aria-label','Optional AI guidance');d.append(guide);
+  guide.setAttribute('aria-label','Optional AI guidance');guide.addEventListener('input',()=>{check.checked=false;refreshPreview()});d.append(guide);
   const preview=el('details','ai-preview');const summary=el('summary','','Preview shared context');
   const share=el('pre','ai-share');preview.append(summary,share);d.append(preview);
   const note=el('p','stage4-muted'),consent=el('label','ai-consent'),check=el('input');
@@ -1001,7 +1001,7 @@ function openAIAssistant(){
   const actions=el('div','stage4-actions'),send=btn('Generate suggestions','primary-button',()=>{}),abort=btn('Cancel request','soft-button',()=>{aiBusy?.abort()});
   abort.disabled=true;actions.append(send,abort);d.append(actions);
   const status=el('p','stage4-muted','No data has been sent.'),results=el('div','ai-results');d.append(status,results);
-  function refreshPreview(){const data=aiContext(scope.value||null);share.textContent=JSON.stringify(data,null,2);note.textContent=data.bubbles.length+' bubble summaries; selected notes limited to 400 characters. Other notes are not sent.';check.checked=false}
+  function refreshPreview(){const data=aiContext(scope.value||null);share.textContent=JSON.stringify({task:kind.value,instruction:aiTasks[kind.value].instruction,userGuidance:aiClean(guide.value,2000),context:data},null,2);note.textContent=data.bubbles.length+' bubble summaries; selected notes limited to 400 characters. Other notes are not sent.';check.checked=false}
   scope.addEventListener('change',refreshPreview);kind.addEventListener('change',refreshPreview);refreshPreview();
   function approvedRow(label,description,apply){
    const row=el('div','ai-result'),heading=el('strong','',label),desc=el('p','stage4-muted',description),msg=el('small','ai-feedback'),button=btn('Apply','soft-button',()=>{

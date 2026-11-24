@@ -122,8 +122,10 @@ async function contextMessages(transcript,signal,status){
    let previous=chat.summary;
    for(let i=0;i<old.length;i+=12){
     const excerpt=old.slice(i,i+12).map(m=>(m.role==='user'?'User':'Assistant')+': '+m.content).join('\n\n');
-    const prompt='Maintain a faithful running summary of an ongoing chat. Preserve exact story ideas, names, relationships, decisions, rejected ideas, constraints, uncertainties and next questions. Do not fabricate facts. Previous running summary:\n'+previous+'\nNew messages:\n'+excerpt.slice(0,24000);
-    previous=await request([{role:'user',content:prompt}],signal,3000);
+    for(let j=0;j<excerpt.length;j+=16000){
+     const prompt='Maintain a faithful running summary of an ongoing chat. Preserve exact story ideas, names, relationships, decisions, rejected ideas, constraints, uncertainties and next questions. Do not fabricate facts. Previous running summary:\n'+previous+'\nNew messages (part):\n'+excerpt.slice(j,j+16000);
+     previous=await request([{role:'user',content:prompt}],signal,3500);
+    }
    }
    chat.summary=previous.slice(0,16000);chat.summarizedThrough=end;save();boundary=end;
   }
@@ -139,7 +141,7 @@ function flatten(data){
  function walk(node,parent,depth){
   if(!node||typeof node!=='object'||seen.has(node)||depth>5||list.length>=110)return;
   seen.add(node);
-  const entry={parent,depth,title:short(node.title,100)||'Untitled',description:short(node.description,2000),notes:short(node.notes,30000),use:true};
+  const entry={parent,depth,title:short(node.title,100)||'Untitled',description:short(node.description,2000),notes:short(node.notes,30000),use:true,subnodes:(Array.isArray(node.subnodes)?node.subnodes:[]).slice(0,10).map(x=>({title:short(x?.title,100)||'Details',body:short(x?.body,30000),use:true}))};
   list.push(entry);const index=list.length-1;
   for(const child of Array.isArray(node.children)?node.children.slice(0,100):[])walk(child,index,depth+1);
  }
@@ -162,8 +164,13 @@ function approvedCreate(list,existingParent){
  });
  const success=B.change(()=>{
   state.nodes.push(...items);
-  for(let i=0;i<items.length;i++)if(active[i].notes)state.notes[items[i].id]=active[i].notes;
- },'Added '+items.length+' approved bubbles');
+  for(let i=0;i<items.length;i++){
+   if(active[i].notes)state.notes[items[i].id]=active[i].notes;
+   for(const sub of active[i].subnodes.filter(x=>x.use)){
+    state.subnodes.push({id:B.id(),ownerId:items[i].id,title:sub.title.slice(0,100),body:sub.body.slice(0,30000)});
+   }
+  }
+ },'Added '+items.length+' approved bubbles and details');
  if(!success)throw Error('Could not save the approved bubble map');
  return items.length;
 }
@@ -191,7 +198,18 @@ function review(result,region,status){
   name.addEventListener('input',()=>item.title=short(name.value,100));
   description.addEventListener('input',()=>item.description=short(description.value,2000));
   notes.addEventListener('input',()=>item.notes=short(notes.value,30000));
-  row.append(el('span','unified-tree-path',i===0?'Main idea':'Level '+item.depth),toggle,name,description,notes);scroll.append(row);
+  row.append(el('span','unified-tree-path',i===0?'Main idea':'Level '+item.depth),toggle,name,description,notes);
+  for(const sub of item.subnodes){
+   const info=el('div','unified-detail-preview'),label=el('label','unified-include'),include=el('input');
+   include.type='checkbox';include.checked=true;include.addEventListener('change',()=>sub.use=include.checked);
+   label.append(include,document.createTextNode(' Attached information sub-node'));
+   const title=mkInput('input','Sub-node title','Sub-node title'),body=mkInput('textarea','Click-through information','Sub-node information');
+   title.value=sub.title;body.value=sub.body;body.rows=3;
+   title.addEventListener('input',()=>sub.title=short(title.value,100));
+   body.addEventListener('input',()=>sub.body=short(body.value,30000));
+   info.append(label,title,body);row.append(info);
+  }
+  scroll.append(row);
  });
  review.append(scroll);
  const commands=el('div','unified-buttons'),commit=btn('Approve & Create Bubbles','primary-button',()=>{
@@ -338,7 +356,7 @@ function studio(){
      if(chat.saveError)status.textContent+=' Warning: browser storage is full. Copy or export your chat before leaving.';
     }else{
      status.textContent='Designing a parent and child bubble hierarchy for your review…';
-     const guide='Convert this conversation into one or more well-organized bubble hierarchies for the ideas discussed. Respond ONLY as a JSON object of this exact form: {"title":"Main idea or project title","description":"short overview","notes":"rich detail","children":[{"title":"Plot / Characters / Worldbuilding / etc when relevant","description":"short summary","notes":"specific detailed notes","children":[{"title":"Specific subtopic","description":"details","notes":"more detail"}]}]}. Use meaningful categories appropriate to ANY idea, not only books. Include only what the user explored, agreed to, or explicitly asked for. Label uncertainty, contradictions, and unchosen alternatives. Preserve specific details. Aim for a useful structure with up to 80 bubbles and 5 levels. Avoid generic empty categories. Do not treat previous AI speculation as settled decisions.';
+     const guide='Convert this conversation into one or more well-organized bubble hierarchies for the ideas discussed. Respond ONLY as a JSON object of this exact form: {"title":"Main idea or project title","description":"short overview","notes":"brief parent notes","subnodes":[{"title":"Detailed information","body":"full clickable content kept off the map"}],"children":[{"title":"Plot / Characters / Worldbuilding / etc when relevant","description":"short summary","notes":"brief summary","subnodes":[{"title":"Information","body":"detailed facts, descriptions and context"}],"children":[{"title":"Specific subtopic","description":"short description","notes":"summary","subnodes":[{"title":"Detail page","body":"long information"}]}]}]}. When an idea is a location, character, item, worldbuilding feature or other detailed concept, put its full information into attached subnodes (not additional visible child bubbles). Visible child bubbles should organize concepts and categories. Use meaningful categories appropriate to ANY idea, not only books. Include only what the user explored, agreed to, or explicitly asked for. Label uncertainty, contradictions, and unchosen alternatives. Preserve specific details. Aim for a useful structure with up to 80 bubbles and 5 levels. Avoid generic empty categories. Do not treat previous AI speculation as settled decisions.';
      const context=await contextMessages(transcript,ctrl.signal,status);
      const answer=await request([...context,{role:'user',content:guide}],ctrl.signal,10000);
      const tree=parseJSON(answer);

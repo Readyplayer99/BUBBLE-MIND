@@ -128,7 +128,7 @@ async function streamReply(messages,signal,onDelta){
   while(true){
    const {value,done}=await reader.read();
    if(done)break;
-   buffer+=decoder.decode(value,{stream:true}).replace(/\r\n/g,'\n');
+   buffer+=decoder.decode(value,{stream:true});buffer=buffer.replace(/\r\n/g,'\n');
    let split;
    while((split=buffer.indexOf('\n\n'))>=0){
     const item=buffer.slice(0,split);buffer=buffer.slice(split+2);event(item);

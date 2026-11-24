@@ -335,7 +335,7 @@ function updateMapLinks(){
  const move=(line,a,b)=>{
   line.setAttribute('x1',a.x);line.setAttribute('y1',a.y);line.setAttribute('x2',b.x);line.setAttribute('y2',b.y);
  };
- const origin={x:0,y:0};
+ const origin=floatMap?.centerPos||{x:0,y:0};
  for(const entry of mapLinkParts.family){const p=display.get(entry.nodeId);if(p)move(entry.line,origin,p)}
  for(const entry of mapLinkParts.relationships){
   const a=entry.link.from===parent?origin:display.get(entry.link.from);
@@ -428,7 +428,7 @@ function renderInside(){const parent=byId(state.currentId);if(!parent){state.cur
   const list=el('div','menu');
   for(const [name,fn] of [['Write notes',()=>openNotes(parent.id)],['Add child bubble',()=>addNode(parent.id)],['Edit central idea',()=>editNode(parent.id)],['Relationships',()=>connections(parent.id)],['Back one level',()=>navigate(parent.parentId)]])list.append(btn(name,'soft-button',()=>{close();fn()}));
   d.append(list)
- })));tools.append(el('span','tether-mode-label','Tether drift · children move freely'));refs.world.append(tools);
+ })));tools.append(el('span','tether-mode-label','Tether drift · parent + children float'));refs.world.append(tools);
  viewport=el('div','map-viewport');viewport.setAttribute('aria-label','Idea mind map');canvas=el('div','map-canvas');svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.classList.add('map-svg');canvas.append(svg);const centre=el('div','map-centre');centre.style.setProperty('--core-size',bubbleDiameter(parent,'centre')+'px');const c=bubbleButton(parent,'bubble-focus');c.onclick=null;c.addEventListener('click',e=>{e.stopImmediatePropagation();editNode(parent.id)},true);centre.append(c);centre.append(btn('✎','map-chip',()=>editNode(parent.id)));canvas.append(centre);
  const children=kids(parent.id),positions=layoutPositions(children);display=new Map();children.forEach((n)=>{const p=positions.get(n.id);display.set(n.id,p);const slot=el('div','map-node');slot.dataset.id=n.id;slot.style.setProperty('--slot-size',bubbleDiameter(n)+'px');slot.style.transform=`translate(${p.x-bubbleDiameter(n)/2}px,${p.y-bubbleDiameter(n)/2}px)`;const bub=bubbleButton(n);bub.classList.toggle('bubble-floating',state.motion&&!reduced());slot.append(bub,btn('⋯','map-chip',()=>editNode(n.id)));canvas.append(slot);wireDrag(slot,n,p)});viewport.append(canvas);const panHelp=el('p','map-pan-help','Drag empty space to pan · Scroll or pinch to zoom');const reset=btn('Center view','map-control map-reset',()=>{state.pan={x:0,y:0,k:1};applyPan()});viewport.append(reset);refs.world.append(viewport,panHelp);applyPan();updateMapLinks();wirePan(viewport);
  const stats=el('div','map-summary',`${children.length} child bubbles · ${state.links.filter(l=>l.from===parent.id||l.to===parent.id||display.has(l.from)&&display.has(l.to)).length} labelled links`);refs.world.append(stats);
@@ -444,6 +444,7 @@ function stopBubbleFloat(){
  for(const el of floatEls)el.style.removeProperty('translate');
  floatEls=[];floatStart=0;
  if(floatMap){
+  if(floatMap.centerEl)floatMap.centerEl.style.removeProperty('translate');
   for(const item of floatMap.items)item.slot.style.removeProperty('translate');
   display=new Map(floatMap.baseline);
   floatMap=null;
@@ -464,7 +465,7 @@ function startBubbleFloat(){
    return{node,slot,initial,x:initial.x,y:initial.y,vx:0,vy:0,phase:(seed%628)/100,slow:(seed%7)/10,
     r:bubbleDiameter(node)/2,orbit:85+seed%55};
   }).filter(x=>x.node&&x.slot);
-  floatMap={baseline,items};
+  floatMap={baseline,items,centerEl:canvas.querySelector('.map-centre'),centerPos:{x:0,y:0}};
  }
  const tick=now=>{
   if(!state.motion||reduced()||document.hidden){stopBubbleFloat();return}
@@ -476,8 +477,16 @@ function startBubbleFloat(){
    item.el.style.translate=x.toFixed(1)+'px '+y.toFixed(1)+'px';
   }
   if(floatMap){
-   const fm=floatMap,items=fm.items,dt=1/60;
+   const fm=floatMap,items=fm.items;
    const centre=byId(state.currentId),centreRadius=centre?bubbleDiameter(centre,'centre')/2:77;
+   // Parent gently explores the available space. Children follow its motion
+   // but also keep their own independent tether drift.
+   const roomX=Math.max(0,viewport.clientWidth/(state.pan.k||1)/2-centreRadius-26);
+   const roomY=Math.max(0,viewport.clientHeight/(state.pan.k||1)/2-centreRadius-26);
+   const cx=Math.sin(t*.34+.45)*Math.min(38,roomX*.56)+Math.sin(t*.19+1.6)*Math.min(13,roomX*.18);
+   const cy=Math.cos(t*.29+.8)*Math.min(31,roomY*.56)+Math.sin(t*.23+.4)*Math.min(12,roomY*.18);
+   fm.centerPos={x:cx,y:cy};
+   if(fm.centerEl)fm.centerEl.style.translate=cx.toFixed(1)+'px '+cy.toFixed(1)+'px';
    const w=viewport.clientWidth/(state.pan.k||1),h=viewport.clientHeight/(state.pan.k||1);
    const left=-w/2-state.pan.x/(state.pan.k||1),right=w/2-state.pan.x/(state.pan.k||1);
    const top=-h/2-state.pan.y/(state.pan.k||1),bottom=h/2-state.pan.y/(state.pan.k||1);
@@ -486,22 +495,22 @@ function startBubbleFloat(){
     const a=item.phase,slow=item.slow;
     // Visible, independent motion: each node follows its own wandering path
     // approximately 85-140 map pixels from its anchor, instead of a tiny bob.
-    const tx=item.initial.x
+    const tx=item.initial.x+cx
       +Math.sin(t*(.54+slow*.18)+a)*item.orbit
       +Math.sin(t*.91+a*1.73)*22;
-    const ty=item.initial.y
+    const ty=item.initial.y+cy
       +Math.cos(t*(.42+slow*.16)+a*1.29)*item.orbit*.82
       +Math.sin(t*.77+a*.73)*23;
     item.vx=(item.vx+(tx-item.x)*.095)*.84;
     item.vy=(item.vy+(ty-item.y)*.095)*.84;
     item.x+=item.vx;item.y+=item.vy;
     // Tether: an independent child can wander, but cannot drift away from its own layout anchor.
-    const dx=item.x-item.initial.x,dy=item.y-item.initial.y;
+    const dx=item.x-(item.initial.x+cx),dy=item.y-(item.initial.y+cy);
     const travel=Math.hypot(dx,dy),range=155;
-    if(travel>range){const k=range/travel;item.x=item.initial.x+dx*k;item.y=item.initial.y+dy*k;item.vx*=.55;item.vy*=.55}
+    if(travel>range){const k=range/travel;item.x=item.initial.x+cx+dx*k;item.y=item.initial.y+cy+dy*k;item.vx*=.55;item.vy*=.55}
     // The center is fixed for editing. Children never cover the parent.
-    const d=Math.hypot(item.x,item.y),minD=centreRadius+item.r+19;
-    if(d<minD){const k=minD/Math.max(d,.01);item.x*=k;item.y*=k;item.vx*=.45;item.vy*=.45}
+    const px=item.x-cx,py=item.y-cy,d=Math.hypot(px,py),minD=centreRadius+item.r+19;
+    if(d<minD){const k=minD/Math.max(d,.01);item.x=cx+px*k;item.y=cy+py*k;item.vx*=.45;item.vy*=.45}
     // Keep initially visible children within the viewport; off-screen user layout is never overwritten.
     const m=item.r+12;
     if(item.initial.x>=left+m&&item.initial.x<=right-m){

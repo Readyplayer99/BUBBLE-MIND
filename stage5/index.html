@@ -243,7 +243,7 @@ background-size:100% 100%,100% 100%,100% 100%,163px 173px,227px 193px,283px 239p
  .brand-title{font-size:19px;letter-spacing:-.8px;overflow:hidden;text-overflow:ellipsis}
  .brand-sub{display:none}
  .top-actions{flex:none;gap:6px;min-width:0}
- .top-actions #motion-button,.top-actions #search-button,.top-actions #outline-button,.top-actions #backup-button,.top-actions #ai-button{display:none!important}
+ .top-actions #motion-button,.top-actions #search-button,.top-actions #outline-button,.top-actions #backup-button,.top-actions #ai-button,.top-actions #story-studio-button{display:none!important}
  .top-actions .header-create{display:flex;align-items:center;justify-content:center;padding:7px 9px;min-width:44px;height:40px;border-radius:11px;font-size:0}
  .top-actions .header-create span:first-child{font-size:25px;line-height:1}
  .top-actions .header-create span:last-child{display:none}
@@ -305,7 +305,7 @@ background-size:100% 100%,100% 100%,100% 100%,163px 173px,227px 193px,283px 239p
       <div class="brand"><div class="brand-symbol" aria-hidden="true"><span></span><span></span><span></span></div><div><div class="brand-title">bubble mind<span class="brand-period">.</span></div><div class="brand-sub">EVERY IDEA HAS A UNIVERSE · STAGE 5</div></div></div>
       <div class="top-actions">
         <button class="icon-action" id="motion-button" aria-label="Toggle floating motion" title="Toggle floating motion"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12c4-8 7 8 11 0s5-4 5 0"/></svg></button>
-        <button class="stage3-action" id="search-button" title="Search all bubbles and notes">Search</button><button class="stage3-action" id="outline-button" title="Open outline view">Outline</button><button class="stage3-action stage4-backup" id="backup-button" title="Back up, export, restore, and install">Backup &amp; Install</button><button class="stage3-action ai-top-action" id="ai-button" title="AI suggestions — all changes require approval">AI Ideas</button><button class="header-create" id="new-button"><span aria-hidden="true">＋</span><span>New</span></button><button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-expanded="false" aria-controls="mobile-tools-panel" aria-label="Open tools menu" type="button">☰</button>
+        <button class="stage3-action" id="search-button" title="Search all bubbles and notes">Search</button><button class="stage3-action" id="outline-button" title="Open outline view">Outline</button><button class="stage3-action stage4-backup" id="backup-button" title="Back up, export, restore, and install">Backup &amp; Install</button><button class="stage3-action ai-top-action" id="ai-button" title="AI suggestions — all changes require approval">AI Ideas</button><button class="stage3-action ai-top-action" id="story-studio-button" title="Import story documents or brainstorm a book into a bubble map">Story Studio</button><button class="header-create" id="new-button"><span aria-hidden="true">＋</span><span>New</span></button><button id="mobile-menu-toggle" class="mobile-menu-toggle" aria-expanded="false" aria-controls="mobile-tools-panel" aria-label="Open tools menu" type="button">☰</button>
       </div>
     </header>
     <div id="mobile-tools-panel" class="mobile-tools-panel" hidden aria-label="Bubble Mind tools"></div>
@@ -1327,6 +1327,7 @@ window.addEventListener('appinstalled',()=>{deferredInstall=null;toast('Bubble M
   ['Outline','outline-button'],
   ['Backup & Install','backup-button'],
   ['AI Ideas','ai-button'],
+  ['Story Studio','story-studio-button'],
   ['Toggle all floating','motion-button']
  ];
  function closeMobileMenu(){panel.hidden=true;toggle.setAttribute('aria-expanded','false');toggle.textContent='☰'}
@@ -1367,8 +1368,18 @@ document.addEventListener('keydown',e=>{
  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='y'){e.preventDefault();redo()}
 });
 load();render();
+window.BubbleMindStudioBridge=Object.freeze({
+ getCurrent:()=>state.currentId,
+ getNode:nodeId=>byId(nodeId),
+ getState:()=>state,
+ getAI:()=>({key:aiKey,model:aiModel}),
+ setAI:(key,model)=>{aiKey=String(key||'');aiModel=String(model||'')},
+ dialog,close,el,btn,change,toast,id,colors:PALETTE,
+ path:nodeId=>getPath(nodeId).map(n=>n.title).join(' / ')
+});
 window.BubbleMindStage2Test={snapshot,byId,kids,change,undo,redo,descendants,isAncestor,layoutPositions,orbitPosition,getState:()=>state};
 })();
 </script>
+<script src="./story-studio.js"></script>
 </body>
 </html>

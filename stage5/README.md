@@ -57,3 +57,9 @@ Future Stage 5 AI development will be optional and should require explicit user 
 - Detail sub-nodes are included in JSON backups, merge/restore, markdown, CSV and undo/redo and are copied/deleted with their owning branches.
 - AI bubble-map proposals may include detail sub-nodes. Each proposed sub-node can be reviewed, edited or excluded before bulk import.
 - Installed Stage 5 will update offline cache version v6 on next online visit; refresh once to load the new files.
+
+## Floating detail bubbles
+- Each detail sub-node now appears as a small titled circular bubble moving around its owning parent bubble, including on Home and inside project maps.
+- Clicking the smaller bubble directly opens its information page. Detailed text is not rendered on the bubble itself.
+- Detail bubbles use slow independent orbital motion when Float is on; when motion is off or reduced-motion is preferred, they remain stationary and clickable.
+- Detail content storage, backup, import, and AI approval workflows are unchanged. Only the presentation changed.

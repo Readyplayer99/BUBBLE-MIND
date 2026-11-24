@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#080f24">
+<title>Bubble Mind — Floating Motion Lab</title>
+<style>
+:root{font-family:system-ui,-apple-system,"Segoe UI",sans-serif;color:#eef4ff;background:#050919}
+*{box-sizing:border-box}html,body{margin:0;min-height:100%;overflow-x:hidden}
+body{background:radial-gradient(ellipse at 20% 25%,#5429796a,transparent 46%),radial-gradient(ellipse at 80% 74%,#116ca45b,transparent 45%),#050919}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(1px 1px at 8% 18%,#fff 90%,transparent),radial-gradient(1px 1px at 35% 39%,#fff 90%,transparent),radial-gradient(1px 1px at 77% 12%,#c6d7ff 90%,transparent),radial-gradient(2px 2px at 61% 83%,#fff 90%,transparent);background-size:173px 193px,239px 211px,281px 199px,311px 283px;opacity:.65}
+main{max-width:1320px;margin:auto;padding:clamp(12px,3vw,32px);position:relative}
+h1{font-size:clamp(24px,4vw,40px);letter-spacing:-.8px;margin:2px 0 5px}p{color:#b9c7e6;line-height:1.45}
+.kicker{font-size:12px;letter-spacing:2px;font-weight:700;color:#92b9ff;margin:0}
+.sub{margin:5px 0 20px;max-width:800px}
+.controls{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:17px}
+button{cursor:pointer;border:1px solid #aec8ff55;color:#e8f2ff;background:#26355b;border-radius:12px;padding:11px 15px;font:inherit;min-height:43px}
+button:focus-visible,input:focus-visible{outline:3px solid #aaccff;outline-offset:2px}
+button[aria-pressed=true]{background:#5a78c0;color:white;border-color:#d0ddff}
+.speed{display:flex;align-items:center;gap:9px;background:#121f3bcc;border:1px solid #a0b6e633;border-radius:12px;padding:7px 12px;font-size:14px}
+.speed input{width:125px;accent-color:#86b6ff}
+.tabs{display:none}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.card{border:1px solid #9aafd044;border-radius:20px;background:#09162bbd;padding:14px;min-width:0;box-shadow:0 12px 40px #0004}
+.card header{display:flex;justify-content:space-between;gap:10px;align-items:start;padding:3px 3px 10px}
+.card h2{font-size:18px;margin:0}.card header p{margin:4px 0 0;font-size:13px}
+.tag{white-space:nowrap;border:1px solid #9ab5e85e;border-radius:20px;padding:5px 9px;color:#b5d1ff;font-size:11px}
+.scene{height:clamp(340px,45vw,525px);position:relative;overflow:hidden;border-radius:15px;border:1px solid #829ec441;background:radial-gradient(ellipse at center,#212c5d77,#070e22 73%),radial-gradient(circle at 80% 30%,#562b8a56,transparent 50%);touch-action:pan-y}
+.scene svg{display:block;width:100%;height:100%;overflow:visible}
+.scene text{font-family:system-ui,sans-serif;font-weight:650;fill:#fff;text-anchor:middle;pointer-events:none;paint-order:stroke;stroke:#10172e;stroke-width:2.7;stroke-linejoin:round}
+.scene .wire{fill:none;stroke:#9dbaff;stroke-width:2;stroke-opacity:.59;stroke-dasharray:6 6}
+.scene .orb{stroke:#fff9;stroke-width:1.7;filter:drop-shadow(0 4px 12px #000c)}
+.legend{display:flex;flex-wrap:wrap;gap:7px 14px;font-size:12px;color:#aec4eb;margin-top:10px}
+.legend b{color:#eaf2ff}
+.foot{margin-top:18px;padding:15px;border-radius:14px;border:1px solid #92b3e83a;background:#0c1830c7;color:#b8c9e7;font-size:14px}
+.foot strong{color:#f1f5ff}
+@media(max-width:780px){
+ .tabs{display:flex;gap:8px;margin-bottom:13px}
+ .tabs button{flex:1;font-size:13px;padding:8px 9px}
+ .grid{display:block}
+ .card{display:none}.card.active{display:block}
+ .scene{height:clamp(380px,63dvh,590px)}
+ .card h2{font-size:16px}
+ .card header p{font-size:12px}
+ .tag{display:none}
+}
+@media(prefers-reduced-motion:reduce){body{scroll-behavior:auto}}
+</style>
+</head>
+<body><main>
+<p class="kicker">BUBBLE MIND · MOTION PLAYGROUND</p>
+<h1>How should your bubbles float?</h1>
+<p class="sub">Two live motion experiments using the same parent bubble and four child ideas. Both keep every child connected. Try the animation, pause it, and choose which feels better.</p>
+<div class="controls">
+<button id="play" type="button" aria-pressed="true">⏸ Pause movement</button>
+<button id="reset" type="button">↺ Reset positions</button>
+<label class="speed">Speed <input id="speed" type="range" min="25" max="200" value="100" step="5" aria-label="Motion speed"><output id="speedLabel">100%</output></label>
+</div>
+<div class="tabs" role="group" aria-label="Compare modes"><button id="tabA" aria-pressed="true">A — Satellites</button><button id="tabB" aria-pressed="false">B — Tethers</button></div>
+<div class="grid">
+<section class="card active" id="cardA">
+<header><div><h2>A — Parent &amp; Satellites</h2><p>The family moves together. Each child stays in orbit around its parent.</p></div><span class="tag">Organized motion</span></header>
+<div class="scene"><svg id="svgA" viewBox="0 0 520 440" role="img" aria-label="A parent bubble glides around with its children orbiting around it"></svg></div>
+<div class="legend"><span><b>Parent:</b> drifts freely</span><span><b>Children:</b> orbit while following</span><span><b>Links:</b> always anchored</span></div>
+</section>
+<section class="card" id="cardB">
+<header><div><h2>B — Floating with Tethers</h2><p>Each child moves on its own, held near the parent by an elastic connection.</p></div><span class="tag">Living constellation</span></header>
+<div class="scene"><svg id="svgB" viewBox="0 0 520 440" role="img" aria-label="A parent bubble drifts and its children independently float within tether lengths"></svg></div>
+<div class="legend"><span><b>Parent:</b> drifts freely</span><span><b>Children:</b> independent motion</span><span><b>Links:</b> stretch and follow</span></div>
+</section>
+</div>
+<div class="foot"><strong>Both are experimental.</strong> They don't change or save anything in your Bubble Mind projects. The finished version can keep the existing Float On/Off setting and use the same relationship data.</div>
+</main>
+<script>
+(()=>{
+'use strict';
+const NS='http://www.w3.org/2000/svg';
+const svgNode=(tag,attrs={})=>{const e=document.createElementNS(NS,tag);for(const [k,v] of Object.entries(attrs))e.setAttribute(k,String(v));return e};
+const labels=['World','Characters','History','Locations','Magic'];
+const fills=['#7a8aff','#83d7d4','#e2a3ea','#f1b57b','#9ac2f4'];
+const v=[{x:0,y:0},{x:0,y:-126},{x:125,y:0},{x:0,y:126},{x:-125,y:0}];
+function scene(el){
+ const svg=document.getElementById(el),edges=[],nodes=[];
+ for(let i=1;i<5;i++){const line=svgNode('line',{class:'wire'});svg.append(line);edges.push(line)}
+ for(let i=0;i<5;i++){const g=svgNode('g');const circle=svgNode('circle',{class:'orb',r:i===0?54:41,fill:fills[i]});
+ const shine=svgNode('ellipse',{cx:-13,cy:-16,rx:i===0?21:17,ry:9,fill:'#ffffff55',transform:'rotate(-27 -13 -16)'});
+ const text=svgNode('text',{'font-size':i===0?16:13,y:5});text.textContent=labels[i];
+ g.append(circle,shine,text);svg.append(g);nodes.push(g)}
+ return {svg,nodes,edges};
+}
+const a=scene('svgA'),b=scene('svgB');
+const parentAt=t=>({x:260+27*Math.sin(t*.27)+16*Math.sin(t*.47),y:220+24*Math.sin(t*.23+1.1)});
+let running=true,rate=1,seconds=0,last=0,frame=0;
+function frameScene(mode,t,scene){
+ const p=parentAt(t),positions=[p];
+ for(let i=1;i<5;i++){
+  if(mode==='A'){
+   const angle=(i-1)*Math.PI/2-Math.PI/2+t*.09;
+   const radius=125+7*Math.sin(t*.5+i);
+   positions.push({x:p.x+Math.cos(angle)*radius,y:p.y+Math.sin(angle)*radius});
+  }else{
+   const origin=v[i],angle=Math.atan2(origin.y,origin.x);
+   const rad=110+22*Math.sin(t*(.25+i*.045)+i*.8);
+   const sway=.24*Math.sin(t*(.39+i*.095)+i*1.6);
+   positions.push({x:p.x+Math.cos(angle+sway)*rad+8*Math.sin(t*.5+i),
+                   y:p.y+Math.sin(angle+sway)*rad+8*Math.cos(t*.45+i*1.7)});
+  }
+ }
+ // The designed motion stays well inside the scene, maintaining every link.
+ for(let i=1;i<5;i++){
+  const q=positions[i],wire=scene.edges[i-1];
+  wire.setAttribute('x1',p.x.toFixed(1));wire.setAttribute('y1',p.y.toFixed(1));
+  wire.setAttribute('x2',q.x.toFixed(1));wire.setAttribute('y2',q.y.toFixed(1));
+ }
+ for(let i=0;i<5;i++)scene.nodes[i].setAttribute('transform','translate('+positions[i].x.toFixed(2)+' '+positions[i].y.toFixed(2)+')');
+}
+function tick(now){
+ if(!last)last=now;
+ if(running)seconds+=Math.min(.05,(now-last)/1000)*rate;
+ last=now;frameScene('A',seconds,a);frameScene('B',seconds,b);
+ frame=requestAnimationFrame(tick);
+}
+function updatePlay(){const button=document.getElementById('play');button.textContent=running?'⏸ Pause movement':'▶ Resume movement';button.setAttribute('aria-pressed',String(running))}
+document.getElementById('play').addEventListener('click',()=>{running=!running;last=0;updatePlay()});
+document.getElementById('reset').addEventListener('click',()=>{seconds=0;frameScene('A',0,a);frameScene('B',0,b)});
+document.getElementById('speed').addEventListener('input',e=>{rate=Number(e.target.value)/100;document.getElementById('speedLabel').textContent=e.target.value+'%'});
+function tab(mode){
+ document.getElementById('cardA').classList.toggle('active',mode==='A');
+ document.getElementById('cardB').classList.toggle('active',mode==='B');
+ document.getElementById('tabA').setAttribute('aria-pressed',String(mode==='A'));
+ document.getElementById('tabB').setAttribute('aria-pressed',String(mode==='B'));
+}
+document.getElementById('tabA').addEventListener('click',()=>tab('A'));
+document.getElementById('tabB').addEventListener('click',()=>tab('B'));
+document.addEventListener('visibilitychange',()=>{last=0});
+frame=requestAnimationFrame(tick);
+})();
+</script>
+</body></html>
